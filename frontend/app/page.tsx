@@ -5,49 +5,57 @@ import Welcome from "./welcome"
 import Panel from "./panel"
 import ForceGraph, { Edge } from "./forcegraph"
 import { GraphNode } from "./forcegraph"
-
-const nodes: GraphNode[] = [
-  {
-    id: 'Napoleon',
-    x: 100,
-    y: 100,
-    team: -1,
-  },
-  {
-    id: 'Einstein',
-    x: 300,
-    y: 100,
-    team: 0,
-  },
-  {
-    id: 'Trump',
-    x: 200,
-    y: 300,
-    team: 0.5, // mostly blue
-  },
-].map(node => {
-  // scale -1 red to 0 grey to 1 blue
-  const background = teamColor(node.team)
-  return {
-    ...node,
-    element: <div
-      style={{ background }}>
-      {node.id}
-    </div>,
-  }
-})
-
-// Define your edges
-const edges: Edge[] = [
-  { source: '1', target: '2' },
-  { source: '2', target: '3' },
-  { source: '3', target: '1' },
-]
+import { useState } from "react"
 
 export default function Home() {
+  const [chatWith, setChatWith] = useState<string | undefined>()
+
+  function clickNode(node: { id: string }) {
+    setChatWith(chatWith => chatWith === node.id ? undefined : node.id)
+  }
+
+  const nodes: GraphNode[] = [
+    {
+      id: 'Napoleon',
+      x: 100,
+      y: 100,
+      team: -1,
+    },
+    {
+      id: 'Einstein',
+      x: 300,
+      y: 100,
+      team: 0,
+    },
+    {
+      id: 'Trump',
+      x: 200,
+      y: 300,
+      team: 0.5, // mostly blue
+    },
+  ].map(node => {
+    // scale -1 red to 0 grey to 1 blue
+    const background = teamColor(node.team)
+    return {
+      ...node,
+      element: <div
+        onClick={() => clickNode(node)}
+        style={{ background }}>
+        {node.id}
+      </div>,
+    }
+  })
+
+  // Define your edges
+  const edges: Edge[] = [
+    { source: 'Napolean', target: 'Einstein' },
+  ]
+
   return (
     <div className={styles.page}>
-      <Panel />
+      <Panel
+        chatWith={chatWith}
+      />
       <main className={styles.main}>
         <ForceGraph
           nodes={nodes}

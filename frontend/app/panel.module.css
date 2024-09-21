@@ -1,20 +1,23 @@
 .panel {
+  box-sizing: border-box;
   left: 0;
   top: 0;
   width: 420px;
-  height: 100vh;
   background: linear-gradient(to bottom, #8B5A2B, #5C4033);
   border-right: 3px solid #3B2F2F;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  font-family: 'Courier New', Courier, monospace;
   color: #f5f0e1;
   overflow: hidden;
   background: url('/images/panel.png');
   background-position: 20%;
+  transition: width 0.3s;
+}
+.panelContent {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100vh;
+  padding: 20px;
 }
 
 .panel button {
@@ -39,6 +42,7 @@
 }
 
 .panel h1 {
+  font-family: 'Courier New', Courier, monospace;
   font-size: 20px;
   font-weight: bold;
   text-align: center;
