@@ -4,10 +4,11 @@ export default function Panel() {
   return (
     <div className={styles.panel}>
       <h1>Command Panel</h1>
-      <button>Attack</button>
-      <button>Defend</button>
-      <button>Retreat</button>
-      <button>Supply</button>
+      <div className={styles.chatArea} />
+      <div className={styles.inputArea}>
+        <input type="text" placeholder="Make an argument" />
+        <button>Supply</button>
+      </div>
     </div>
   )
 }

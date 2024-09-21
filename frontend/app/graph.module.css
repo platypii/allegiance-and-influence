@@ -1,5 +1,6 @@
 .graph {
   position: relative;
+  flex: 1;
 }
 .node {
   position: absolute;
@@ -19,7 +20,9 @@
 }
 .edges {
   position: absolute;
+  bottom: 0;
   top: 0;
+  right: 0;
   left: 0;
   pointer-events: none;
 }
