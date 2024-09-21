@@ -175,8 +175,8 @@ export default function ForceGraph({
                 y1={source.y}
                 x2={target.x}
                 y2={target.y}
-                stroke="#999"
-                strokeWidth={1}
+                stroke="#333"
+                strokeWidth={2}
               />
             )
           }

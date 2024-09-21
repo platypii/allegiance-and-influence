@@ -48,8 +48,11 @@ export default function Home() {
 
   // Define your edges
   const edges: Edge[] = [
-    { source: 'Napolean', target: 'Einstein' },
+    { source: 'Napoleon', target: 'Einstein' },
   ]
+
+  const redCount = nodes.filter(node => node.team < 0).length
+  const blueCount = nodes.filter(node => node.team > 0).length
 
   return (
     <div className={styles.page}>
@@ -61,6 +64,10 @@ export default function Home() {
           nodes={nodes}
           edges={edges}
         />
+        <div className={styles.overlay}>
+          <div className={styles.red}>{redCount}</div>
+          <div className={styles.blue}>{blueCount}</div>
+        </div>
         <Welcome />
       </main>
     </div>

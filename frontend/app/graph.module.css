@@ -1,6 +1,7 @@
 .graph {
   position: relative;
   flex: 1;
+  width: 100%;
 }
 .node {
   position: absolute;
