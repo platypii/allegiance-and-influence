@@ -11,17 +11,23 @@ export default function Home() {
         <ForceGraph
           graphData={{
             nodes: [
-              { id: "You", color: "blue" },
-              { id: "Agent", color: "red" },
+              { id: "You", team: "blue" },
+              { id: "Agent", team: "red" },
             ],
             links: [{ source: "You", target: "Agent" }],
           }}
           nodeCanvasObject={(node, ctx, globalScale) => {
             const label = node.id
-            const fontSize = 12 / globalScale
+            const fontSize = 4
             ctx.font = `${fontSize}px Sans-Serif`
-            ctx.fillStyle = node.color
-            ctx.fillText(label, node.x, node.y)
+            ctx.fillStyle = node.team
+            // ctx.fillRect(node.x - 10, node.y - 10, 20, 20)
+            ctx.beginPath()
+            ctx.arc(node.x, node.y, 10, 0, 2 * Math.PI)
+            ctx.fill()
+            const textWidth = ctx.measureText(label).width
+            ctx.fillStyle = "#eee"
+            ctx.fillText(label, node.x - textWidth / 2, node.y + fontSize / 2)
           }}
         />
         <Welcome />
