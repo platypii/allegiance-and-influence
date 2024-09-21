@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "How To Win Friends and Influence Agents",
+  title: "Allegence and Influence",
   description: "A game of human-machine influence",
 }
 

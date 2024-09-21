@@ -30,7 +30,10 @@ const nodes: GraphNode[] = [
   const background = teamColor(node.team)
   return {
     ...node,
-    element: <div className={styles.no} style={{ width: 50, height: 50, background, borderRadius: '50%' }}>{node.id}</div>,
+    element: <div
+      style={{ background }}>
+      {node.id}
+    </div>,
   }
 })
 

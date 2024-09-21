@@ -2,13 +2,13 @@ import { useState, useEffect } from "react"
 import styles from "./page.module.css"
 
 export default function Welcome() {
-  const [dismissed, setDismissed] = useState(false)
+  const [dismissed, setDismissed] = useState(true)
 
   // Check localStorage on component mount
   useEffect(() => {
     const isDismissed = localStorage.getItem('welcomeDismissed') === 'true'
-    if (isDismissed) {
-      setDismissed(true)
+    if (!isDismissed) {
+      setDismissed(false)
     }
   }, [])
 
