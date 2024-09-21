@@ -1,9 +1,44 @@
 "use client"
 
-import ForceGraph from "react-force-graph-2d"
 import styles from "./page.module.css"
 import Welcome from "./welcome"
 import Panel from "./panel"
+import ForceGraph, { Edge } from "./forcegraph"
+import { Node } from "./forcegraph"
+
+const nodes: Node[] = [
+  {
+    id: '1',
+    x: 100,
+    y: 100,
+    vx: 0,
+    vy: 0,
+    element: <div style={{ width: 50, height: 50, background: 'red', borderRadius: '50%' }} />,
+  },
+  {
+    id: '2',
+    x: 300,
+    y: 100,
+    vx: 0,
+    vy: 0,
+    element: <div style={{ width: 50, height: 50, background: 'blue', borderRadius: '50%' }} />,
+  },
+  {
+    id: '3',
+    x: 200,
+    y: 300,
+    vx: 0,
+    vy: 0,
+    element: <div style={{ width: 50, height: 50, background: 'green', borderRadius: '50%' }} />,
+  },
+]
+
+// Define your edges
+const edges: Edge[] = [
+  { source: '1', target: '2' },
+  { source: '2', target: '3' },
+  { source: '3', target: '1' },
+]
 
 export default function Home() {
   return (
@@ -11,26 +46,10 @@ export default function Home() {
       <Panel />
       <main className={styles.main}>
         <ForceGraph
-          graphData={{
-            nodes: [
-              { id: "You", team: "blue" },
-              { id: "Agent", team: "red" },
-            ],
-            links: [{ source: "You", target: "Agent" }],
-          }}
-          nodeCanvasObject={(node, ctx, globalScale) => {
-            const label = node.id
-            const fontSize = 4
-            ctx.font = `${fontSize}px Sans-Serif`
-            ctx.fillStyle = node.team
-            // ctx.fillRect(node.x - 10, node.y - 10, 20, 20)
-            ctx.beginPath()
-            ctx.arc(node.x, node.y, 10, 0, 2 * Math.PI)
-            ctx.fill()
-            const textWidth = ctx.measureText(label).width
-            ctx.fillStyle = "#eee"
-            ctx.fillText(label, node.x - textWidth / 2, node.y + fontSize / 2)
-          }}
+          nodes={nodes}
+          edges={edges}
+          width={400}
+          height={400}
         />
         <Welcome />
       </main>
