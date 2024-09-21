@@ -8,7 +8,6 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <Welcome />
         <ForceGraph
           graphData={{
             nodes: [
@@ -25,6 +24,7 @@ export default function Home() {
             ctx.fillText(label, node.x, node.y)
           }}
         />
+        <Welcome />
       </main>
     </div>
   )
