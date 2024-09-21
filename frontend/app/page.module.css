@@ -41,4 +41,12 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+.permadismiss {
+  cursor: pointer;
+  margin-top: 20px;
+}
+.permadismiss input {
+  margin-right: 5px;
 }
