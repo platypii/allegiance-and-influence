@@ -52,19 +52,36 @@
 }
 
 .chatArea {
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  gap: 10px;
   overflow-y: auto;
   padding: 10px;
   background: rgba(0, 0, 0, 0.6);
   border: 2px solid #3B2F2F;
   border-radius: 5px;
 }
+.chatArea > div {
+  border-radius: 12px;
+  line-height: 1.4em;
+  padding: 6px 12px;
+}
+.assistant {
+  background: linear-gradient(#d8d8db, #d4d4d8);
+  color: #333;
+  margin-right: 40px;
+}
+.user {
+  background: linear-gradient(#2280cc, #17d);
+  color: #eee;
+  margin-left: 40px;
+}
 
 .inputArea {
   display: flex;
   gap: 10px;
 }
-
 .inputArea input {
   flex: 1;
   padding: 10px;
