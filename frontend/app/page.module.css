@@ -9,7 +9,6 @@
   display: flex;
   min-height: 100svh;
   font-family: 'Mulish', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  background: url('/images/background.png') no-repeat center/cover;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,6 +23,7 @@
 }
 
 .main {
+  background: url('/images/background.png') no-repeat center/cover;
   display: flex;
   flex: 1;
   flex-direction: column;
