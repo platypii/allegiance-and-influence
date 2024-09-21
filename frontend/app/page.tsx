@@ -3,10 +3,12 @@
 import ForceGraph from "react-force-graph-2d"
 import styles from "./page.module.css"
 import Welcome from "./welcome"
+import Panel from "./panel"
 
 export default function Home() {
   return (
     <div className={styles.page}>
+      <Panel />
       <main className={styles.main}>
         <ForceGraph
           graphData={{
