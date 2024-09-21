@@ -2,15 +2,13 @@
 
 import ForceGraph from "react-force-graph-2d"
 import styles from "./page.module.css"
+import Welcome from "./welcome"
 
 export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <div className={styles.welcome}>
-          <h1>How To Win Friends and Influence Agents</h1>
-          A game of human-machine influence
-        </div>
+        <Welcome />
         <ForceGraph
           graphData={{
             nodes: [
