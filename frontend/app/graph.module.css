@@ -1,0 +1,24 @@
+.graph {
+  position: relative;
+}
+.node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  font-size: 8pt;
+  transition: transform 0.2s;
+}
+.node:hover {
+  transform: translate(-50%, -50%) scale(1.2);
+}
+.node > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.edges {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}

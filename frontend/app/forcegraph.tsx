@@ -1,12 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react'
+import styles from "./graph.module.css"
 
-export interface Node {
+export interface GraphNode {
   id: string
   x: number
   y: number
+  element: React.ReactElement
+}
+
+interface Node extends GraphNode {
   vx: number
   vy: number
-  element: React.ReactElement
 }
 
 export interface Edge {
@@ -15,10 +19,8 @@ export interface Edge {
 }
 
 interface ForceGraphProps {
-  nodes: Node[]
+  nodes: GraphNode[]
   edges: Edge[]
-  width: number
-  height: number
   // Optional simulation parameters
   chargeStrength?: number
   linkDistance?: number
@@ -28,19 +30,21 @@ interface ForceGraphProps {
 export default function ForceGraph({
   nodes: initialNodes,
   edges,
-  width,
-  height,
   chargeStrength = -30,
   linkDistance = 100,
   friction = 0.9,
 }: ForceGraphProps) {
   const [nodes, setNodes] = useState<Node[]>(() =>
-    initialNodes.map(node => ({ ...node }))
+    initialNodes.map(node => ({ ...node, vx: 0, vy: 0 }))
   )
   const animationRef = useRef<number | null>(null)
+  const graphRef = useRef<HTMLDivElement>(null)
 
   // Create a map for quick node lookup
   const nodeMap = useRef<Map<string, Node>>(new Map())
+
+  const width = graphRef.current?.clientWidth || 800
+  const height = graphRef.current?.clientHeight || 600
 
   useEffect(() => {
     nodeMap.current = new Map(nodes.map(node => [node.id, node]))
@@ -107,15 +111,12 @@ export default function ForceGraph({
 
   return (
     <div
-      style={{
-        position: 'relative',
-        width: `${width}px`,
-        height: `${height}px`,
-        border: '1px solid #ccc',
-      }}
+      className={styles.graph}
+      ref={graphRef}
     >
       {/* Render edges as SVG lines */}
       <svg
+        className={styles.edges}
         width={width}
         height={height}
         style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}
@@ -143,14 +144,9 @@ export default function ForceGraph({
       {/* Render nodes as positioned elements */}
       {nodes.map(node => (
         <div
+          className={styles.node}
           key={node.id}
-          style={{
-            position: 'absolute',
-            left: node.x,
-            top: node.y,
-            transform: 'translate(-50%, -50%)', // Center the element
-            cursor: 'pointer',
-          }}
+          style={{ left: node.x, top: node.y }}
         >
           {node.element}
         </div>
