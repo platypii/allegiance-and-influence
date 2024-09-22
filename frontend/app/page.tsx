@@ -10,12 +10,12 @@ import characters, { Character } from "./characters"
 import { randomEdges } from "./utils"
 import { teamColor } from "./teamColor"
 import { database } from "./firebase"
-import { onValue, ref } from "firebase/database"
+import { onValue, ref, update } from "firebase/database"
 import Round, { RoundState } from "./round"
 
 export default function Home() {
   const [chatWith, setChatWith] = useState<Character | undefined>()
-  const [playerName, setPlayerName] = useState<string | undefined>()
+  const [playerName, setPlayerName] = useState<'player_red' | 'player_blue' | undefined>()
   const [state, setState] = useState<RoundState>({
     round_number: 1,
     current_agents: [],
@@ -36,10 +36,10 @@ export default function Home() {
 
   function clickNode(id: string) {
     if (!playerName) return
-    if (playerName !== "player_red" && playerName !== "player_blue") return
     if (state.round_state[playerName].choose) return console.log("Already made a choice")
     // Set the player's choice
-    database.ref(`/current_state/round_state/${playerName}/choose`).set(id)
+    const dbRef = ref(database, `/current_state/round_state/${playerName}`)
+    update(dbRef, { choose: id })
     const character = characters.find(character => character.UID === id)
     setChatWith(chatWith => chatWith?.UID === id ? undefined : character)
   }
@@ -52,7 +52,6 @@ export default function Home() {
       setState(state)
 
       if (!playerName) return
-      if (playerName !== "player_red" && playerName !== "player_blue") return
       const character = characters.find(character => character.UID === state?.round_state[playerName].choose)
       if (character) setChatWith(character)
     })
@@ -93,12 +92,16 @@ export default function Home() {
   const redCount = nodes?.filter(node => node.team < 0)?.length
   const blueCount = nodes?.filter(node => node.team > 0)?.length
 
+  const messages = playerName ? state?.round_state?.[playerName]?.messages || [] : []
+
   return (
     <div className={styles.page}>
-      <Panel
+      {playerName && <Panel
+        playerName={playerName}
         chatWith={chatWith}
+        firemessages={messages}
         onClose={() => setChatWith(undefined)}
-      />
+      />}
       <main className={styles.main}>
         <ForceGraph
           nodes={nodes}

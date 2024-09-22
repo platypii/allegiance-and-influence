@@ -1,10 +1,13 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import styles from "./panel.module.css"
 import { Character } from "./characters"
 import { database } from "./firebase"
+import { ref, update } from "firebase/database"
 
 interface PanelProps {
+  playerName: 'player_red' | 'player_blue'
   chatWith: Character | undefined
+  firemessages: Message[]
   onClose: () => void
 }
 
@@ -13,11 +16,8 @@ interface Message {
   text: string
 }
 
-export default function Panel({ chatWith, onClose }: PanelProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    { role: "user", text: "Hello" },
-    { role: "assistant", text: "Hi" },
-  ])
+export default function Panel({ playerName, chatWith, firemessages, onClose }: PanelProps) {
+  const [messages, setMessages] = useState<Message[]>(firemessages)
   const inputRef = useRef<HTMLInputElement>(null)
 
   function handleInput(event: React.FormEvent) {
@@ -28,13 +28,20 @@ export default function Panel({ chatWith, onClose }: PanelProps) {
         ...messages,
         { role: "user", text },
       ])
+      // Send message to Firebase
+      const dbRef = ref(database, `/current_state/round_state/${playerName}/messages`)
+      update(dbRef, [...messages, { role: "user", text }])
       inputRef.current.value = ""
     }
   }
 
+  useEffect(() => {
+    setMessages(firemessages)
+  }, [firemessages])
+
   function handleDone() {
     // TODO: Send messages to Firebase
-    // database.ref('/state').update()
+    // database.ref('/current_state').update()
   }
 
   return (

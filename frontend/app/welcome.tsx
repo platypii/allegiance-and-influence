@@ -1,7 +1,7 @@
 import styles from "./welcome.module.css"
 
 interface WelcomeProps {
-  setPlayerName: (name: string) => void
+  setPlayerName: (name: 'player_red' | 'player_blue') => void
 }
 
 export default function Welcome({ setPlayerName }: WelcomeProps) {
