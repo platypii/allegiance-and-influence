@@ -7,7 +7,6 @@ import ForceGraph, { Edge } from "./forcegraph"
 import { GraphNode } from "./forcegraph"
 import { useEffect, useState } from "react"
 import characters, { Character } from "./characters"
-import { randomEdges } from "./utils"
 import { teamColor } from "./teamColor"
 import { database } from "./firebase"
 import { onValue, ref, update } from "firebase/database"
@@ -19,6 +18,7 @@ export default function Home() {
   const [state, setState] = useState<RoundState>({
     round_number: 1,
     current_agents: [],
+    current_pairing: [],
     round_state: {
       player_red: {
         choose: null,
@@ -37,6 +37,7 @@ export default function Home() {
   function clickNode(id: string) {
     if (!playerName) return
     if (state.round_state[playerName]?.choose) return console.log("Already made a choice")
+    if (id.startsWith('player_')) return console.log("Can't choose a player")
     // Set the player's choice
     const dbRef = ref(database, `/current_state/round_state/${playerName}`)
     update(dbRef, { choose: id })
@@ -93,7 +94,17 @@ export default function Home() {
   }) || []
 
   // Make random connections, at most one connection per person
-  const edges: Edge[] = randomEdges(characters.map(character => character.UID), 10)
+  const edges: Edge[] = state?.current_pairing?.map(([agent1, agent2]) => {
+    const source = nodes.find(node => node.id === agent1)
+    const target = nodes.find(node => node.id === agent2)
+    if (source && target) {
+      return {
+        source: source.id,
+        target: target.id,
+      }
+    }
+    return null
+  }).filter(edge => edge !== null) as Edge[] || []
 
   const redCount = nodes?.filter(node => node.team < 0)?.length
   const blueCount = nodes?.filter(node => node.team > 0)?.length

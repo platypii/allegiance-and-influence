@@ -2,13 +2,15 @@
   position: absolute;
   right: 0;
   top: 0;
-  width: 240px;
+  width: 260px;
   background-color: #333;
   color: #8c8;
   padding: 10px 20px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   font-family: 'Courier New', Courier, monospace;
   border-bottom-left-radius: 10px;
+  max-height: 100vh;
 }
 
 .pairing {
@@ -19,6 +21,8 @@
   display: flex;
   gap: 10px;
   justify-content: space-between;
+  margin-bottom: 20px;
+  /* overflow: hidden; */
 }
 .pair img {
   width: 80px;

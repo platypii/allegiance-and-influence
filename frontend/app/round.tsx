@@ -12,6 +12,7 @@ interface Message {
 export interface RoundState {
   round_number: number
   current_agents: string[]
+  current_pairing: [string, string][]
   round_state: {
     player_red: {
       choose: string | null
