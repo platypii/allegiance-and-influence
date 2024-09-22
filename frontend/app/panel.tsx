@@ -29,8 +29,8 @@ export default function Panel({ playerName, chatWith, firemessages, onClose }: P
         { role: "user", text },
       ])
       // Send message to Firebase
-      const dbRef = ref(database, `/current_state/round_state/${playerName}/messages`)
-      update(dbRef, [...messages, { role: "user", text }])
+      const dbRef = ref(database, `/current_state/round_state/${playerName}`)
+      update(dbRef, {messages: [...messages, { role: "user", text }]})
       inputRef.current.value = ""
     }
   }
