@@ -31,11 +31,9 @@ def get_agents(
     # Create ArgumentaBot instances
     agents = []
     for character in selected_characters:
-        system_message = (
-            f"You are {character['Character']}, {character['Description']}. Your attributes are: Charisma: {character['Charisma']}, Intellect: {character['Intellect']}, Stubbornness: {character['Stubbornness']}, Empathy: {character['Empathy']}, Influence Range: {character['Influence Range']}, Loyalty: {character['Loyalty']}, Curiosity: {character['Curiosity']}, Consistency: {character['Consistency']}. After every message state as "
-            "Status:"
-            f" if you want to stay on your current team [STAY], stay neutral [STAY] or join the character that you are talking toos team [JOIN].\n\n{root_message}"
-        )
+        system_message = f"You are {character['Character']}, {character['Description']}. Your attributes are: Charisma: {character['Charisma']}, Intellect: {character['Intellect']}, Stubbornness: {character['Stubbornness']}, Empathy: {character['Empathy']}, Influence Range: {character['Influence Range']}, Loyalty: {character['Loyalty']}, Curiosity: {character['Curiosity']}, Consistency: {character['Consistency']}."
+        system_message += f"\n\n{root_message}"
+        system_message += "\n\nImportantly, after every message, please respond with `Status: Not Join` or `Status: Join` to indicate if you have decided to not join or join the other person's side."
         agents.append(
             ArgumentaBot(
                 name=character["Character"],

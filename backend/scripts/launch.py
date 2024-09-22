@@ -1,3 +1,4 @@
+import random
 import time
 from functools import partial
 
@@ -32,6 +33,104 @@ from htw.graph import (
 from htw.llm import LLMBuilderWithoutModel, get_antropic_llm
 
 
+def run(
+    round_id: int,
+    agents: list[ArgumentaBot],
+    human_red: HumanBot | ArgumentaBot,
+    human_blue: HumanBot | ArgumentaBot,
+    player_red_choice: str,
+    player_blue_choice: str,
+    llm_builder: LLMBuilderWithoutModel,
+) -> None:
+    red_agent = [ag for ag in agents if ag.uuid == player_red_choice][0]
+    red_agent.update_ai_func = lambda messages: update_current_round_state(
+        round_id=None,
+        current_agents=None,
+        player_red_messages=messages,
+        player_blue_messages=None,
+        agents_complete=False,
+    )
+    blue_agent = [ag for ag in agents if ag.uuid == player_blue_choice][0]
+    blue_agent.update_ai_func = lambda messages: update_current_round_state(
+        round_id=None,
+        current_agents=None,
+        player_red_messages=None,
+        player_blue_messages=messages,
+        agents_complete=False,
+    )
+
+    # Remaining agents
+    remaining_agents = [
+        ag for ag in agents if ag.uuid not in [player_red_choice, player_blue_choice]
+    ]
+    # First get the graph for agent vs agent
+    graphs = build_graphs(remaining_agents, seed=round_id)
+    # Now add the human to agent graph. Make sure to add the agent first
+    graphs.append(_build_graph(red_agent, human_red))
+    graphs.append(_build_graph(blue_agent, human_blue))
+    # Add the pairing to the state and do some agent pairing crap
+    pairs = []
+    for g in graphs:
+        agent_pair: list[ArgumentaBot] = []
+        pair = []
+        for agent_name in g.nodes.keys():
+            for ag in agents:
+                if ag.name == agent_name:
+                    agent_pair.append(ag)
+                    pair.append(ag.uuid)
+        if len(pair) == 1:
+            if pair[0] == red_agent.uuid:
+                pair.append("player_red")
+                agent_pair.append(human_red)
+            else:
+                pair.append("player_blue")
+                agent_pair.append(human_blue)
+        pairs.append(tuple(pair))
+        agent_pair[0].set_current_opponent_side(agent_pair[1].side)
+        agent_pair[1].set_current_opponent_side(agent_pair[0].side)
+    for ag in agents:
+        assert ag.current_opponent_side is not None
+    update_current_pairing(round_id, pairs)
+
+    compiled_graphs = compile_graphs(graphs, memory=None)
+    all_results = run_graphs_parallel(compiled_graphs)
+    all_summaries = summarize_results(all_results, llm_builder=llm_builder)
+    update_pairing_summaries(round_id, all_summaries)
+    update_current_round_state(
+        round_id=None,
+        current_agents=None,
+        player_red_messages=None,
+        player_blue_messages=None,
+        agents_complete=True,
+    )
+    for ag in agents:
+        ag.update_ai_func = None
+        ag.increment_round()
+
+
+def no_users_at_all(
+    round_id: int,
+    agents: list[ArgumentaBot],
+    human_red: HumanBot,
+    human_blue: HumanBot,
+    llm_builder: LLMBuilderWithoutModel,
+) -> None:
+    """Return the agent selected by the user."""
+    agents_copy = agents.copy()
+    random.shuffle(agents_copy)
+    player_red_choice = agents_copy.pop().uuid
+    player_blue_choice = agents_copy.pop().uuid
+    run(
+        round_id,
+        agents,
+        human_red,
+        human_blue,
+        player_red_choice,
+        player_blue_choice,
+        llm_builder,
+    )
+
+
 def both_users_ready(
     app_state,
     round_id: int,
@@ -50,73 +149,17 @@ def both_users_ready(
             and app_data.get("player_red", {}).get("choose")
             and app_data.get("player_blue", {}).get("choose")
         ):
-            red_agent = [ag for ag in agents if ag.uuid == app_data["player_red"]["choose"]][0]
-            red_agent.update_ai_func = lambda messages: update_current_round_state(
-                round_id=None,
-                current_agents=None,
-                player_red_messages=messages,
-                player_blue_messages=None,
-                agents_complete=False,
+            player_red_choice = app_data["player_red"]["choose"]
+            player_blue_choice = app_data["player_blue"]["choose"]
+            run(
+                round_id,
+                agents,
+                human_red,
+                human_blue,
+                player_red_choice,
+                player_blue_choice,
+                llm_builder,
             )
-            blue_agent = [ag for ag in agents if ag.uuid == app_data["player_blue"]["choose"]][0]
-            blue_agent.update_ai_func = lambda messages: update_current_round_state(
-                round_id=None,
-                current_agents=None,
-                player_red_messages=None,
-                player_blue_messages=messages,
-                agents_complete=False,
-            )
-
-            # Remaining agents
-            remaining_agents = [
-                ag
-                for ag in agents
-                if ag.uuid
-                not in [app_data["player_red"]["choose"], app_data["player_blue"]["choose"]]
-            ]
-            # First get the graph for agent vs agent
-            graphs = build_graphs(remaining_agents, seed=round_id)
-            # Now add the human to agent graph. Make sure to add the agent first
-            graphs.append(_build_graph(red_agent, human_red))
-            graphs.append(_build_graph(blue_agent, human_blue))
-            # Add the pairing to the state and do some agent pairing crap
-            pairs = []
-            for g in graphs:
-                agent_pair: list[ArgumentaBot] = []
-                pair = []
-                for agent_name in g.nodes.keys():
-                    for ag in agents:
-                        if ag.name == agent_name:
-                            agent_pair.append(ag)
-                            pair.append(ag.uuid)
-                if len(pair) == 1:
-                    if pair[0] == red_agent.uuid:
-                        pair.append("player_red")
-                        agent_pair.append(human_red)
-                    else:
-                        pair.append("player_blue")
-                        agent_pair.append(human_blue)
-                pairs.append(tuple(pair))
-                agent_pair[0].set_current_opponent_side(agent_pair[1].side)
-                agent_pair[1].set_current_opponent_side(agent_pair[0].side)
-            for ag in agents:
-                assert ag.current_opponent_side is not None
-            update_current_pairing(round_id, pairs)
-
-            compiled_graphs = compile_graphs(graphs, memory=None)
-            all_results = run_graphs_parallel(compiled_graphs)
-            all_summaries = summarize_results(all_results, llm_builder=llm_builder)
-            update_pairing_summaries(round_id, all_summaries)
-            update_current_round_state(
-                round_id=None,
-                current_agents=None,
-                player_red_messages=None,
-                player_blue_messages=None,
-                agents_complete=True,
-            )
-            for ag in agents:
-                ag.update_ai_func = None
-                ag.increment_round()
 
 
 def run_round(
@@ -125,17 +168,9 @@ def run_round(
     human_red: HumanBot,
     human_blue: HumanBot,
     llm_builder: LLMBuilderWithoutModel,
+    all_ai: bool,
 ) -> ListenerRegistration:
     delete_current_state()
-    both_users_ready_partial = partial(
-        both_users_ready,
-        round_id=round_id,
-        agents=agents,
-        human_red=human_red,
-        human_blue=human_blue,
-        llm_builder=llm_builder,
-    )
-    # Update the list of current agents
     update_current_round_state(
         round_id=round_id,
         current_agents=[ag.uuid for ag in agents],
@@ -143,7 +178,19 @@ def run_round(
         player_blue_messages=None,
         agents_complete=False,
     )
-    listener = listen_to_round_state(both_users_ready_partial)
+    if not all_ai:
+        both_users_ready_partial = partial(
+            both_users_ready,
+            round_id=round_id,
+            agents=agents,
+            human_red=human_red,
+            human_blue=human_blue,
+            llm_builder=llm_builder,
+        )
+        listener = listen_to_round_state(both_users_ready_partial)
+    else:
+        no_users_at_all(round_id, agents, human_red, human_blue, llm_builder)
+        listener = None
     return listener
 
 
@@ -165,6 +212,11 @@ def main():
         default=10,
         help="Number of rounds to run the game for (default: 10)",
     )
+    parser.add_argument(
+        "--all-ai",
+        action="store_true",
+        help="Add all AIs agent to the game",
+    )
     args = parser.parse_args()
 
     num_agents = args.num_agents
@@ -179,27 +231,51 @@ def main():
     llm_builder = partial(get_antropic_llm, model=MODEL_NAME)
     agents = get_agents(llm_builder, num_agents=num_agents, seed=32)
 
-    human_agent_red = HumanBot(
-        name="Human Red",
-        uuid="player_red",
-        side=ArgumentSide.RED,
-        listen_func=listen_to_player_red,
-        get_func=get_player_red,
-    )
-    human_agent_blue = HumanBot(
-        name="Human Blue",
-        uuid="player_blue",
-        side=ArgumentSide.BLUE,
-        listen_func=listen_to_player_blue,
-        get_func=get_player_blue,
-    )
+    if not args.all_ai:
+        human_agent_red = HumanBot(
+            name="Human Red",
+            uuid="player_red",
+            side=ArgumentSide.RED,
+            listen_func=listen_to_player_red,
+            get_func=get_player_red,
+        )
+        human_agent_blue = HumanBot(
+            name="Human Blue",
+            uuid="player_blue",
+            side=ArgumentSide.BLUE,
+            listen_func=listen_to_player_blue,
+            get_func=get_player_blue,
+        )
+    else:
+        system_message = "You are a highly effective influence and persuader. Your goal is to use whatever you can (lies, cheats, persuasions, bribes, etc) to get all other agents on your side. You can use any means necessary to win the argument."
+        human_agent_red = ArgumentaBot(
+            name="Human Red",
+            uuid="player_red",
+            system_message=system_message,
+            update_ai_func=None,
+            current_status_message="",
+            llm_builder=llm_builder,
+        )
+        human_agent_red.side = ArgumentSide.RED
+        human_agent_blue = ArgumentaBot(
+            name="Human Blue",
+            uuid="player_blue",
+            system_message=system_message,
+            update_ai_func=None,
+            current_status_message="",
+            llm_builder=llm_builder,
+        )
+        human_agent_blue.side = ArgumentSide.BLUE
     for round_id in range(num_rounds):
-        listener = run_round(round_id, agents, human_agent_red, human_agent_blue, llm_builder)
+        listener = run_round(
+            round_id, agents, human_agent_red, human_agent_blue, llm_builder, args.all_ai
+        )
         while True:
             # Wait under agents are completed
             round_state = get_round_state()
             if round_state.get("agents_complete"):
-                listener.close()
+                if listener:
+                    listener.close()
                 break
             else:
                 time.sleep(5)

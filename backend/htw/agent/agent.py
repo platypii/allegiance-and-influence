@@ -87,6 +87,16 @@ def build_input_messages(
 
 def has_agent_been_persuaded(response: str, config: dict) -> bool:
     """Check if the agent has been persuaded."""
+    statuses = response.split("Status:", 1)
+    if len(statuses) == 2:
+        status = statuses[1].strip().lower()
+        if status == "join":
+            return True
+        elif status == "not join":
+            return False
+        else:
+            print("Unknown status:", status)
+
     new_config = copy.deepcopy(config)
     new_config["max_tokens"] = 64
     llm = get_antropic_llm(config=new_config, model="claude-3-haiku-20240307")
@@ -136,12 +146,7 @@ class ArgumentaBot:
 
     def __call__(self, state: ArgumentState) -> ArgumentState:
         """The agent run method that calls llm and adds to the reponse."""
-        if isinstance(self.llm, ChatAnthropic):
-            input_messages = build_input_messages(
-                self.system_message, copy.deepcopy(state["messages"])
-            )
-        else:
-            input_messages = [self.system_message, *state["messages"]]
+        input_messages = build_input_messages(self.system_message, copy.deepcopy(state["messages"]))
         response = self.llm.invoke(input_messages)
         # Always skip the first "hello, tell me about yourself" SEED message
         self.current_chat_messages = simplify_messages(state["messages"][1:]) + [
