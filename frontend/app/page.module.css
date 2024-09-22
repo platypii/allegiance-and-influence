@@ -66,3 +66,28 @@
 .blue {
   color: #8484e9;
 }
+
+.status {
+  position: absolute;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  padding: 10px 20px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% {
+    color: #00ff00;
+    text-shadow: 0 0 5px #00ff00;
+  }
+  50% {
+    color: #00cc00;
+    text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00;
+  }
+  100% {
+    color: #00ff00;
+    text-shadow: 0 0 5px #00ff00;
+  }
+}
