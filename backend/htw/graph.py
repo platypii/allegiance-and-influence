@@ -58,32 +58,6 @@ def compile_graphs(graphs: list[StateGraph], memory: SqliteSaver) -> list[Compil
     return compiled_graphs
 
 
-def summarize_conversation(messages: List[BaseMessage], llm_builder) -> str:
-    """
-    Summarize the entire conversation between two agents.
-    
-    Args:
-    messages (List[BaseMessage]): List of messages from the conversation.
-    llm_builder: Function to build the LLM.
-
-    Returns:
-    str: A concise summary of the conversation.
-    """
-    llm = llm_builder(model=MODEL_NAME, config=LLM_CONFIG)
-    
-    # Flatten the list of messages
-    flattened_messages = [msg for sublist in messages for msg in (sublist if isinstance(sublist, list) else [sublist])]
-    
-    conversation_text = "\n".join([f"{msg.additional_kwargs.get('sender', 'Unknown')}: {msg.content}" for msg in flattened_messages])
-    
-    prompt = [
-        SystemMessage(content="You are a highly efficient summarizer."),
-        HumanMessage(content=f"Based on the following conversation, summarize what happened and call out any decisive moments where one argument won over the other. The summary should be no more than 5 simple bullets. Be extremely concise and to the point.\n\nConversation:\n{conversation_text}")
-    ]
-    
-    response = llm.invoke(prompt)
-    return response.content
-
 
 def _run_agent_graph(compiled_graph: CompiledStateGraph, verbose: bool, llm_builder) -> list[dict]:
     initial_state = ArgumentState(
