@@ -91,7 +91,7 @@
     "Consistency": 8
   },
   {
-    "UID": "martin_luther_king_jr",
+    "UID": "martin_luther",
     "Character": "Martin Luther King Jr.",
     "Description": "Civil rights leader, \"I Have a Dream\" speech",
     "Charisma": 10,
@@ -104,7 +104,7 @@
     "Consistency": 9
   },
   {
-    "UID": "queen_elizabeth_i",
+    "UID": "queen_elizabeth",
     "Character": "Queen Elizabeth I",
     "Description": "Tudor monarch, led English Golden Age",
     "Charisma": 8,
@@ -143,7 +143,7 @@
     "Consistency": 5
   },
   {
-    "UID": "Steve Jobs",
+    "UID": "steve_jobs",
     "Character": "Apple co-founder, iPhone creator",
     "Description": "9",
     "Charisma": 9,
@@ -156,7 +156,7 @@
     "Consistency": null
   },
   {
-    "UID": "Benito Mussolini",
+    "UID": "benito_mussolini",
     "Character": "Italian fascist dictator",
     "Description": "8",
     "Charisma": 7,
@@ -208,7 +208,7 @@
     "Consistency": 8
   },
   {
-    "UID": "leonardo_da_vinci",
+    "UID": "leonardo_davinci",
     "Character": "Leonardo da Vinci",
     "Description": "Renaissance polymath, painted Mona Lisa",
     "Charisma": 7,
@@ -286,7 +286,7 @@
     "Consistency": 8
   },
   {
-    "UID": "hunter_s_thompson",
+    "UID": "hunter_thompson",
     "Character": "Hunter S. Thompson",
     "Description": "Gonzo journalist, \"Fear and Loathing\" author",
     "Charisma": 8,

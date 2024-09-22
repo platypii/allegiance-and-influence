@@ -18,7 +18,7 @@ export default function Home() {
   const nodes: GraphNode[] = characters.map((character, i) => {
     const team = i % 2 === 0 ? -1 : 1
     // scale -1 red to 0 grey to 1 blue
-    const background = teamColor(team)
+    const borderColor = teamColor(team)
     return {
       id: character.UID,
       x: Math.random() * 800,
@@ -26,8 +26,8 @@ export default function Home() {
       team,
       element: <div
         onClick={() => clickNode(character.UID)}
-        style={{ background }}>
-        {character.Character}
+        style={{ borderColor }}>
+        <img src={`/images/agents/${character.UID}.jpg`} alt={character.Character} />
       </div>,
     }
   })
