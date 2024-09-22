@@ -97,9 +97,9 @@
   line-height: 1.4em;
   padding: 10px;
   color: #333;
+  font-family: "Playwrite DE Grund", cursive;
 }
 .assistant {
-  font-family: cursive;
   margin-right: 40px;
 }
 .player_red,
