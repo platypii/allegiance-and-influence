@@ -19,12 +19,12 @@ export default function Home() {
     round_number: 1,
     current_agents: [],
     round_state: {
-      player1: {
+      player_red: {
         choose: null,
         messages: [],
         doneTalking: false,
       },
-      player2: {
+      player_blue: {
         choose: null,
         messages: [],
         doneTalking: false,
@@ -75,7 +75,6 @@ export default function Home() {
       </div>,
     }
   }) || []
-  console.log("Nodes", nodes)
 
   // Make random connections, at most one connection per person
   const edges: Edge[] = randomEdges(characters.map(character => character.UID), 10)

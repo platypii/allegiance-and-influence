@@ -9,12 +9,12 @@ export interface RoundState {
   round_number: number
   current_agents: string[]
   round_state: {
-    player1: {
+    player_red: {
       choose: string | null
       messages: Message[]
       doneTalking: boolean
     }
-    player2: {
+    player_blue: {
       choose: string | null
       messages: Message[]
       doneTalking: boolean
