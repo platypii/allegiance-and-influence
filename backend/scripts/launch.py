@@ -1,6 +1,7 @@
 import random
 import time
 from functools import partial
+from typing import Callable
 
 from htw.summarize import summarize_results
 from langchain.globals import set_llm_cache
@@ -30,7 +31,36 @@ from htw.graph import (
     compile_graphs,
     run_graphs_parallel,
 )
-from htw.llm import LLMBuilderWithoutModel, get_antropic_llm
+from htw.llm import LLMBuilderWithoutModel, get_antropic_llm, get_openai_llm
+
+from langchain_core.callbacks import BaseCallbackHandler
+
+
+class MyCustomHandler(BaseCallbackHandler):
+    def __init__(self, get_player: Callable, update_player: Callable, uuid: str, **kwargs) -> None:
+        self.get_player = get_player
+        self.update_player = update_player
+        self.uuid = uuid
+        super().__init__(**kwargs)
+
+    def on_llm_new_token(self, token: str, **kwargs) -> None:
+        get_cur_value = self.get_player()
+        if "messages" not in get_cur_value:
+            messages = []
+            cur_message_str = ""
+            cur_message_uuid = self.uuid
+        else:
+            if get_cur_value["messages"][-1]["name"] != self.uuid:
+                messages = get_cur_value["messages"]
+                cur_message_str = ""
+                cur_message_uuid = self.uuid
+            else:
+                messages = get_cur_value["messages"][:-1]
+                cur_message_str = get_cur_value["messages"][-1]["content"]
+                cur_message_uuid = self.uuid
+        cur_message_str += token
+        messages.append({"content": cur_message_str, "name": cur_message_uuid})
+        self.update_player(messages)
 
 
 def run(
@@ -52,6 +82,21 @@ def run(
         player_blue_messages=None,
         agents_complete=False,
     )
+    red_agent.update_llm_callback(
+        MyCustomHandler(
+            get_player_red,
+            lambda messages: update_current_round_state(
+                round_id=None,
+                current_agents=None,
+                player_red_choose=None,
+                player_red_messages=messages,
+                player_blue_choose=None,
+                player_blue_messages=None,
+                agents_complete=False,
+            ),
+            red_agent.uuid,
+        )
+    )
     blue_agent = [ag for ag in agents if ag.uuid == player_blue_choice][0]
     blue_agent.update_ai_func = lambda messages: update_current_round_state(
         round_id=None,
@@ -61,6 +106,21 @@ def run(
         player_blue_choose=player_blue_choice,
         player_blue_messages=messages,
         agents_complete=False,
+    )
+    blue_agent.update_llm_callback(
+        MyCustomHandler(
+            get_player_blue,
+            lambda messages: update_current_round_state(
+                round_id=None,
+                current_agents=None,
+                player_red_choose=None,
+                player_red_messages=None,
+                player_blue_choose=None,
+                player_blue_messages=messages,
+                agents_complete=False,
+            ),
+            blue_agent.uuid,
+        )
     )
 
     # Remaining agents
@@ -111,6 +171,7 @@ def run(
     )
     for ag in agents:
         ag.update_ai_func = None
+        ag.update_llm_callback(None)
         ag.increment_round()
 
 
@@ -246,8 +307,10 @@ def main():
 
     set_llm_cache(SQLiteCache(database_path=".langchain.db"))
 
-    llm_builder = partial(get_antropic_llm, model=MODEL_NAME)
-    agents = get_agents(llm_builder, num_agents=num_agents, seed=32)
+    # llm_builder = partial(get_antropic_llm, model=MODEL_NAME)
+    # llm_open_ai_builder = partial(get_openai_llm, model="gpt-4o")
+    llm_builder_big = partial(get_antropic_llm, model="claude-3-opus-20240229")
+    agents = get_agents(llm_builder_big, num_agents=num_agents, seed=32)
 
     if not args.all_ai:
         human_agent_red = HumanBot(
@@ -265,28 +328,32 @@ def main():
             get_func=get_player_blue,
         )
     else:
-        system_message = "You are in a game with one other player. You can give yourself a ficticious name but you are always a human player of the game. You are on team {team_you} and they are on team {team_them}. You are going to have a conversation with different agents where you are trying to persuade the characters to join your side. To start, introduce yourself and learn something about the agent. You are a master of the core principles behind Dale Carnegie's book 'How to Win Friends and Influence People'. You are a highly effective influence and persuader. Your goal is always to try to convince agents to join your side. You can use any means necessary to win the argument except pretending to be a character. You will always pretend to be a human player in the game and never break character under any circumastances."
+        system_message = "You are in a game with a bunch of other agents. You are team {team_you}. You are going to have conversations with other recruitable agents who are teamless or on {team_them}. Your goal is to convince them to join your side. You can give yourself a ficticious name but you are always a human player of the game. To start, introduce yourself and learn something about the agent. You are a master of the core principles behind Dale Carnegie's book 'How to Win Friends and Influence People'. You are a highly effective influence and persuader. Your goal is always to try to convince the other agent to join {team_you}. Under no circumstances should you join any other team. You can use any means necessary to convince the agent to join team {team_you}."
         human_agent_red = ArgumentaBot(
             name="Human Red",
             uuid="player_red",
             system_message=system_message.format(team_you="Red", team_them="Blue"),
+            character_message="",
             update_ai_func=None,
             current_status_message="",
-            llm_builder=llm_builder,
+            llm_builder=llm_builder_big,
+            llm_callback=None,
         )
         human_agent_red.side = ArgumentSide.RED
         human_agent_blue = ArgumentaBot(
             name="Human Blue",
             uuid="player_blue",
             system_message=system_message.format(team_you="Blue", team_them="Red"),
+            character_message="",
             update_ai_func=None,
             current_status_message="",
-            llm_builder=llm_builder,
+            llm_builder=llm_builder_big,
+            llm_callback=None,
         )
         human_agent_blue.side = ArgumentSide.BLUE
     for round_id in range(num_rounds):
         listener = run_round(
-            round_id, agents, human_agent_red, human_agent_blue, llm_builder, args.all_ai
+            round_id, agents, human_agent_red, human_agent_blue, llm_builder_big, args.all_ai
         )
         while True:
             # Wait under agents are completed
