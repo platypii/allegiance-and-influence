@@ -73,7 +73,9 @@ def update_current_round_state(
     round_id: int | None,
     current_agents: list[str] | None,
     player_red_messages: list[dict] | None,
+    player_red_choose: str | None,
     player_blue_messages: list[dict] | None,
+    player_blue_choose: str | None,
     agents_complete: bool | None,
 ) -> None:
     """Update the current pairing in firebase."""
@@ -84,8 +86,12 @@ def update_current_round_state(
         update_key(f"{root_key}/current_agents", current_agents)
     if player_red_messages is not None:
         update_key(f"{root_key}/round_state/player_red/messages", player_red_messages)
+    if player_red_choose is not None:
+        update_key(f"{root_key}/round_state/player_red/choose", player_red_choose)
     if player_blue_messages is not None:
         update_key(f"{root_key}/round_state/player_blue/messages", player_blue_messages)
+    if player_blue_choose is not None:
+        update_key(f"{root_key}/round_state/player_blue/choose", player_blue_choose)
     if agents_complete is not None:
         update_key(f"{root_key}/round_state/agents_complete", agents_complete)
 

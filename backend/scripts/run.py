@@ -20,7 +20,7 @@ from htw.llm import get_antropic_llm
 
 
 def run_human_vs_bot(llm_builder):
-    agents = get_agents(llm_builder, num_agents=1, seed=None)
+    agents = get_agents(llm_builder, num_agents=1)
     human_agent = HumanBot(name="Human", uid="human_player")
     graph_builder = _build_graph(agents[0], human_agent)
     compiled_graphs = compile_graphs([graph_builder], memory=None)
@@ -31,7 +31,7 @@ def run_human_vs_bot(llm_builder):
 
 
 def run_bot_vs_bot(llm_builder):
-    agents = get_agents(llm_builder, num_agents=2, seed=None)
+    agents = get_agents(llm_builder, num_agents=2)
     graph_builder = _build_graph(agents[0], agents[1])
     compiled_graphs = compile_graphs([graph_builder], memory=None)
     all_results = _run_agent_graph(compiled_graphs[0], verbose=True)

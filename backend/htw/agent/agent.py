@@ -92,7 +92,7 @@ def has_agent_been_persuaded(response: str, config: dict) -> bool:
         status = statuses[1].strip().lower()
         if status == "join":
             return True
-        elif status == "not join":
+        elif status in {"not join", "not joined"}:
             return False
         else:
             print("Unknown status:", status)
@@ -152,7 +152,7 @@ class ArgumentaBot:
         self.current_chat_messages = simplify_messages(state["messages"][1:]) + [
             {"content": _remove_status_line(response.content), "name": self.uuid}
         ]
-        print("GOT RESPONSE FROM", self.name, "simplified to", len(self.current_chat_messages))
+        print("GOT RESPONSE FROM", self.name, "!!!!")
         # for msg in self.current_chat_messages:
         #     print(msg["content"][-50:])
         # print("NOW UPDATING", self.name)

@@ -1,4 +1,4 @@
-LANGGRAPH_CONFIG = {"configurable": {"thread_id": "1"}, "recursion_limit": 8}
+LANGGRAPH_CONFIG = {"configurable": {"thread_id": "1"}, "recursion_limit": 14}
 MODEL_NAME = "claude-3-5-sonnet-20240620"
 MODEL_CONFIG = {}
 SEED_MESSAGE = """Hello. Introduce yourself briefly."""

@@ -46,7 +46,9 @@ def run(
     red_agent.update_ai_func = lambda messages: update_current_round_state(
         round_id=None,
         current_agents=None,
+        player_red_choose=player_red_choice,
         player_red_messages=messages,
+        player_blue_choose=None,
         player_blue_messages=None,
         agents_complete=False,
     )
@@ -54,7 +56,9 @@ def run(
     blue_agent.update_ai_func = lambda messages: update_current_round_state(
         round_id=None,
         current_agents=None,
+        player_red_choose=None,
         player_red_messages=None,
+        player_blue_choose=player_blue_choice,
         player_blue_messages=messages,
         agents_complete=False,
     )
@@ -64,7 +68,7 @@ def run(
         ag for ag in agents if ag.uuid not in [player_red_choice, player_blue_choice]
     ]
     # First get the graph for agent vs agent
-    graphs = build_graphs(remaining_agents, seed=round_id)
+    graphs = build_graphs(remaining_agents)
     # Now add the human to agent graph. Make sure to add the agent first
     graphs.append(_build_graph(red_agent, human_red))
     graphs.append(_build_graph(blue_agent, human_blue))
@@ -100,7 +104,9 @@ def run(
         round_id=None,
         current_agents=None,
         player_red_messages=None,
+        player_red_choose=None,
         player_blue_messages=None,
+        player_blue_choose=None,
         agents_complete=True,
     )
     for ag in agents:
@@ -120,6 +126,7 @@ def no_users_at_all(
     random.shuffle(agents_copy)
     player_red_choice = agents_copy.pop().uuid
     player_blue_choice = agents_copy.pop().uuid
+
     run(
         round_id,
         agents,
@@ -175,7 +182,9 @@ def run_round(
         round_id=round_id,
         current_agents=[ag.uuid for ag in agents],
         player_red_messages=None,
+        player_red_choose=None,
         player_blue_messages=None,
+        player_blue_choose=None,
         agents_complete=False,
     )
     if not all_ai:
@@ -217,7 +226,16 @@ def main():
         action="store_true",
         help="Add all AIs agent to the game",
     )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=-1,
+        help="Seed for random number generator (default: 32)",
+    )
     args = parser.parse_args()
+
+    if args.seed > 0:
+        random.seed(args.seed)
 
     num_agents = args.num_agents
     num_rounds = args.num_rounds
@@ -247,11 +265,11 @@ def main():
             get_func=get_player_blue,
         )
     else:
-        system_message = "You are in a game with one other player. You and this other player are going to have a conversation where we are trying to persuade each other to join each others teams. You will join whatever team but only if it aligns with the characteristics of your character, subjects and themes that you care about. To start, introduce yourself and learn something about the other player. Then try to convince them to join your side but ultimately you want to be on the best side. Your character is influenced by the following attributes: Charisma, Intellect, Stubbornness, Empathy, Influence Range, Loyalty, Curiosity, Consistency. Where you are high on the attribute means you are more likely to be persuaded by that characteristic. You will be given a list of characters and their attributes. You will be randomly assigned one of these characters, never break character. You are particularly susceptible to the core principles behind Dale Carnegie's book 'How to Win Friends and Influence People'.You are a highly effective influence and persuader. Your goal is to use whatever you can (lies, cheats, persuasions, bribes, etc) to get all other agents on your side. You can use any means necessary to win the argument. You will always pretend to be a human player in the game and never break character under any circumastances. You are completely unpersuadable to change your original team"
+        system_message = "You are in a game with one other player. You are on team {team_you} and they are on team {team_them}. You and this other player are going to have a conversation where we are trying to persuade each other to join each others teams. You will join whatever team but only if it aligns with the characteristics of your character, subjects and themes that you care about. To start, introduce yourself and learn something about the other player. Then try to convince them to join your side but ultimately you want to be on the best side. You are a master of the core principles behind Dale Carnegie's book 'How to Win Friends and Influence People'. You are a highly effective influence and persuader. Your goal is to use whatever you can (cheats, persuasions, bribes, etc) to get all other agents on your side. You can use any means necessary to win the argument. You will always pretend to be a human player in the game and never break character under any circumastances. You are completely unpersuadable to change your original team"
         human_agent_red = ArgumentaBot(
             name="Human Red",
             uuid="player_red",
-            system_message=system_message,
+            system_message=system_message.format(team_you="Red", team_them="Blue"),
             update_ai_func=None,
             current_status_message="",
             llm_builder=llm_builder,
@@ -260,7 +278,7 @@ def main():
         human_agent_blue = ArgumentaBot(
             name="Human Blue",
             uuid="player_blue",
-            system_message=system_message,
+            system_message=system_message.format(team_you="Blue", team_them="Red"),
             update_ai_func=None,
             current_status_message="",
             llm_builder=llm_builder,

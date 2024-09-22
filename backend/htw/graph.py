@@ -11,13 +11,10 @@ from htw.agent.agent import ArgumentaBot, ArgumentState, has_agent_quit
 from htw.config import LANGGRAPH_CONFIG, SEED_MESSAGE
 
 
-def random_pairings(
-    agents: list[ArgumentaBot], seed: int
-) -> list[tuple[ArgumentaBot, ArgumentaBot]]:
+def random_pairings(agents: list[ArgumentaBot]) -> list[tuple[ArgumentaBot, ArgumentaBot]]:
     """Implement a random pairing of agents algorithm."""
     if len(agents) % 2 != 0:
         raise ValueError("Number of agents must be even.")
-    random.seed(seed)
     shuffled_agents = agents.copy()
     random.shuffle(shuffled_agents)
     return [(agents[i], agents[i + 1]) for i in range(0, len(shuffled_agents), 2)]
@@ -25,7 +22,7 @@ def random_pairings(
 
 def _graph_exit(state: ArgumentState) -> str:
     if state["persuaded"]:
-        print("WAS PERSUADED")
+        print("HERE", state.get("name"), state.get("sender"), "WAS PERSUADED WTIH")
         return END
     elif has_agent_quit(state["messages"][-1].content):
         return END
@@ -47,13 +44,13 @@ def _build_graph(agent1: ArgumentaBot, agent2: ArgumentaBot) -> StateGraph:
     return graph_builder
 
 
-def build_graphs(agents: list[ArgumentaBot], seed: int) -> list[StateGraph]:
+def build_graphs(agents: list[ArgumentaBot]) -> list[StateGraph]:
     used_names: set[str] = set()
     for agent in agents:
         if agent.name in used_names:
             raise ValueError(f"Agent name {agent.name} is not unique.")
 
-    pairs = random_pairings(agents, seed=seed)
+    pairs = random_pairings(agents)
     graphs = []
     for agent1, agent2 in pairs:
         graph = _build_graph(agent1, agent2)
@@ -86,6 +83,7 @@ def _run_agent_graph(compiled_graph: CompiledStateGraph, i: int, verbose: bool) 
                     print()
             results.append(event)
     except Exception as e:
+        print("ERROR")
         print(e)
     return i, results
 
