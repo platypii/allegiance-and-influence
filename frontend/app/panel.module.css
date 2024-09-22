@@ -136,7 +136,7 @@
 }
 .inputArea textarea:active,
 .inputArea textarea:focus {
-  border: 2px solid #acc2de;
+  border: 2px solid #759e7b;
   outline: 0;
 }
 .inputArea button {

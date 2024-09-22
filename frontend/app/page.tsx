@@ -112,7 +112,7 @@ export default function Home() {
 
   const messages = playerName ? state?.round_state?.[playerName]?.messages || [] : []
 
-  const status = playerName ? (state?.round_state?.[playerName]?.choose ? null : 'Select an agent') : null
+  const status = playerName ? (state?.round_state?.[playerName]?.choose ? null : 'Select a character to recruit') : null
 
   return (
     <div className={styles.page}>

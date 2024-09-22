@@ -67,7 +67,7 @@ export default function Round({ state }: RoundProps) {
   return (
     <div className={styles.round}>
       <h1>
-        Round {state.round_number + 1}
+        Round {state.round_number ? state.round_number + 1 : 1}
       </h1>
       <div>
         {state.current_agents?.length} Agents
