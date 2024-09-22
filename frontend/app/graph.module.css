@@ -1,5 +1,5 @@
 .graph {
-  --node-size: 80px;
+  --node-size: 70px;
 }
 .graph {
   position: relative;
@@ -30,8 +30,8 @@
   overflow: hidden;
 }
 .node > div > img {
-  width: 100%;
-  height: 100%;
+  width: 110%;
+  height: 110%;
 }
 .edges {
   position: absolute;

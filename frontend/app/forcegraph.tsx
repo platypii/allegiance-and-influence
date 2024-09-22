@@ -31,7 +31,7 @@ interface ForceGraphProps {
 export default function ForceGraph({
   nodes: initialNodes,
   edges,
-  chargeStrength = 800,
+  chargeStrength = 400,
   linkDistance = 100,
   friction = 0.9,
   gravityStrength = 0.1, // Default gravity strength
@@ -155,7 +155,6 @@ export default function ForceGraph({
         className={styles.edges}
         width={dimensions.width}
         height={dimensions.height}
-        style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}
       >
         {edges.map((edge, index) => {
           const source = nodes.find(node => node.id === edge.source)
@@ -168,8 +167,8 @@ export default function ForceGraph({
                 y1={source.y}
                 x2={target.x}
                 y2={target.y}
-                stroke="#999"
-                strokeWidth={1}
+                stroke="#666"
+                strokeWidth={3}
               />
             )
           }

@@ -7,6 +7,7 @@ import ForceGraph, { Edge } from "./forcegraph"
 import { GraphNode } from "./forcegraph"
 import { useState } from "react"
 import characters from "./characters.json"
+import { randomEdges } from "./utils"
 
 export default function Home() {
   const [chatWith, setChatWith] = useState<string | undefined>()
@@ -16,7 +17,7 @@ export default function Home() {
   }
 
   const nodes: GraphNode[] = characters.map((character, i) => {
-    const team = i % 2 === 0 ? -1 : 1
+    const team = Math.random() * 2 - 1
     // scale -1 red to 0 grey to 1 blue
     const borderColor = teamColor(team)
     return {
@@ -32,10 +33,8 @@ export default function Home() {
     }
   })
 
-  // Define your edges
-  const edges: Edge[] = [
-    { source: 'Napoleon', target: 'Einstein' },
-  ]
+  // Make random connections, at most one connection per person
+  const edges: Edge[] = randomEdges(characters.map(character => character.UID), 10)
 
   const redCount = nodes.filter(node => node.team < 0).length
   const blueCount = nodes.filter(node => node.team > 0).length
