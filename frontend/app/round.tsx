@@ -28,7 +28,7 @@ export interface RoundState {
   }
 }
 
-interface Round {
+export interface RoundType {
   agents: {[key: string]: {
     current_chat_messages: {
       name?: string
@@ -42,27 +42,11 @@ interface Round {
 
 interface RoundProps {
   state: RoundState
+  round?: RoundType
 }
 
-export default function Round({ state }: RoundProps) {
-  const [round, setRound] = useState<Round>()
-
+export default function Round({ state, round }: RoundProps) {
   const statsRound = state.round_state?.agents_complete ? state.round_number : state.round_number - 1
-  useEffect(() => {
-    let unsubscribe: () => void
-    // get data from firebase
-    if (statsRound >= 0) {
-      const roundRef = ref(database, '/rounds')
-      unsubscribe = onValue(roundRef, (snapshot) => {
-        const rounds = snapshot.val()
-        const round = rounds?.[statsRound]
-        setRound(round)
-        console.log("Round data", round)
-      })
-    }
-
-    return () => unsubscribe?.()
-  }, [statsRound])
 
   return (
     <div className={styles.round}>

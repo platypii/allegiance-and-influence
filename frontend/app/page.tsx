@@ -10,7 +10,7 @@ import characters, { Character } from "./characters"
 import { teamColor } from "./teamColor"
 import { database } from "./firebase"
 import { onValue, ref, update } from "firebase/database"
-import Round, { RoundState } from "./round"
+import Round, { RoundState, RoundType } from "./round"
 
 export default function Home() {
   const [chatWith, setChatWith] = useState<Character | undefined>()
@@ -33,6 +33,7 @@ export default function Home() {
       agents_complete: false,
     },
   })
+  const [round, setRound] = useState<RoundType | undefined>()
 
   function clickNode(id: string) {
     if (!playerName) return
@@ -57,16 +58,32 @@ export default function Home() {
       if (state?.round_state?.[playerName].done_talking) return
       const character = characters.find(character => character.UID === state?.round_state[playerName].choose)
       if (character) setChatWith(character)
+
+      if (state.round_state.agents_complete) {
+        setChatWith(undefined)
+      }
     })
 
     return () => unsubscribe()
   }, [playerName])
 
+  useEffect(() => {
+    const roundRef = ref(database, '/rounds')
+    const unsubscribe = onValue(roundRef, (snapshot) => {
+      const rounds = snapshot.val()
+      const round = rounds?.[state.round_number - 1]
+      setRound(round)
+    })
+
+    return () => unsubscribe()
+  }, [state?.round_number])
+
   const agents = [...(state?.current_agents || []), 'player_red', 'player_blue']
   const nodes: GraphNode[] = agents.map(id => {
     const character = characters.find(character => character.UID === id)
     if (!character) throw new Error(`Character not found: ${id}`)
-    let team = 0 // TODO
+    // Get score from round
+    let team = round?.agents?.[id]?.side || 0
     if (id === 'player_red') team = -1
     if (id === 'player_blue') team = 1
     // scale -1 red to 0 grey to 1 blue
@@ -138,7 +155,7 @@ export default function Home() {
           </div>
         </div>
         {!playerName && <Welcome setPlayerName={setPlayerName} />}
-        {state && <Round state={state} />}
+        {state && <Round state={state} round={round} />}
         {status && <div className={styles.status}>{status}</div>}
       </main>
     </div>
