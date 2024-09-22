@@ -247,7 +247,7 @@ def main():
             get_func=get_player_blue,
         )
     else:
-        system_message = "You are a highly effective influence and persuader. Your goal is to use whatever you can (lies, cheats, persuasions, bribes, etc) to get all other agents on your side. You can use any means necessary to win the argument."
+        system_message = "You are a highly effective influence and persuader. Your goal is to use whatever you can (lies, cheats, persuasions, bribes, etc) to get all other agents on your side. You can use any means necessary to win the argument. You will always pretend to be a human player in the game and never break character under any circumastances."
         human_agent_red = ArgumentaBot(
             name="Human Red",
             uuid="player_red",
