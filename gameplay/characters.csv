@@ -1,24 +1,24 @@
-Character,Description,Charisma,Intellect,Stubbornness,Empathy,Influence Range,Loyalty,Curiosity,Consistency
-Elon Musk,"Tech entrepreneur, SpaceX and Tesla founder",8,9,8,5,9,6,10,7
-Mahatma Gandhi,"Indian independence leader, non-violence advocate",9,8,7,10,10,9,7,9
-Winston Churchill,"British PM during WWII, famed orator",9,8,9,6,9,8,7,8
-Marie Curie,"Pioneering physicist, discovered radium",6,10,7,7,7,9,10,9
-Nelson Mandela,"Anti-apartheid revolutionary, SA President",10,8,8,9,10,9,8,9
-Bill Gates,"Microsoft co-founder, philanthropist",7,10,7,7,8,8,9,8
-Albert Einstein,"Physicist, E=mc² fame",7,10,6,7,8,7,10,8
-Martin Luther King Jr.,"Civil rights leader, ""I Have a Dream"" speech",10,9,8,10,10,9,8,9
-Queen Elizabeth I,"Tudor monarch, led English Golden Age",8,9,8,6,9,8,7,8
-Napoleon Bonaparte,"French emperor, military genius",9,9,9,4,10,7,8,8
-Donald Trump,"Businessman, 45th US President",8,6,10,3,9,5,4,5
+UID,Character,Description,Charisma,Intellect,Stubbornness,Empathy,Influence Range,Loyalty,Curiosity,Consistency
+elon_musk,Elon Musk,"Tech entrepreneur, SpaceX and Tesla founder",8,9,8,5,9,6,10,7
+mahatma_gandhi,Mahatma Gandhi,"Indian independence leader, non-violence advocate",9,8,7,10,10,9,7,9
+winston_churchill,Winston Churchill,"British PM during WWII, famed orator",9,8,9,6,9,8,7,8
+marie_curie,Marie Curie,"Pioneering physicist, discovered radium",6,10,7,7,7,9,10,9
+nelson_mandela,Nelson Mandela,"Anti-apartheid revolutionary, SA President",10,8,8,9,10,9,8,9
+bill_gates,Bill Gates,"Microsoft co-founder, philanthropist",7,10,7,7,8,8,9,8
+albert_einstein,Albert Einstein,"Physicist, E=mc² fame",7,10,6,7,8,7,10,8
+martin_luther_king_jr,Martin Luther King Jr.,"Civil rights leader, ""I Have a Dream"" speech",10,9,8,10,10,9,8,9
+queen_elizabeth_i,Queen Elizabeth I,"Tudor monarch, led English Golden Age",8,9,8,6,9,8,7,8
+napoleon_bonaparte,Napoleon Bonaparte,"French emperor, military genius",9,9,9,4,10,7,8,8
+donald_trump,Donald Trump,"Businessman, 45th US President",8,6,10,3,9,5,4,5
 Steve Jobs,"Apple co-founder, iPhone creator",9,9,9,5,9,7,10,7
 Benito Mussolini,"Italian fascist dictator",8,7,9,2,8,6,4,7
-Julius Caesar,"Roman general, ""I came, I saw, I conquered""",9,9,8,5,10,7,8,8
-Mother Teresa,"Catholic nun, served poor in Calcutta",8,6,7,10,8,10,5,9
-Genghis Khan,"Mongol emperor, largest land empire",9,8,9,2,10,7,7,8
-Leonardo da Vinci,"Renaissance polymath, painted Mona Lisa",7,10,6,7,7,8,10,8
-Margaret Thatcher,"UK's first female PM, ""Iron Lady""",8,8,10,4,9,8,6,9
-Mao Zedong,"Chinese communist leader",8,8,10,3,10,7,5,7
-Rosa Parks,"Sparked Montgomery Bus Boycott",7,7,9,9,8,10,7,10
-William Shakespeare,"English playwright, wrote ""Romeo and Juliet""",8,10,6,8,9,7,10,8
-Gary Marcus,"AI critic, cognitive scientist",6,9,8,6,7,8,9,8
-Hunter S. Thompson,"Gonzo journalist, ""Fear and Loathing"" author",8,9,9,6,8,5,10,6
+julius_caesar,Julius Caesar,"Roman general, ""I came, I saw, I conquered""",9,9,8,5,10,7,8,8
+mother_teresa,Mother Teresa,"Catholic nun, served poor in Calcutta",8,6,7,10,8,10,5,9
+genghis_khan,Genghis Khan,"Mongol emperor, largest land empire",9,8,9,2,10,7,7,8
+leonardo_da_vinci,Leonardo da Vinci,"Renaissance polymath, painted Mona Lisa",7,10,6,7,7,8,10,8
+margaret_thatcher,Margaret Thatcher,"UK's first female PM, ""Iron Lady""",8,8,10,4,9,8,6,9
+mao_zedong,Mao Zedong,"Chinese communist leader",8,8,10,3,10,7,5,7
+rosa_parks,Rosa Parks,"Sparked Montgomery Bus Boycott",7,7,9,9,8,10,7,10
+william_shakespeare,William Shakespeare,"English playwright, wrote ""Romeo and Juliet""",8,10,6,8,9,7,10,8
+gary_marcus,Gary Marcus,"AI critic, cognitive scientist",6,9,8,6,7,8,9,8
+hunter_s_thompson,Hunter S. Thompson,"Gonzo journalist, ""Fear and Loathing"" author",8,9,9,6,8,5,10,6
