@@ -112,20 +112,20 @@ class ArgumentaBot:
             )
         else:
             input_messages = [self.system_message, *state["messages"]]
-        # print("STARTING FOR", self.name)
-        # for msg in input_messages:
-        #     print(msg.type)
-        #     print(msg.content)
-        #     print("*******")
         response = self.llm.invoke(input_messages)
         response.name = self.name
-        # TODO (Diego): parse the response so we can update the side
         # new_side = ArgumentSide.NEUTRAL if response == "neutral" else ArgumentSide.OTHER
         # self.update_side(new_side)
+        
+        # Check if the bot has been persuaded
+        status_line = response.content.split("\n")[-1].lower()
+        if "status:" in status_line and "join" in status_line:
+            return {"messages": [response], "stop_reason": "persuaded"}
+        
         return {"messages": [response]}
 
     def __str__(self):
-        return f"Agent: {self.name}"
+        return f"Agent: {self.name} ({self.uid})"
 
     def _state_dict(self) -> dict:
         """Generate state dict for FE."""
@@ -177,21 +177,22 @@ class ArgumentaBot:
 
 
 class HumanBot:
-    def __init__(self, name: str):
+    def __init__(self, name: str, uid: str):
         self.name = name
+        self.uid = uid
 
     def __call__(self, state: ArgumentState) -> ArgumentState:
         print("MESSAGES SO FAR")
         for msg in state["messages"]:
-            print(f"{msg.name}: {msg.content}")
+            sender = msg.additional_kwargs.get('sender', 'Unknown')
+            print(f"{sender}: {msg.content}")
         print("------------------------")
         print("------------------------")
-        result = input(">>>")
+        result = input(f"{self.name} ({self.uid})>>> ")
         if result == "exit":
             raise SystemExit
-        human_msg = HumanMessage(result)
-        human_msg.name = self.name
+        human_msg = HumanMessage(result, name=self.name, additional_kwargs={'sender': f"{self.name} ({self.uid})"})
         return {"messages": [human_msg]}
 
     def __str__(self):
-        return f"Agent: {self.name}"
+        return f"Agent: {self.name} ({self.uid})"

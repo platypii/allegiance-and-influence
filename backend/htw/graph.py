@@ -57,16 +57,24 @@ def compile_graphs(graphs: list[StateGraph], memory: SqliteSaver) -> list[Compil
 
 def _run_agent_graph(compiled_graph: CompiledStateGraph, verbose: bool) -> list[dict]:
     initial_state = ArgumentState(
-        messages=[BaseMessage(content=SEED_MESSAGE, type="human")], sender="STARTING"
+        messages=[BaseMessage(content=SEED_MESSAGE, type="human", additional_kwargs={'sender': 'SYSTEM'})],
+        sender="STARTING"
     )
     results = []
     try:
         for event in compiled_graph.stream(initial_state, config=LANGGRAPH_CONFIG, debug=False):
             if verbose:
                 for k, v in event.items():
-                    print(f"{k}: {v['messages'][0].content}")
+                    sender = v['messages'][0].additional_kwargs.get('sender', k)
+                    print(f"{sender}: {v['messages'][0].content}")
                     print()
             results.append(event)
+            
+            # Check if any agent has been persuaded
+            if any(v.get('stop_reason') == 'persuaded' for v in event.values()):
+                if verbose:
+                    print("Conversation ended: An agent has been persuaded!")
+                break
     except Exception as e:
         print(e)
     return results

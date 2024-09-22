@@ -19,12 +19,12 @@ from htw.llm import get_antropic_llm
 
 def run_human_vs_bot(llm_builder):
     agents = get_agents(llm_builder, num_agents=1)
-    human_agent = HumanBot(name="Human")
+    human_agent = HumanBot(name="Human", uid="human_player")
     graph_builder = _build_graph(agents[0], human_agent)
     compiled_graphs = compile_graphs([graph_builder], memory=None)
     all_results = _run_agent_graph(compiled_graphs[0], verbose=True)
     print("Human vs Bot Results:")
-    print(all_results)
+    print_persuasion_result(all_results)
 
 def run_bot_vs_bot(llm_builder):
     agents = get_agents(llm_builder, num_agents=2)
@@ -32,7 +32,15 @@ def run_bot_vs_bot(llm_builder):
     compiled_graphs = compile_graphs([graph_builder], memory=None)
     all_results = _run_agent_graph(compiled_graphs[0], verbose=True)
     print("Bot vs Bot Results:")
-    print(all_results)
+    print_persuasion_result(all_results)
+
+def print_persuasion_result(results):
+    for result in results:
+        for agent, data in result.items():
+            if data.get('stop_reason') == 'persuaded':
+                print(f"{agent} was persuaded to join the other team!")
+                return
+    print("No agent was persuaded. The conversation ended without a clear winner.")
 
 def main():
     set_llm_cache(SQLiteCache(database_path=".langchain.db"))
