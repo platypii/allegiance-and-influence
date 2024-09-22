@@ -8,6 +8,7 @@
   padding: 10px 20px;
   overflow: hidden;
   font-family: 'Courier New', Courier, monospace;
+  border-bottom-left-radius: 10px;
 }
 
 .pairing {

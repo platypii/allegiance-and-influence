@@ -60,10 +60,13 @@ export default function Home() {
     return () => unsubscribe()
   }, [playerName])
 
-  const nodes: GraphNode[] = state?.current_agents?.map((id, i) => {
+  const agents = [...(state?.current_agents || []), 'player_red', 'player_blue']
+  const nodes: GraphNode[] = agents.map(id => {
     const character = characters.find(character => character.UID === id)
     if (!character) throw new Error(`Character not found: ${id}`)
-    const team = 0 // TODO
+    let team = 0 // TODO
+    if (id === 'player_red') team = -1
+    if (id === 'player_blue') team = 1
     // scale -1 red to 0 grey to 1 blue
     const borderColor = teamColor(team)
     return {

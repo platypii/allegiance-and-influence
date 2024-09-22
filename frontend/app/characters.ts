@@ -311,6 +311,32 @@ const json: Character[] = [
     "Loyalty": 5,
     "Curiosity": 10,
     "Consistency": 6
+  },
+  {
+    "UID": "player_red",
+    "Character": "Player Red",
+    "Description": "You are Player Red",
+    "Charisma": 5,
+    "Intellect": 5,
+    "Stubbornness": 5,
+    "Empathy": 5,
+    "Influence Range": 5,
+    "Loyalty": 5,
+    "Curiosity": 5,
+    "Consistency": 5
+  },
+  {
+    "UID": "player_blue",
+    "Character": "Player Blue",
+    "Description": "You are Player Blue",
+    "Charisma": 5,
+    "Intellect": 5,
+    "Stubbornness": 5,
+    "Empathy": 5,
+    "Influence Range": 5,
+    "Loyalty": 5,
+    "Curiosity": 5,
+    "Consistency": 5
   }
 ]
 
