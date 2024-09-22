@@ -20,8 +20,8 @@ from htw.llm import get_antropic_llm
 def main() -> None:
     # conn = sqlite3.connect("/home/laurel/htw_cache/.checkpoints.sqlite")
     # memory = SqliteSaver(conn)
-
-    set_llm_cache(SQLiteCache(database_path="/home/laurel/htw_cache/.langchain.db"))
+    # TODO: Add ANTROPHIC_API_KEY to bachrc as environment variable
+    set_llm_cache(SQLiteCache(database_path=".langchain.db"))
 
     llm_model_name = "claude-3-haiku-20240307"
     llm_builder = partial(get_antropic_llm, model=llm_model_name)
@@ -34,7 +34,7 @@ def main() -> None:
     # IMPORTANT: make sure agent is first
     graph_builder = _build_graph(agent, human_agent)
     compiled_graphs = compile_graphs([graph_builder], memory=None)
-    all_results = _run_agent_graph(compiled_graphs[0])
+    all_results = _run_agent_graph(compiled_graphs[0], verbose=False)
     print(all_results)
 
 
