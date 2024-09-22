@@ -9,6 +9,7 @@ import { useState } from "react"
 import characters, { Character } from "./characters"
 import { randomEdges } from "./utils"
 import { teamColor } from "./teamColor"
+import { database } from "./firebase"
 
 export default function Home() {
   const [chatWith, setChatWith] = useState<Character | undefined>()
@@ -17,6 +18,8 @@ export default function Home() {
     const character = characters.find(character => character.UID === id)
     setChatWith(chatWith => chatWith?.UID === id ? undefined : character)
   }
+
+  console.log("Firebase initialized", database)
 
   const nodes: GraphNode[] = characters.map((character, i) => {
     const team = Math.random() * 2 - 1
@@ -55,6 +58,7 @@ export default function Home() {
     <div className={styles.page}>
       <Panel
         chatWith={chatWith}
+        onClose={() => setChatWith(undefined)}
       />
       <main className={styles.main}>
         <ForceGraph

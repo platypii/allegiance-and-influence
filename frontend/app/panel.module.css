@@ -1,9 +1,9 @@
 .panel {
   position: absolute;
-  box-sizing: border-box;
+  display: flex;
   left: 0;
   top: 0;
-  width: 420px;
+  width: 700px;
   background: linear-gradient(to bottom, #8B5A2B, #5C4033);
   border-right: 3px solid #3B2F2F;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
@@ -18,8 +18,40 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  width: 440px;
   height: 100vh;
   padding: 20px;
+}
+.panelBio {
+  width: 240px;
+  padding: 10px;
+}
+
+.panelBio img {
+  width: 100%;
+  border-radius: 50%;
+  border: 2px solid #3B2F2F; /* Dark brown border to resemble old photo frames */
+}
+
+.panelBio p {
+  font-family: 'Courier New', Courier, monospace; /* Typewriter-like font for a vintage feel */
+  font-size: 14px;
+  color: #3B2F2F; /* Matching dark brown text color */
+  line-height: 1.5;
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #F5F5DC; /* A vintage beige color */
+  border: 1px solid #3B2F2F; /* Dark border to match the theme */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+}
+.panelBio ul {
+  margin-top: 20px;
+  list-style-type: none;
+  padding: 0;
+}
+.panelBio ul li {
+  display: flex;
+  justify-content: space-between;
 }
 
 .panel button {
@@ -92,4 +124,16 @@
 .inputArea input:focus {
   border: 2px solid #acc2de;
   outline: 0;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #5e3a1d;
+  border: 2px solid #3B2F2F;
+  padding: 5px;
+  color: #f5f0e1;
+  cursor: pointer;
+  transition: background 0.3s;
 }

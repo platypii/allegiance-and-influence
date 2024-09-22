@@ -4,6 +4,7 @@ import { Character } from "./characters"
 
 interface PanelProps {
   chatWith: Character | undefined
+  onClose: () => void
 }
 
 interface Message {
@@ -11,7 +12,7 @@ interface Message {
   text: string
 }
 
-export default function Panel({ chatWith }: PanelProps) {
+export default function Panel({ chatWith, onClose }: PanelProps) {
   const [messages, setMessages] = useState<Message[]>([
     { role: "user", text: "Hello" },
     { role: "assistant", text: "Hi" },
@@ -45,6 +46,23 @@ export default function Panel({ chatWith }: PanelProps) {
           <input ref={inputRef} type="text" placeholder="Make an argument" />
         </form>
       </div>
+      <div className={styles.panelBio}>
+        <img src={`/images/agents/${chatWith?.UID}.jpg`} alt={chatWith?.Character} />
+        <p>
+          {chatWith?.Description}
+          <ul>
+            <li>Charisma: <span>{chatWith?.Charisma}</span></li>
+            <li>Intellect: <span>{chatWith?.Intellect}</span></li>
+            <li>Stubbornness: <span>{chatWith?.Stubbornness}</span></li>
+            <li>Empathy: <span>{chatWith?.Empathy}</span></li>
+            <li>Influence Range: <span>{chatWith?.['Influence Range']}</span></li>
+            <li>Loyalty: <span>{chatWith?.Loyalty}</span></li>
+            <li>Curiosity: <span>{chatWith?.Curiosity}</span></li>
+            <li>Consistency: <span>{chatWith?.Consistency}</span></li>
+          </ul>
+        </p>
+      </div>
+      <div className={styles.close} onClick={onClose}>X</div>
     </div>
   )
 }
