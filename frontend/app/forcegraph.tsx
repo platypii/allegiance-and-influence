@@ -82,7 +82,6 @@ export default function ForceGraph({
       vx: 0,
       vy: 0
     }))
-    console.log("Nodes updated", nodes)
     setNodes(nodes)
     nodeMap.current = new Map(nodes.map(node => [node.id, node]))
   }, [initialNodes])

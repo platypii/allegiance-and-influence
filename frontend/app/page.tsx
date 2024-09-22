@@ -47,7 +47,7 @@ export default function Home() {
     })
   }, [])
 
-  const nodes: GraphNode[] = state.current_agents.map((id, i) => {
+  const nodes: GraphNode[] = state?.current_agents?.map((id, i) => {
     const character = characters.find(character => character.UID === id)
     if (!character) throw new Error(`Character not found: ${id}`)
     const team = Math.random() * 2 - 1
@@ -74,14 +74,14 @@ export default function Home() {
         }} />
       </div>,
     }
-  })
+  }) || []
   console.log("Nodes", nodes)
 
   // Make random connections, at most one connection per person
   const edges: Edge[] = randomEdges(characters.map(character => character.UID), 10)
 
-  const redCount = nodes.filter(node => node.team < 0).length
-  const blueCount = nodes.filter(node => node.team > 0).length
+  const redCount = nodes?.filter(node => node.team < 0)?.length
+  const blueCount = nodes?.filter(node => node.team > 0)?.length
 
   return (
     <div className={styles.page}>

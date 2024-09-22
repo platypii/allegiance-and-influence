@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import styles from "./page.module.css"
+import styles from "./welcome.module.css"
 
 export default function Welcome() {
   const [dismissed, setDismissed] = useState(true)
@@ -31,6 +31,10 @@ export default function Welcome() {
       <h1>How To Win Friends and Influence Agents</h1>
       <sub>A game of human-machine influence</sub>
       
+      <div className={styles.choose}>
+        <button>Player 1</button>
+        <button>Player 2</button>
+      </div>
       <label className={styles.permadismiss} onClick={handleCheckboxClick}>
         <input type="checkbox" />
         Don't show this again
