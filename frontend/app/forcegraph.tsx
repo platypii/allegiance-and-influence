@@ -78,13 +78,16 @@ export default function ForceGraph({
   }, [])
 
   useEffect(() => {
-    const nodes = initialNodes.map(node => ({
-      ...node,
-      x: Math.random() * 800 - 400,
-      y: Math.random() * 600 - 300,
-      vx: 0,
-      vy: 0
-    }))
+    const nodes = initialNodes.map(node => {
+      const existingNode = nodeMap.current.get(node.id)
+      return {
+        ...node,
+        x: existingNode ? existingNode.x : Math.random() * 800 - 400,
+        y: existingNode ? existingNode.y : Math.random() * 600 - 300,
+        vx: existingNode ? existingNode.vx : 0,
+        vy: existingNode ? existingNode.vy : 0,
+      }
+    })
     setNodes(nodes)
     nodeMap.current = new Map(nodes.map(node => [node.id, node]))
   }, [initialNodes])
