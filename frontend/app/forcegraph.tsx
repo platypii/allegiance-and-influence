@@ -3,6 +3,7 @@ import styles from "./graph.module.css"
 
 export interface GraphNode {
   id: string
+  team: number
   element: React.ReactElement
 }
 
@@ -25,6 +26,7 @@ interface ForceGraphProps {
   chargeStrength?: number
   linkDistance?: number
   linkForce?: number
+  teamForce?: number
   friction?: number
   gravityStrength?: number
 }
@@ -35,6 +37,7 @@ export default function ForceGraph({
   chargeStrength = 400,
   linkDistance = 80,
   linkForce = 0.004,
+  teamForce = 0.05,
   friction = 0.9,
   gravityStrength = 0.1, // Default gravity strength
 }: ForceGraphProps) {
@@ -131,6 +134,9 @@ export default function ForceGraph({
         // Normalize the direction and apply gravity strength
         fx += -(node.x / distanceCenter) * gravityStrength
         fy += -(node.y / distanceCenter) * gravityStrength
+
+        // Team force (-1 to left, 1 to right)
+        fx += node.team * teamForce
 
         // Update velocity
         node.vx = (node.vx + fx) * friction
