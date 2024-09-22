@@ -52,6 +52,7 @@ export default function Home() {
       setState(state)
 
       if (!playerName) return
+      if (!state?.round_state[playerName]) return
       const character = characters.find(character => character.UID === state?.round_state[playerName].choose)
       if (character) setChatWith(character)
     })
