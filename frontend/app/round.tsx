@@ -6,7 +6,8 @@ interface Message {
 }
 
 export interface RoundState {
-  roundNumber: number
+  round_number: number
+  current_agents: string[]
   roundState: {
     player1: {
       choose: string | null
@@ -29,7 +30,7 @@ interface RoundProps {
 export default function Round({ state }: RoundProps) {
   return (
     <div className={styles.round}>
-      <h1>Round {state.roundNumber}</h1>
+      <h1>Round {state.round_number}</h1>
     </div>
   )
 }

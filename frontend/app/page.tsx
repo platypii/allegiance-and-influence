@@ -11,12 +11,13 @@ import { randomEdges } from "./utils"
 import { teamColor } from "./teamColor"
 import { database } from "./firebase"
 import { onValue, ref } from "firebase/database"
-import Round from "./round"
+import Round, { RoundState } from "./round"
 
 export default function Home() {
   const [chatWith, setChatWith] = useState<Character | undefined>()
-  const [state, setState] = useState({
-    roundNumber: 1,
+  const [state, setState] = useState<RoundState>({
+    round_number: 1,
+    current_agents: [],
     roundState: {
       player1: {
         choose: null,
@@ -39,22 +40,11 @@ export default function Home() {
 
   console.log("Firebase initialized", database)
   useEffect(() => {
-    // /state
-    // {
-    //   roundNumber: 3,
-    //   roundState: {
-    //     player1: {
-    //       choose: 'gary'
-    //       messages: [{}, {}]
-    //       doneTalking: false
-    //     },
-    //     player2: ...
-    //     agentsCompleted: false
-    //   }
     const stateRef = ref(database, '/current_state')
     onValue(stateRef, (snapshot) => {
       const state = snapshot.val()
       console.log("Data updated", state)
+      setState(state)
     })
   }, [])
 
