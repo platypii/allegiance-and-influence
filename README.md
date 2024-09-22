@@ -25,45 +25,6 @@
 4. **Scoring**: Points awarded for each AI agent in a player's faction.
 5. **Victory Condition**: The player with the largest faction at the end of the game wins.
 
-## Project Structure
-
-```
-/src
-  /ai
-    - agent.py
-    - conversation.py
-  /game
-    - board.py
-    - player.py
-    - turn.py
-  /ui
-    - interface.py
-    - render.py
-/tests
-  - test_agent.py
-  - test_game.py
-/docs
-  - game_design.md
-  - api_reference.md
-```
-
-## Getting Started
-
-1. Clone the repository:
-   ```
-   git clone https://github.com/your-username/how-to-win-friends-and-influence-agents.git
-   ```
-
-2. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-
-3. Run the game:
-   ```
-   python src/main.py
-   ```
-
 ## Contributing
 
 We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) file for details on how to get started.
