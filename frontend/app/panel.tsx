@@ -1,8 +1,9 @@
 import { useRef, useState } from "react"
 import styles from "./panel.module.css"
+import { Character } from "./characters"
 
 interface PanelProps {
-  chatWith: string | undefined
+  chatWith: Character | undefined
 }
 
 interface Message {
@@ -32,7 +33,7 @@ export default function Panel({ chatWith }: PanelProps) {
   return (
     <div className={styles.panel} style={chatWith ? {} : {width: "0px"}}>
       <div className={styles.panelContent}>
-        <h1>{chatWith}</h1>
+        <h1>{chatWith?.Character}</h1>
         <div className={styles.chatArea}>
           {messages.map((message, index) => (
             <div key={index} className={styles[message.role]}>

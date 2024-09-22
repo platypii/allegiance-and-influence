@@ -6,15 +6,16 @@ import Panel from "./panel"
 import ForceGraph, { Edge } from "./forcegraph"
 import { GraphNode } from "./forcegraph"
 import { useState } from "react"
-import characters from "./characters.json"
+import characters, { Character } from "./characters"
 import { randomEdges } from "./utils"
 import { teamColor } from "./teamColor"
 
 export default function Home() {
-  const [chatWith, setChatWith] = useState<string | undefined>()
+  const [chatWith, setChatWith] = useState<Character | undefined>()
 
   function clickNode(id: string) {
-    setChatWith(chatWith => chatWith === id ? undefined : id)
+    const character = characters.find(character => character.UID === id)
+    setChatWith(chatWith => chatWith?.UID === id ? undefined : character)
   }
 
   const nodes: GraphNode[] = characters.map((character, i) => {

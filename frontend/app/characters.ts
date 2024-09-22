@@ -1,4 +1,18 @@
-[
+export interface Character {
+  "UID": string
+  "Character": string
+  "Description": string
+  "Charisma": number
+  "Intellect": number
+  "Stubbornness": number
+  "Empathy": number
+  "Influence Range": number
+  "Loyalty": number
+  "Curiosity": number
+  "Consistency": number
+}
+
+const json: Character[] = [
   {
     "UID": "elon_musk",
     "Character": "Elon Musk",
@@ -153,7 +167,7 @@
     "Influence Range": 7,
     "Loyalty": 10,
     "Curiosity": 7,
-    "Consistency": null
+    "Consistency": 6
   },
   {
     "UID": "benito_mussolini",
@@ -166,7 +180,7 @@
     "Influence Range": 6,
     "Loyalty": 4,
     "Curiosity": 7,
-    "Consistency": null
+    "Consistency": 3
   },
   {
     "UID": "julius_caesar",
@@ -299,3 +313,5 @@
     "Consistency": 6
   }
 ]
+
+export default json
