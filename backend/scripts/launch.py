@@ -39,7 +39,7 @@ def both_users_ready(
     human_red: HumanBot,
     human_blue: HumanBot,
     llm_builder: LLMBuilderWithoutModel,
-) -> str:
+) -> None:
     """Return the agent selected by the user."""
     if app_state.event_type in {"put", "patch"}:
         # You can technically get the fine grained put updates of each subkey in app_state.path
@@ -115,6 +115,7 @@ def both_users_ready(
                 agents_complete=True,
             )
             for ag in agents:
+                ag.update_ai_func = None
                 ag.increment_round()
 
 
@@ -198,7 +199,7 @@ def main():
             # Wait under agents are completed
             round_state = get_round_state()
             if round_state.get("agents_complete"):
-                listener
+                listener.close()
                 break
             else:
                 time.sleep(5)

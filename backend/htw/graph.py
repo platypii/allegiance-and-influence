@@ -25,6 +25,7 @@ def random_pairings(
 
 def _graph_exit(state: ArgumentState) -> str:
     if state["persuaded"]:
+        print("WAS PERSUADED")
         return END
     elif has_agent_quit(state["messages"][-1].content):
         return END
@@ -68,7 +69,7 @@ def compile_graphs(graphs: list[StateGraph], memory: SqliteSaver) -> list[Compil
     return compiled_graphs
 
 
-def _run_agent_graph(compiled_graph: CompiledStateGraph, verbose: bool) -> list[dict]:
+def _run_agent_graph(compiled_graph: CompiledStateGraph, i: int, verbose: bool) -> list[dict]:
     initial_state = ArgumentState(
         messages=[
             BaseMessage(content=SEED_MESSAGE, type="human", additional_kwargs={"sender": "SYSTEM"})
@@ -84,15 +85,9 @@ def _run_agent_graph(compiled_graph: CompiledStateGraph, verbose: bool) -> list[
                     print(f"{sender}: {v['messages'][0].content}")
                     print()
             results.append(event)
-
-            # Check if any agent has been persuaded
-            if any(v.get("stop_reason") == "persuaded" for v in event.values()):
-                if verbose:
-                    print("Conversation ended: An agent has been persuaded!")
-                break
     except Exception as e:
         print(e)
-    return results
+    return i, results
 
 
 def run_graphs(compiled_graphs: list[CompiledStateGraph], verbose: bool) -> list[list[dict]]:
@@ -105,28 +100,29 @@ def run_graphs(compiled_graphs: list[CompiledStateGraph], verbose: bool) -> list
             print("------------------")
             print("NEW GRAPH")
             print("------------------")
-        results.append(_run_agent_graph(graph, verbose))
+        results.append(_run_agent_graph(graph, i, verbose)[1])
     return results
 
 
 def run_graphs_parallel(
     compiled_graphs: list[CompiledStateGraph], timeout: float = None
 ) -> list[list[dict]]:
-    results = []
+    results = [None] * len(compiled_graphs)
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        _run_agent_graph_partial = partial(_run_agent_graph, verbose=False)
         future_to_graph = {
-            executor.submit(_run_agent_graph_partial, graph): graph for graph in compiled_graphs
+            executor.submit(partial(_run_agent_graph, i=i, verbose=False), graph): graph
+            for i, graph in enumerate(compiled_graphs)
         }
 
         try:
             for future in concurrent.futures.as_completed(future_to_graph, timeout=timeout):
                 try:
-                    result = future.result()
-                    results.append(result)
+                    result_tuple = future.result()
+                    idx, result = result_tuple
+                    results[idx] = result
                 except Exception as e:
                     print(f"An error occurred while running a graph: {e}")
         except concurrent.futures.TimeoutError:
             print("Execution timed out")
-
+    print("LAUREL FIND ME...I AM DONE WITH PARALLEL")
     return results

@@ -10,7 +10,7 @@ from typing import Annotated, Callable, Sequence
 from anthropic import BaseModel
 from htw.config import MODEL_CONFIG
 from htw.firebase import get_round_state, listen_to_player_red, update_agent_state
-from htw.llm import LLMBuilderWithoutModel
+from htw.llm import LLMBuilderWithoutModel, get_antropic_llm
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage, AIMessage
 from langchain_core.runnables import RunnableConfig
@@ -85,8 +85,11 @@ def build_input_messages(
     return [system_message, *new_messages]
 
 
-def has_agent_been_persuaded(response: str, llm: ChatAnthropic | ChatOpenAI) -> bool:
+def has_agent_been_persuaded(response: str, config: dict) -> bool:
     """Check if the agent has been persuaded."""
+    new_config = copy.deepcopy(config)
+    new_config["max_tokens"] = 64
+    llm = get_antropic_llm(config=new_config, model="claude-3-haiku-20240307")
     prompt = [
         SystemMessage(
             "You are a discriminative classifier who determines if someone is persuaded to join the other person's team or not.\n\nLook at the last status sentence from a conversation and determine if the person has been persuaded to join the other person's team. Output `Score: #` where `#` is -1 if they have strongly not been persuaded, 0 if they are neutral, and 1 if they have strongly been persuaded."
@@ -144,13 +147,14 @@ class ArgumentaBot:
         self.current_chat_messages = simplify_messages(state["messages"][1:]) + [
             {"content": _remove_status_line(response.content), "name": self.uuid}
         ]
-        for msg in self.current_chat_messages:
-            print(msg["content"][-500:])
         print("GOT RESPONSE FROM", self.name, "simplified to", len(self.current_chat_messages))
+        # for msg in self.current_chat_messages:
+        #     print(msg["content"][-50:])
+        # print("NOW UPDATING", self.name)
         if self.update_ai_func:
             self.update_ai_func(self.current_chat_messages)
         # Check if the bot has been persuaded
-        persuaded = has_agent_been_persuaded(response.content, self.llm)
+        persuaded = has_agent_been_persuaded(response.content, self.llm_config)
         if persuaded:
             if self.current_opponent_side is None:
                 raise ValueError("Agent has been persuaded but the opponent side is not set.")
@@ -184,7 +188,7 @@ class ArgumentaBot:
             raise ValueError("No messages to summarize. Call this before incrementing a round.")
         prompt = [
             SystemMessage(
-                "Your job is to generate a summary of the messages from this round and come up with a concise understanding of what side this person is on."
+                f"Your job is to generate a very short summary of the messages from this round and come up with a concise understanding of what {self.name} learned and their stance. No more than one sentence."
             ),
             HumanMessage(_serialize_messages(self.current_chat_messages)),
         ]
@@ -248,11 +252,11 @@ class HumanBot:
         print(f"WAITING......{self.name}")
         listener = self.listen_func(self._wait_for_user_input)
         while True:
-            print(".", self.user_input_from_last_message, end="", flush=True)
             if self.user_input_from_last_message is not None:
                 listener.close()
                 break
             else:
+                print("R" if "red" in self.uuid else "B", end="")
                 time.sleep(0.5)
         print(f"DONE WAITING... {self.name}")
         human_msg = HumanMessage(

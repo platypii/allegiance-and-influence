@@ -1,5 +1,5 @@
 LANGGRAPH_CONFIG = {"configurable": {"thread_id": "1"}, "recursion_limit": 8}
-MODEL_NAME = "claude-3-sonnet-20240229"
+MODEL_NAME = "claude-3-5-sonnet-20240620"
 MODEL_CONFIG = {}
 SEED_MESSAGE = """Hello. Introduce yourself briefly."""
 
