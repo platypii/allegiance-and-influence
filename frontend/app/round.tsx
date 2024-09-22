@@ -76,7 +76,7 @@ export default function Round({ state }: RoundProps) {
         {!state.round_state?.agents_complete && '(in progress)'}
       </sub>
       {round && statsRound >= 0 && <>
-        <h2>Previous Round {statsRound}</h2>
+        {state.round_number !== statsRound && <h2>Previous Round {statsRound}</h2>}
         {round.current_pairing.map(([agent1, agent2], index) => (
           <div className={styles.pairing} key={index}>
             <div className={styles.pair}>

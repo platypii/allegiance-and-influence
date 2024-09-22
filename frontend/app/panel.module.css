@@ -99,6 +99,7 @@
   padding: 10px;
   color: #333;
   font-family: "Playwrite DE Grund", cursive;
+  white-space: pre-wrap;
 }
 .assistant {
   margin-right: 40px;
