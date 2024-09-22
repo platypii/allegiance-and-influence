@@ -35,3 +35,8 @@
 .choose button:hover {
   background-color: #ffff2f;
 }
+
+.win {
+  font-size: 40px;
+  font-weight: bold;
+}

@@ -41,6 +41,6 @@ a {
   }
 }
 
-.nextjs-portal {
-  display: none;
+nextjs-portal {
+  display: none !important;
 }

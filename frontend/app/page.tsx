@@ -11,6 +11,7 @@ import { teamColor } from "./teamColor"
 import { database } from "./firebase"
 import { onValue, ref, update } from "firebase/database"
 import Round, { RoundState, RoundType } from "./round"
+import Endgame from "./endgame"
 
 export default function Home() {
   const [chatWith, setChatWith] = useState<Character | undefined>()
@@ -158,6 +159,7 @@ export default function Home() {
         {!playerName && <Welcome setPlayerName={setPlayerName} />}
         {state && <Round state={state} round={round} />}
         {status && <div className={styles.status}>{status}</div>}
+        {false && <Endgame playerName={redCount > blueCount ? 'player_red' : 'player_blue'} />}
       </main>
     </div>
   )
