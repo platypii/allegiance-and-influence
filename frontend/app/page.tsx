@@ -6,42 +6,28 @@ import Panel from "./panel"
 import ForceGraph, { Edge } from "./forcegraph"
 import { GraphNode } from "./forcegraph"
 import { useState } from "react"
+import characters from "./characters.json"
 
 export default function Home() {
   const [chatWith, setChatWith] = useState<string | undefined>()
 
-  function clickNode(node: { id: string }) {
-    setChatWith(chatWith => chatWith === node.id ? undefined : node.id)
+  function clickNode(id: string) {
+    setChatWith(chatWith => chatWith === id ? undefined : id)
   }
 
-  const nodes: GraphNode[] = [
-    {
-      id: 'Napoleon',
-      x: 100,
-      y: 100,
-      team: -1,
-    },
-    {
-      id: 'Einstein',
-      x: 300,
-      y: 100,
-      team: 0,
-    },
-    {
-      id: 'Trump',
-      x: 200,
-      y: 300,
-      team: 0.5, // mostly blue
-    },
-  ].map(node => {
+  const nodes: GraphNode[] = characters.map((character, i) => {
+    const team = i % 2 === 0 ? -1 : 1
     // scale -1 red to 0 grey to 1 blue
-    const background = teamColor(node.team)
+    const background = teamColor(team)
     return {
-      ...node,
+      id: character.UID,
+      x: Math.random() * 800,
+      y: Math.random() * 600,
+      team,
       element: <div
-        onClick={() => clickNode(node)}
+        onClick={() => clickNode(character.UID)}
         style={{ background }}>
-        {node.id}
+        {character.Character}
       </div>,
     }
   })

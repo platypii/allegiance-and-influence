@@ -31,7 +31,7 @@ interface ForceGraphProps {
 export default function ForceGraph({
   nodes: initialNodes,
   edges,
-  chargeStrength = -30,
+  chargeStrength = 800,
   linkDistance = 100,
   friction = 0.9,
   gravityStrength = 0.1, // Default gravity strength
