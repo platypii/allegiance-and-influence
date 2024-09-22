@@ -55,6 +55,7 @@ export default function Panel({ playerName, chatWith, firemessages, onClose }: P
               {message.name?.startsWith('player_') ? 'user' : chatWith?.Character}: {message.content}
             </div>
           ))}
+          {messages.length === 0 && <div>Thinking...</div>}
         </div>
         <div className={styles.inputArea}>
           <form onSubmit={handleInput}>
