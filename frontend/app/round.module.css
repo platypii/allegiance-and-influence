@@ -2,9 +2,11 @@
   position: absolute;
   right: 0;
   top: 0;
+  width: 240px;
   background-color: beige;
   color: #333;
   padding: 10px;
+  overflow: hidden;
 }
 
 .spinner {
@@ -22,16 +24,22 @@
 }
 
 .pairing {
-  display: flex;
-  gap: 10px;
   margin-top: 10px;
 }
-.pairing img {
+.pair {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+.pair img {
   width: 80px;
   border-radius: 50%;
   border: 2px solid #3B2F2F;
 }
-.pairing > div {
+.pair > div {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  width: 50%;
+  font-size: 12px;
 }

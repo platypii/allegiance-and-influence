@@ -14,12 +14,11 @@ export default function Welcome({ setPlayerName }: WelcomeProps) {
 
   return (
     <div className={styles.welcome}>
-      <h1>Allegiance & Influence</h1>
-      <sub>A game of human-machine influence</sub>
+      <img src="/images/splash_logo.png" alt="Allegiance & Influence" />
       
       <div className={styles.choose}>
-        <button style={{ color: '#d11' }} onClick={clickPlayer1}>Player 1</button>
-        <button style={{ color: '#11e' }} onClick={clickPlayer2}>Player 2</button>
+        <button style={{ color: '#ef8585' }} onClick={clickPlayer1}>Player 1</button>
+        <button style={{ color: '#8484e9' }} onClick={clickPlayer2}>Player 2</button>
       </div>
     </div>
   )

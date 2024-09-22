@@ -2,10 +2,11 @@ import { useEffect, useState } from "react"
 import styles from "./round.module.css"
 import { database } from "./firebase"
 import { onValue, ref } from "firebase/database"
+import { teamColor } from "./teamColor"
 
 interface Message {
-  role: "user" | "assistant"
-  text: string
+  name: string
+  content: string
 }
 
 export interface RoundState {
@@ -32,9 +33,10 @@ interface Round {
       name?: string
       content: string
     }[]
-    side: string
+    side: number
   }}
   current_pairing: [string, string][]
+  pairing_summaries: string[]
 }
 
 interface RoundProps {
@@ -56,7 +58,7 @@ export default function Round({ state }: RoundProps) {
         console.log("Round data", round)
       })
     }
-  }, [])
+  }, [statsRound])
 
   return (
     <div className={styles.round}>
@@ -65,20 +67,21 @@ export default function Round({ state }: RoundProps) {
         {!state.round_state?.agents_complete && <div className={styles.spinner} />}
       </h1>
       <div>{state.current_agents?.length} Agents</div>
-      {round && <>
+      {round && statsRound >= 0 && <>
         <h2>Previous Round {statsRound}</h2>
         {round.current_pairing.map(([agent1, agent2], index) => (
           <div className={styles.pairing} key={index}>
-            <div>
-              <img src={`/images/agents/${agent1}.jpg`} alt={agent1} />
-              {round.agents?.[agent1]?.side}
-              {agent1}
+            <div className={styles.pair}>
+              <div>
+                <img src={`/images/agents/${agent1}.jpg`} alt={agent1} style={{ borderColor: teamColor(round.agents?.[agent1]?.side || 0) }} />
+                {agent1}
+              </div>
+              <div>
+                <img src={`/images/agents/${agent2}.jpg`} alt={agent2} style={{ borderColor: teamColor(round.agents?.[agent2]?.side || 0) }} />
+                {agent2}
+              </div>
             </div>
-            <div>
-              <img src={`/images/agents/${agent2}.jpg`} alt={agent2} />
-              {round.agents?.[agent2]?.side}
-              {agent2}
-            </div>
+            <div>{round.pairing_summaries[index]}</div>
           </div>
         ))}
       </>}

@@ -61,7 +61,7 @@ export default function Home() {
   const nodes: GraphNode[] = state?.current_agents?.map((id, i) => {
     const character = characters.find(character => character.UID === id)
     if (!character) throw new Error(`Character not found: ${id}`)
-    const team = Math.random() * 2 - 1
+    const team = 0 // TODO
     // scale -1 red to 0 grey to 1 blue
     const borderColor = teamColor(team)
     return {
