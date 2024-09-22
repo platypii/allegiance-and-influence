@@ -11,9 +11,26 @@ import { randomEdges } from "./utils"
 import { teamColor } from "./teamColor"
 import { database } from "./firebase"
 import { onValue, ref } from "firebase/database"
+import Round from "./round"
 
 export default function Home() {
   const [chatWith, setChatWith] = useState<Character | undefined>()
+  const [state, setState] = useState({
+    roundNumber: 1,
+    roundState: {
+      player1: {
+        choose: null,
+        messages: [],
+        doneTalking: false,
+      },
+      player2: {
+        choose: null,
+        messages: [],
+        doneTalking: false,
+      },
+      agentsCompleted: false,
+    },
+  })
 
   function clickNode(id: string) {
     const character = characters.find(character => character.UID === id)
@@ -34,11 +51,10 @@ export default function Home() {
     //     player2: ...
     //     agentsCompleted: false
     //   }
-    const dataRef = ref(database, '/rounders')
-    onValue(dataRef, (snapshot) => {
-      const rounds = snapshot.val()
-      const { agents } = rounds[rounds.length - 1]
-      console.log("Data updated", agents)
+    const stateRef = ref(database, '/state')
+    onValue(stateRef, (snapshot) => {
+      const state = snapshot.val()
+      console.log("Data updated", state)
     })
   }, [])
 
@@ -92,6 +108,7 @@ export default function Home() {
           <div className={styles.blue}>{blueCount}</div>
         </div>
         <Welcome />
+        {state && <Round state={state} />}
       </main>
     </div>
   )

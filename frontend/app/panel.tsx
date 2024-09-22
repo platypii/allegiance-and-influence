@@ -69,7 +69,7 @@ export default function Panel({ chatWith, onClose }: PanelProps) {
           </ul>
         </div>
       </div>
-      <div className={styles.close} onClick={onClose}>X</div>
+      <button className={styles.close} onClick={onClose}>X</button>
     </div>
   )
 }

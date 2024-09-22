@@ -77,8 +77,8 @@
   font-weight: bold;
   text-align: center;
   margin-bottom: 10px;
-  color: #f0d9b5;
-  text-shadow: 1px 1px 2px #3B2F2F;
+  color: #333;
+  text-decoration: underline;
 }
 
 .chatArea {
@@ -128,14 +128,15 @@
   outline: 0;
 }
 
-.close {
+button.close {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 2px;
+  right: 2px;
   background: #5e3a1d;
   border: 2px solid #3B2F2F;
-  padding: 5px;
+  border-radius: 4px;
   color: #f5f0e1;
   cursor: pointer;
+  padding: 8px 12px;
   transition: background 0.3s;
 }
