@@ -34,6 +34,7 @@ export default function Round({ state }: RoundProps) {
         Round {state.round_number}
         {!state.round_state?.agents_complete && <div className={styles.spinner} />}
       </h1>
+      <div>{state.current_agents.length} Agents</div>
     </div>
   )
 }
