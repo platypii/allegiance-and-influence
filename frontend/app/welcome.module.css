@@ -9,13 +9,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   backdrop-filter: blur(8px);
+  z-index: 2000;
 }
-.permadismiss {
-  cursor: pointer;
+
+.choose {
+  display: flex;
+  gap: 20px;
   margin-top: 20px;
 }
-.permadismiss input {
-  margin-right: 5px;
+.choose button {
+  padding: 8px 16px;
+  cursor: pointer;
 }
