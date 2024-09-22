@@ -21,7 +21,7 @@
 }
 
 .panel button {
-  background: #6B4423;
+  background: #5e3a1d;
   border: 2px solid #3B2F2F;
   padding: 10px 15px;
   color: #f5f0e1;
@@ -31,14 +31,9 @@
   transition: background 0.3s, transform 0.3s;
 }
 
-.panel button:hover {
-  background: #5C4033;
-  transform: translateY(-2px);
-}
-
+.panel button:hover,
 .panel button:active {
-  background: #3B2F2F;
-  transform: translateY(0);
+  background: #3b2116;
 }
 
 .panel h1 {
@@ -60,7 +55,7 @@
   padding: 10px;
   background: rgba(0, 0, 0, 0.6);
   border: 2px solid #3B2F2F;
-  border-radius: 5px;
+  border-radius: 8px;
 }
 .chatArea > div {
   border-radius: 12px;
@@ -89,4 +84,10 @@
   border-radius: 5px;
   background: rgba(0, 0, 0, 0.6);
   color: #f5f0e1;
+  transition: border 0.3s;
+}
+.inputArea input:active,
+.inputArea input:focus {
+  border: 2px solid #acc2de;
+  outline: 0;
 }
