@@ -1,15 +1,18 @@
 import time
 from functools import partial
 
+from htw.summarize import summarize_results
 from langchain.globals import set_llm_cache
 from langchain_community.cache import SQLiteCache
+from firebase_admin.db import ListenerRegistration
 
-from htw.agent.agent import ArgumentaBot, HumanBot
+from htw.agent.agent import ArgumentSide, ArgumentaBot, HumanBot
 from htw.agent.builder import get_agents
 from htw.config import MODEL_NAME
 from htw.firebase import (
     connect,
     delete_current_state,
+    delete_key,
     get_player_blue,
     get_player_red,
     get_round_state,
@@ -18,6 +21,7 @@ from htw.firebase import (
     listen_to_round_state,
     update_current_pairing,
     update_current_round_state,
+    update_pairing_summaries,
 )
 from htw.graph import (
     _build_graph,
@@ -37,7 +41,7 @@ def both_users_ready(
     llm_builder: LLMBuilderWithoutModel,
 ) -> str:
     """Return the agent selected by the user."""
-    if app_state.event_type == "put":
+    if app_state.event_type in {"put", "patch"}:
         # You can technically get the fine grained put updates of each subkey in app_state.path
         # and app_state.app_data but it's easier to get the entire state and check if the keys
         app_data = get_round_state()
@@ -47,7 +51,21 @@ def both_users_ready(
             and app_data.get("player_blue", {}).get("choose")
         ):
             red_agent = [ag for ag in agents if ag.uuid == app_data["player_red"]["choose"]][0]
+            red_agent.update_ai_func = lambda messages: update_current_round_state(
+                round_id=None,
+                current_agents=None,
+                player_red_messages=messages,
+                player_blue_messages=None,
+                agents_complete=False,
+            )
             blue_agent = [ag for ag in agents if ag.uuid == app_data["player_blue"]["choose"]][0]
+            blue_agent.update_ai_func = lambda messages: update_current_round_state(
+                round_id=None,
+                current_agents=None,
+                player_red_messages=None,
+                player_blue_messages=messages,
+                agents_complete=False,
+            )
 
             # Remaining agents
             remaining_agents = [
@@ -61,24 +79,34 @@ def both_users_ready(
             # Now add the human to agent graph. Make sure to add the agent first
             graphs.append(_build_graph(red_agent, human_red))
             graphs.append(_build_graph(blue_agent, human_blue))
-            # Add the pairing to the state
+            # Add the pairing to the state and do some agent pairing crap
             pairs = []
             for g in graphs:
+                agent_pair: list[ArgumentaBot] = []
                 pair = []
                 for agent_name in g.nodes.keys():
                     for ag in agents:
                         if ag.name == agent_name:
+                            agent_pair.append(ag)
                             pair.append(ag.uuid)
                 if len(pair) == 1:
                     if pair[0] == red_agent.uuid:
                         pair.append("player_red")
+                        agent_pair.append(human_red)
                     else:
                         pair.append("player_blue")
+                        agent_pair.append(human_blue)
                 pairs.append(tuple(pair))
+                agent_pair[0].set_current_opponent_side(agent_pair[1].side)
+                agent_pair[1].set_current_opponent_side(agent_pair[0].side)
+            for ag in agents:
+                assert ag.current_opponent_side is not None
             update_current_pairing(round_id, pairs)
 
             compiled_graphs = compile_graphs(graphs, memory=None)
-            all_results = run_graphs_parallel(compiled_graphs, llm_builder)
+            all_results = run_graphs_parallel(compiled_graphs)
+            all_summaries = summarize_results(all_results, llm_builder=llm_builder)
+            update_pairing_summaries(round_id, all_summaries)
             update_current_round_state(
                 round_id=None,
                 current_agents=None,
@@ -96,7 +124,7 @@ def run_round(
     human_red: HumanBot,
     human_blue: HumanBot,
     llm_builder: LLMBuilderWithoutModel,
-):
+) -> ListenerRegistration:
     delete_current_state()
     both_users_ready_partial = partial(
         both_users_ready,
@@ -114,7 +142,8 @@ def run_round(
         player_blue_messages=None,
         agents_complete=False,
     )
-    listen_to_round_state(both_users_ready_partial)
+    listener = listen_to_round_state(both_users_ready_partial)
+    return listener
 
 
 def main():
@@ -142,6 +171,8 @@ def main():
 
     connect()
 
+    delete_key("/")
+
     set_llm_cache(SQLiteCache(database_path=".langchain.db"))
 
     llm_builder = partial(get_antropic_llm, model=MODEL_NAME)
@@ -150,35 +181,24 @@ def main():
     human_agent_red = HumanBot(
         name="Human Red",
         uuid="player_red",
+        side=ArgumentSide.RED,
         listen_func=listen_to_player_red,
         get_func=get_player_red,
-        update_ai_func=lambda messages: update_current_round_state(
-            round_id=None,
-            current_agents=None,
-            player_red_messages=messages,
-            player_blue_messages=None,
-            agents_complete=False,
-        ),
     )
     human_agent_blue = HumanBot(
         name="Human Blue",
         uuid="player_blue",
+        side=ArgumentSide.BLUE,
         listen_func=listen_to_player_blue,
         get_func=get_player_blue,
-        update_ai_func=lambda messages: update_current_round_state(
-            round_id=None,
-            current_agents=None,
-            player_red_messages=None,
-            player_blue_messages=messages,
-            agents_complete=False,
-        ),
     )
     for round_id in range(num_rounds):
-        run_round(round_id, agents, human_agent_red, human_agent_blue, llm_builder)
+        listener = run_round(round_id, agents, human_agent_red, human_agent_blue, llm_builder)
         while True:
             # Wait under agents are completed
             round_state = get_round_state()
             if round_state.get("agents_complete"):
+                listener
                 break
             else:
                 time.sleep(5)

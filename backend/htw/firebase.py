@@ -1,9 +1,9 @@
-from functools import partial
 import os
 from typing import Any, Callable
 
 import firebase_admin
 from firebase_admin import credentials, db
+from firebase_admin.db import ListenerRegistration
 
 
 def connect() -> bool:
@@ -45,10 +45,11 @@ def get_key(key: str) -> Any:
         return None
 
 
-def listen_to_changes(key: str, callback: Callable):
+def listen_to_changes(key: str, callback: Callable) -> ListenerRegistration:
     try:
         ref = db.reference(key)
-        ref.listen(callback)
+        listener = ref.listen(callback)
+        return listener
     except Exception as e:
         print(f"Error setting up listener: {e}")
 
@@ -64,6 +65,8 @@ def update_current_pairing(round_id: int, agent_pairs: list[tuple[str, str]]) ->
     """Update the current pairing in firebase."""
     key = f"rounds/{round_id}/current_pairing"
     update_key(key, agent_pairs)
+    current_state_key = "current_state/current_pairing"
+    update_key(current_state_key, agent_pairs)
 
 
 def update_current_round_state(
@@ -87,16 +90,24 @@ def update_current_round_state(
         update_key(f"{root_key}/round_state/agents_complete", agents_complete)
 
 
-def listen_to_player_red(callback: Callable):
-    listen_to_changes("current_state/round_state/player_red/", callback)
+def update_pairing_summaries(round_id: int, summaries: list[str]) -> None:
+    """Update the pairing summaries in firebase."""
+    key = f"rounds/{round_id}/pairing_summaries"
+    update_key(key, summaries)
+    current_state_key = "current_state/pairing_summaries"
+    update_key(current_state_key, summaries)
 
 
-def listen_to_player_blue(callback: Callable):
-    listen_to_changes("current_state/round_state/player_blue/", callback)
+def listen_to_player_red(callback: Callable) -> ListenerRegistration:
+    return listen_to_changes("current_state/round_state/player_red/", callback)
 
 
-def listen_to_round_state(callback: Callable):
-    listen_to_changes("current_state/round_state/", callback)
+def listen_to_player_blue(callback: Callable) -> ListenerRegistration:
+    return listen_to_changes("current_state/round_state/player_blue/", callback)
+
+
+def listen_to_round_state(callback: Callable) -> ListenerRegistration:
+    return listen_to_changes("current_state/round_state/", callback)
 
 
 def get_round_state() -> dict:

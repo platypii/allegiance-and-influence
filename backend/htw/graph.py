@@ -2,17 +2,13 @@ import concurrent.futures
 import random
 from functools import partial
 
-from htw.llm import LLMBuilderWithoutModel
-from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import BaseMessage
-from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
-from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage, AIMessage
 
-from htw.agent.agent import ArgumentaBot, ArgumentState, has_agent_been_persuaded, has_agent_quit
-from htw.config import LANGGRAPH_CONFIG, LLM_CONFIG, MODEL_NAME, SEED_MESSAGE
+from htw.agent.agent import ArgumentaBot, ArgumentState, has_agent_quit
+from htw.config import LANGGRAPH_CONFIG, SEED_MESSAGE
 
 
 def random_pairings(
@@ -28,7 +24,7 @@ def random_pairings(
 
 
 def _graph_exit(state: ArgumentState) -> str:
-    if has_agent_been_persuaded(state["messages"][-1].content):
+    if state["persuaded"]:
         return END
     elif has_agent_quit(state["messages"][-1].content):
         return END
@@ -48,42 +44,6 @@ def _build_graph(agent1: ArgumentaBot, agent2: ArgumentaBot) -> StateGraph:
     )
     graph_builder.add_edge(START, agent1.name)
     return graph_builder
-
-
-def summarize_conversation(messages: list[BaseMessage], llm_builder: LLMBuilderWithoutModel) -> str:
-    """
-    Summarize the entire conversation between two agents.
-
-    Args:
-    messages (List[BaseMessage]): List of messages from the conversation.
-    llm_builder: Function to build the LLM.
-
-    Returns:
-    str: A concise summary of the conversation.
-    """
-    llm: ChatAnthropic | ChatOpenAI = llm_builder(config=LLM_CONFIG)
-
-    # Flatten the list of messages
-    flattened_messages = [
-        msg for sublist in messages for msg in (sublist if isinstance(sublist, list) else [sublist])
-    ]
-
-    conversation_text = "\n".join(
-        [
-            f"{msg.additional_kwargs.get('sender', 'Unknown')}: {msg.content}"
-            for msg in flattened_messages
-        ]
-    )
-
-    prompt = [
-        SystemMessage(content="You are a highly efficient summarizer."),
-        HumanMessage(
-            content=f"Based on the following conversation, summarize what happened and call out any decisive moments where one argument won over the other. The summary should be no more than 5 simple bullets. Be extremely concise and to the point.\n\nConversation:\n{conversation_text}"
-        ),
-    ]
-
-    response = llm.invoke(prompt)
-    return response.content
 
 
 def build_graphs(agents: list[ArgumentaBot], seed: int) -> list[StateGraph]:
@@ -108,9 +68,7 @@ def compile_graphs(graphs: list[StateGraph], memory: SqliteSaver) -> list[Compil
     return compiled_graphs
 
 
-def _run_agent_graph(
-    compiled_graph: CompiledStateGraph, verbose: bool, llm_builder: LLMBuilderWithoutModel
-) -> list[dict]:
+def _run_agent_graph(compiled_graph: CompiledStateGraph, verbose: bool) -> list[dict]:
     initial_state = ArgumentState(
         messages=[
             BaseMessage(content=SEED_MESSAGE, type="human", additional_kwargs={"sender": "SYSTEM"})
@@ -118,7 +76,6 @@ def _run_agent_graph(
         sender="STARTING",
     )
     results = []
-    all_messages = []
     try:
         for event in compiled_graph.stream(initial_state, config=LANGGRAPH_CONFIG, debug=False):
             if verbose:
@@ -127,7 +84,6 @@ def _run_agent_graph(
                     print(f"{sender}: {v['messages'][0].content}")
                     print()
             results.append(event)
-            all_messages.extend(event[k]["messages"] for k in event)
 
             # Check if any agent has been persuaded
             if any(v.get("stop_reason") == "persuaded" for v in event.values()):
@@ -136,18 +92,10 @@ def _run_agent_graph(
                 break
     except Exception as e:
         print(e)
-
-    # Generate and print the summary
-    summary = summarize_conversation(all_messages, llm_builder)
-    print("\nConversation Summary:")
-    print(summary)
-
     return results
 
 
-def run_graphs(
-    compiled_graphs: list[CompiledStateGraph], verbose: bool, llm_builder: LLMBuilderWithoutModel
-) -> list[list[dict]]:
+def run_graphs(compiled_graphs: list[CompiledStateGraph], verbose: bool) -> list[list[dict]]:
     """In same thread, run the compiled graphs serially."""
     results = []
     for i, graph in enumerate(compiled_graphs):
@@ -157,28 +105,28 @@ def run_graphs(
             print("------------------")
             print("NEW GRAPH")
             print("------------------")
-        results.append(_run_agent_graph(graph, verbose, llm_builder))
+        results.append(_run_agent_graph(graph, verbose))
     return results
 
 
 def run_graphs_parallel(
-    compiled_graphs: list[CompiledStateGraph], llm_builder: LLMBuilderWithoutModel
+    compiled_graphs: list[CompiledStateGraph], timeout: float = None
 ) -> list[list[dict]]:
-    """In separate threads, run the compiled graphs."""
     results = []
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        _run_agent_graph_partial = partial(_run_agent_graph, verbose=False, llm_builder=llm_builder)
-        # Submit each graph to the executor
+        _run_agent_graph_partial = partial(_run_agent_graph, verbose=False)
         future_to_graph = {
             executor.submit(_run_agent_graph_partial, graph): graph for graph in compiled_graphs
         }
 
-        # Collect results as they complete
-        for future in concurrent.futures.as_completed(future_to_graph):
-            try:
-                result = future.result()
-                results.append(result)
-            except Exception as e:
-                print(f"An error occurred while running a graph: {e}")
+        try:
+            for future in concurrent.futures.as_completed(future_to_graph, timeout=timeout):
+                try:
+                    result = future.result()
+                    results.append(result)
+                except Exception as e:
+                    print(f"An error occurred while running a graph: {e}")
+        except concurrent.futures.TimeoutError:
+            print("Execution timed out")
 
     return results

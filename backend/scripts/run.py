@@ -3,6 +3,7 @@ import sqlite3
 from functools import partial
 from typing import Annotated
 
+from htw.summarize import summarize_results
 from langchain.globals import set_llm_cache
 from langchain_anthropic import ChatAnthropic
 from langchain_community.cache import SQLiteCache
@@ -23,7 +24,8 @@ def run_human_vs_bot(llm_builder):
     human_agent = HumanBot(name="Human", uid="human_player")
     graph_builder = _build_graph(agents[0], human_agent)
     compiled_graphs = compile_graphs([graph_builder], memory=None)
-    all_results = _run_agent_graph(compiled_graphs[0], verbose=True, llm_builder=llm_builder)
+    all_results = _run_agent_graph(compiled_graphs[0], verbose=True)
+    all_summarize = summarize_results(all_results, llm_builder)
     print("Human vs Bot Results:")
     print_persuasion_result(all_results)
 
@@ -32,7 +34,8 @@ def run_bot_vs_bot(llm_builder):
     agents = get_agents(llm_builder, num_agents=2, seed=None)
     graph_builder = _build_graph(agents[0], agents[1])
     compiled_graphs = compile_graphs([graph_builder], memory=None)
-    all_results = _run_agent_graph(compiled_graphs[0], verbose=True, llm_builder=llm_builder)
+    all_results = _run_agent_graph(compiled_graphs[0], verbose=True)
+    all_summarize = summarize_results(all_results, llm_builder)
     print("Bot vs Bot Results:")
     print_persuasion_result(all_results)
 
