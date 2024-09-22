@@ -51,7 +51,7 @@ export default function Home() {
     //     player2: ...
     //     agentsCompleted: false
     //   }
-    const stateRef = ref(database, '/state')
+    const stateRef = ref(database, '/current_state')
     onValue(stateRef, (snapshot) => {
       const state = snapshot.val()
       console.log("Data updated", state)
@@ -78,7 +78,7 @@ export default function Home() {
           left: 0,
           right: 0,
           backgroundColor: borderColor,
-          opacity: 0.4,
+          opacity: 0.3,
           mixBlendMode: "multiply",
         }} />
       </div>,

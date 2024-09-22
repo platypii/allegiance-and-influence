@@ -3,12 +3,12 @@ import styles from "./graph.module.css"
 
 export interface GraphNode {
   id: string
-  x: number
-  y: number
   element: React.ReactElement
 }
 
 interface Node extends GraphNode {
+  x: number
+  y: number
   vx: number
   vy: number
 }
@@ -39,7 +39,13 @@ export default function ForceGraph({
   gravityStrength = 0.1, // Default gravity strength
 }: ForceGraphProps) {
   const [nodes, setNodes] = useState<Node[]>(() =>
-    initialNodes.map(node => ({ ...node, vx: 0, vy: 0 }))
+    initialNodes.map(node => ({
+      ...node,
+      x: Math.random() * 800 - 400,
+      y: Math.random() * 600 - 300,
+      vx: 0,
+      vy: 0
+    }))
   )
   const animationRef = useRef<number | null>(null)
   const graphRef = useRef<HTMLDivElement>(null)
@@ -77,10 +83,6 @@ export default function ForceGraph({
       // Destructure width and height for easy access
       const { width, height } = dimensions
 
-      // Define center coordinates
-      const centerX = width / 2
-      const centerY = height / 2
-
       // Apply forces
       nodes.forEach(node => {
         // Initialize forces
@@ -117,12 +119,10 @@ export default function ForceGraph({
         })
 
         // Gravity force towards the center
-        const dxCenter = centerX - node.x
-        const dyCenter = centerY - node.y
-        const distanceCenter = Math.sqrt(dxCenter * dxCenter + dyCenter * dyCenter) || 1
+        const distanceCenter = Math.sqrt(node.x * node.x + node.y * node.y) || 1
         // Normalize the direction and apply gravity strength
-        fx += (dxCenter / distanceCenter) * gravityStrength
-        fy += (dyCenter / distanceCenter) * gravityStrength
+        fx += -(node.x / distanceCenter) * gravityStrength
+        fy += -(node.y / distanceCenter) * gravityStrength
 
         // Update velocity
         node.vx = (node.vx + fx) * friction
@@ -133,8 +133,8 @@ export default function ForceGraph({
         node.y += node.vy
 
         // Boundary conditions (optional: keep nodes within the viewport)
-        node.x = Math.max(0, Math.min(width, node.x))
-        node.y = Math.max(0, Math.min(height, node.y))
+        node.x = Math.max(-width / 2, Math.min(width / 2, node.x))
+        node.y = Math.max(-height / 2, Math.min(height / 2, node.y))
       })
 
       setNodes([...nodes])
@@ -169,10 +169,10 @@ export default function ForceGraph({
             return (
               <line
                 key={index}
-                x1={source.x}
-                y1={source.y}
-                x2={target.x}
-                y2={target.y}
+                x1={source.x + 0.5 * dimensions.width}
+                y1={source.y + 0.5 * dimensions.height}
+                x2={target.x + 0.5 * dimensions.width}
+                y2={target.y + 0.5 * dimensions.height}
                 stroke="#86551f"
                 strokeWidth={strokeWidth}
               />
@@ -188,8 +188,8 @@ export default function ForceGraph({
           className={styles.node}
           key={node.id}
           style={{
-            left: node.x,
-            top: node.y,
+            left: node.x + 0.5 * dimensions.width,
+            top: node.y + 0.5 * dimensions.height,
           }}
         >
           {node.element}
