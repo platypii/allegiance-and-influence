@@ -24,6 +24,7 @@ interface ForceGraphProps {
   // Optional simulation parameters
   chargeStrength?: number
   linkDistance?: number
+  linkForce?: number
   friction?: number
   gravityStrength?: number // Added gravity strength as an optional prop
 }
@@ -33,6 +34,7 @@ export default function ForceGraph({
   edges,
   chargeStrength = 400,
   linkDistance = 100,
+  linkForce = 0.004,
   friction = 0.9,
   gravityStrength = 0.1, // Default gravity strength
 }: ForceGraphProps) {
@@ -92,8 +94,9 @@ export default function ForceGraph({
             const dy = node.y - other.y
             const distance = Math.sqrt(dx * dx + dy * dy) || 1
             const force = chargeStrength / (distance * distance)
-            fx += (dx / distance) * force
-            fy += (dy / distance) * force
+            const clamped = Math.min(10, Math.max(-10, force))
+            fx += (dx / distance) * clamped
+            fy += (dy / distance) * clamped
           }
         })
 
@@ -106,7 +109,7 @@ export default function ForceGraph({
               const dx = other.x - node.x
               const dy = other.y - node.y
               const distance = Math.sqrt(dx * dx + dy * dy) || 1
-              const force = (distance - linkDistance) * 0.1
+              const force = (distance - linkDistance) * linkForce
               fx += (dx / distance) * force
               fy += (dy / distance) * force
             }
@@ -160,6 +163,10 @@ export default function ForceGraph({
           const source = nodes.find(node => node.id === edge.source)
           const target = nodes.find(node => node.id === edge.target)
           if (source && target) {
+            const length = Math.sqrt(
+              Math.pow(target.x - source.x, 2) + Math.pow(target.y - source.y, 2)
+            )
+            const strokeWidth = Math.max(3, Math.min(8, 800 / length))
             return (
               <line
                 key={index}
@@ -167,8 +174,8 @@ export default function ForceGraph({
                 y1={source.y}
                 x2={target.x}
                 y2={target.y}
-                stroke="#666"
-                strokeWidth={3}
+                stroke="#555"
+                strokeWidth={strokeWidth}
               />
             )
           }
