@@ -12,8 +12,8 @@ interface PanelProps {
 }
 
 interface Message {
-  role: "user" | "assistant"
-  text: string
+  name: string
+  content: string
 }
 
 export default function Panel({ playerName, chatWith, firemessages, onClose }: PanelProps) {
@@ -23,14 +23,14 @@ export default function Panel({ playerName, chatWith, firemessages, onClose }: P
   function handleInput(event: React.FormEvent) {
     event.preventDefault()
     if (inputRef.current) {
-      const text = inputRef.current.value
+      const content = inputRef.current.value
       setMessages(messages => [
         ...messages,
-        { role: "user", text },
+        { name: playerName, content },
       ])
       // Send message to Firebase
       const dbRef = ref(database, `/current_state/round_state/${playerName}`)
-      update(dbRef, {messages: [...messages, { role: "user", text }]})
+      update(dbRef, {messages: [...messages, { name: playerName, content }]})
       inputRef.current.value = ""
     }
   }
@@ -49,8 +49,8 @@ export default function Panel({ playerName, chatWith, firemessages, onClose }: P
       <div className={styles.panelContent}>
         <div className={styles.chatArea}>
           {messages.map((message, index) => (
-            <div key={index} className={styles[message.role]}>
-              {message.role === 'user' ? 'user' : chatWith?.Character}: {message.text}
+            <div key={index} className={styles[message.name]}>
+              {message.name?.startsWith('player_') ? 'user' : chatWith?.Character}: {message.content}
             </div>
           ))}
         </div>

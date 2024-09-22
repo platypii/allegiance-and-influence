@@ -20,3 +20,18 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+.pairing {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+.pairing img {
+  width: 80px;
+  border-radius: 50%;
+  border: 2px solid #3B2F2F;
+}
+.pairing > div {
+  display: flex;
+  flex-direction: column;
+}

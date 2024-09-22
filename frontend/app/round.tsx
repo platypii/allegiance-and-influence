@@ -44,16 +44,18 @@ interface RoundProps {
 export default function Round({ state }: RoundProps) {
   const [round, setRound] = useState<Round>()
 
-  const statsRound = state.round_state.agents_complete ? state.round_number : state.round_number - 1
+  const statsRound = state.round_state?.agents_complete ? state.round_number : state.round_number - 1
   useEffect(() => {
     // get data from firebase
-    const roundRef = ref(database, '/rounds')
-    onValue(roundRef, (snapshot) => {
-      const rounds = snapshot.val()
-      const round = rounds[statsRound]
-      setRound(round)
-      console.log("Round data", round)
-    })
+    if (statsRound >= 0) {
+      const roundRef = ref(database, '/rounds')
+      onValue(roundRef, (snapshot) => {
+        const rounds = snapshot.val()
+        const round = rounds?.[statsRound]
+        setRound(round)
+        console.log("Round data", round)
+      })
+    }
   }, [])
 
   return (
@@ -66,7 +68,18 @@ export default function Round({ state }: RoundProps) {
       {round && <>
         <h2>Previous Round {statsRound}</h2>
         {round.current_pairing.map(([agent1, agent2], index) => (
-          <div key={index}>{agent1} - {agent2}</div>
+          <div className={styles.pairing} key={index}>
+            <div>
+              <img src={`/images/agents/${agent1}.jpg`} alt={agent1} />
+              {round.agents?.[agent1]?.side}
+              {agent1}
+            </div>
+            <div>
+              <img src={`/images/agents/${agent2}.jpg`} alt={agent2} />
+              {round.agents?.[agent2]?.side}
+              {agent2}
+            </div>
+          </div>
         ))}
       </>}
     </div>

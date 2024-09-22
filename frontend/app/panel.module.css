@@ -95,13 +95,14 @@
   border-radius: 12px;
   line-height: 1.4em;
   padding: 10px;
+  color: #333;
 }
 .assistant {
   font-family: cursive;
-  color: #333;
   margin-right: 40px;
 }
-.user {
+.player_red,
+.player_blue {
   font-family: 'Courier New', Courier, monospace;
   color: #333;
   margin-left: 40px;
