@@ -28,6 +28,7 @@
   align-items: center;
   user-select: none;
   overflow: hidden;
+  position: relative;
 }
 .node > div > img {
   width: 110%;

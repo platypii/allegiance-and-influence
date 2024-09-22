@@ -8,6 +8,7 @@ import { GraphNode } from "./forcegraph"
 import { useState } from "react"
 import characters from "./characters.json"
 import { randomEdges } from "./utils"
+import { teamColor } from "./teamColor"
 
 export default function Home() {
   const [chatWith, setChatWith] = useState<string | undefined>()
@@ -29,6 +30,16 @@ export default function Home() {
         onClick={() => clickNode(character.UID)}
         style={{ borderColor }}>
         <img src={`/images/agents/${character.UID}.jpg`} alt={character.Character} />
+        <div style={{
+          position: "absolute",
+          bottom: 0,
+          top: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: borderColor,
+          opacity: 0.4,
+          mixBlendMode: "multiply",
+        }} />
       </div>,
     }
   })
@@ -58,25 +69,4 @@ export default function Home() {
       </main>
     </div>
   )
-}
-
-function teamColor(team: number) {
-  const red = [255, 0, 0] // -1: red
-  const grey = [128, 128, 128] // 0: grey
-  const blue = [0, 0, 255] // 1: blue
-
-  // Interpolate between colors based on the value
-  let color
-  if (team < 0) {
-    // Interpolate between red and grey
-    const t = (team + 1) / 1 // Map -1 to 0, and 0 to 1
-    color = red.map((c, i) => Math.round(c * (1 - t) + grey[i] * t))
-  } else {
-    // Interpolate between grey and blue
-    const t = team // Map 0 to 0, and 1 to 1
-    color = grey.map((c, i) => Math.round(c * (1 - t) + blue[i] * t))
-  }
-
-  // Return the color as a CSS rgb string
-  return `rgb(${color.join(",")})`
 }

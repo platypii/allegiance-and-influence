@@ -26,7 +26,7 @@ interface ForceGraphProps {
   linkDistance?: number
   linkForce?: number
   friction?: number
-  gravityStrength?: number // Added gravity strength as an optional prop
+  gravityStrength?: number
 }
 
 export default function ForceGraph({
@@ -151,7 +151,6 @@ export default function ForceGraph({
     <div
       className={styles.graph}
       ref={graphRef}
-      style={{ position: 'relative', width: '100%', height: '100%' }} // Ensure the graph container is positioned correctly
     >
       {/* Render edges as SVG lines */}
       <svg
@@ -174,7 +173,7 @@ export default function ForceGraph({
                 y1={source.y}
                 x2={target.x}
                 y2={target.y}
-                stroke="#555"
+                stroke="#86551f"
                 strokeWidth={strokeWidth}
               />
             )

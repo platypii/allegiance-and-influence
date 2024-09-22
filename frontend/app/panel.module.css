@@ -12,6 +12,7 @@
   background: url('/images/panel.png');
   background-position: 20%;
   transition: width 0.3s;
+  z-index: 1000;
 }
 .panelContent {
   display: flex;
