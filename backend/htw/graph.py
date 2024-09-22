@@ -3,13 +3,16 @@ import random
 from functools import partial
 
 from htw.llm import LLMBuilderWithoutModel
+from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import BaseMessage
+from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
+from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage, AIMessage
 
 from htw.agent.agent import ArgumentaBot, ArgumentState, has_agent_been_persuaded, has_agent_quit
-from htw.config import LANGGRAPH_CONFIG, SEED_MESSAGE
+from htw.config import LANGGRAPH_CONFIG, LLM_CONFIG, MODEL_NAME, SEED_MESSAGE
 
 
 def random_pairings(
@@ -47,7 +50,7 @@ def _build_graph(agent1: ArgumentaBot, agent2: ArgumentaBot) -> StateGraph:
     return graph_builder
 
 
-def summarize_conversation(messages: List[BaseMessage], llm_builder) -> str:
+def summarize_conversation(messages: list[BaseMessage], llm_builder: LLMBuilderWithoutModel) -> str:
     """
     Summarize the entire conversation between two agents.
 
@@ -58,7 +61,7 @@ def summarize_conversation(messages: List[BaseMessage], llm_builder) -> str:
     Returns:
     str: A concise summary of the conversation.
     """
-    llm = llm_builder(model=MODEL_NAME, config=LLM_CONFIG)
+    llm: ChatAnthropic | ChatOpenAI = llm_builder(config=LLM_CONFIG)
 
     # Flatten the list of messages
     flattened_messages = [
