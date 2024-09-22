@@ -56,7 +56,8 @@ export default function Home() {
       if (!playerName) return
       if (!state?.round_state?.[playerName]) return
       if (state?.round_state?.[playerName].done_talking) return
-      const character = characters.find(character => character.UID === state?.round_state[playerName].choose)
+      const { choose } = state?.round_state[playerName]
+      const character = characters.find(character => character.UID === choose)
       if (character) setChatWith(character)
 
       if (state.round_state.agents_complete) {
@@ -151,7 +152,7 @@ export default function Home() {
             <div className={styles.blue}>{blueCount}</div>
           </div>
           <div className={playerName === 'player_red' ? styles.red : styles.blue}>
-            Player {playerName === 'player_red' ? 'Red' : 'Blue'}
+            You Are Player {playerName === 'player_red' ? 'Red' : 'Blue'}
           </div>
         </div>
         {!playerName && <Welcome setPlayerName={setPlayerName} />}

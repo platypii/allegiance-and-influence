@@ -40,3 +40,7 @@ a {
     color-scheme: dark;
   }
 }
+
+.nextjs-portal {
+  display: none;
+}

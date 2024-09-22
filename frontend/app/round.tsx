@@ -1,8 +1,6 @@
-import { useEffect, useState } from "react"
 import styles from "./round.module.css"
-import { database } from "./firebase"
-import { onValue, ref } from "firebase/database"
 import { teamColor } from "./teamColor"
+import characters from "./characters"
 
 interface Message {
   name: string
@@ -66,11 +64,11 @@ export default function Round({ state, round }: RoundProps) {
             <div className={styles.pair}>
               <div>
                 <img src={`/images/agents/${agent1}.jpg`} alt={agent1} style={{ borderColor: teamColor(round.agents?.[agent1]?.side || 0) }} />
-                {agent1}
+                {characters.find(character => character.UID === agent1)?.Character}
               </div>
               <div>
                 <img src={`/images/agents/${agent2}.jpg`} alt={agent2} style={{ borderColor: teamColor(round.agents?.[agent2]?.side || 0) }} />
-                {agent2}
+                {characters.find(character => character.UID === agent2)?.Character}
               </div>
             </div>
             <div>{round.pairing_summaries?.[index]}</div>

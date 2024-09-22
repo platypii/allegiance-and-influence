@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import styles from "./panel.module.css"
 import { Character } from "./characters"
 import { database } from "./firebase"
-import { ref, update } from "firebase/database"
+import { ref, set, update } from "firebase/database"
 
 interface PanelProps {
   playerName: 'player_red' | 'player_blue'
@@ -37,6 +37,11 @@ export default function Panel({ playerName, chatWith, firemessages, onClose }: P
 
   useEffect(() => {
     setMessages(firemessages)
+    // Scroll to bottom of chat
+    setTimeout(() => {
+      const chatArea = document.querySelector(`.${styles.chatArea}`)
+      chatArea?.scrollTo(0, chatArea.scrollHeight)
+    }, 100)
   }, [firemessages])
 
   function handleDone() {
