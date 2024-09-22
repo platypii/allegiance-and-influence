@@ -2,6 +2,7 @@ import concurrent.futures
 import random
 from functools import partial
 
+from htw.llm import LLMBuilderWithoutModel
 from langchain_core.messages import BaseMessage
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
@@ -96,7 +97,9 @@ def compile_graphs(graphs: list[StateGraph], memory: SqliteSaver) -> list[Compil
     return compiled_graphs
 
 
-def _run_agent_graph(compiled_graph: CompiledStateGraph, verbose: bool, llm_builder) -> list[dict]:
+def _run_agent_graph(
+    compiled_graph: CompiledStateGraph, verbose: bool, llm_builder: LLMBuilderWithoutModel
+) -> list[dict]:
     initial_state = ArgumentState(
         messages=[
             BaseMessage(content=SEED_MESSAGE, type="human", additional_kwargs={"sender": "SYSTEM"})
@@ -132,7 +135,7 @@ def _run_agent_graph(compiled_graph: CompiledStateGraph, verbose: bool, llm_buil
 
 
 def run_graphs(
-    compiled_graphs: list[CompiledStateGraph], verbose: bool, llm_builder
+    compiled_graphs: list[CompiledStateGraph], verbose: bool, llm_builder: LLMBuilderWithoutModel
 ) -> list[list[dict]]:
     """In same thread, run the compiled graphs serially."""
     results = []
@@ -147,11 +150,13 @@ def run_graphs(
     return results
 
 
-def run_graphs_parallel(compiled_graphs: list[CompiledStateGraph]) -> list[list[dict]]:
+def run_graphs_parallel(
+    compiled_graphs: list[CompiledStateGraph], llm_builder: LLMBuilderWithoutModel
+) -> list[list[dict]]:
     """In separate threads, run the compiled graphs."""
     results = []
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        _run_agent_graph_partial = partial(_run_agent_graph, verbose=False)
+        _run_agent_graph_partial = partial(_run_agent_graph, verbose=False, llm_builder=llm_builder)
         # Submit each graph to the executor
         future_to_graph = {
             executor.submit(_run_agent_graph_partial, graph): graph for graph in compiled_graphs

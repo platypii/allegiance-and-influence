@@ -3,11 +3,12 @@ from __future__ import annotations
 import copy
 from enum import Enum
 import operator
+import time
 from typing import Annotated, Callable, Sequence
 
 from anthropic import BaseModel
 from htw.config import MODEL_CONFIG
-from htw.firebase import listen_to_player_red, update_agent_state
+from htw.firebase import get_round_state, listen_to_player_red, update_agent_state
 from htw.llm import LLMBuilderWithoutModel
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage, AIMessage
@@ -55,7 +56,7 @@ class ArgumentState(TypedDict):
 
 def serialize_messages(messages: Sequence[BaseMessage]) -> str:
     """Serialize messages for storage in Firebase."""
-    messages_str = [f"{m.name}: {m.content}" for m in messages]
+    messages_str = [f"{m['name']}: {m['content']}" for m in messages]
     return "\n\n".join(messages_str)
 
 
@@ -117,7 +118,6 @@ class ArgumentaBot:
         # Game state variables
         self.side = ArgumentSide.NEUTRAL
         self.current_round_id = 0
-        self.current_opponent = None
         self.current_chat_messages = []
 
     def __call__(self, state: ArgumentState) -> ArgumentState:
@@ -128,9 +128,11 @@ class ArgumentaBot:
             )
         else:
             input_messages = [self.system_message, *state["messages"]]
-        self.current_chat_messages = simplify_messages(input_messages)
         response = self.llm.invoke(input_messages)
         response.name = self.name
+        self.current_chat_messages = simplify_messages(input_messages) + [
+            {"content": response.content, "name": self.name}
+        ]
         # Check if the bot has been persuaded
         persuaded = has_agent_been_persuaded(response.content)
         if persuaded:
@@ -143,8 +145,7 @@ class ArgumentaBot:
     def _state_dict(self) -> dict:
         """Generate state dict for FE."""
         return {
-            "side": self.side,
-            "current_opponent": self.current_opponent,
+            "side": self.side.value,
             "current_chat_messages": self.current_chat_messages,
         }
 
@@ -171,7 +172,6 @@ class ArgumentaBot:
         self.update_status_message(summary)
         # Then increment the round
         self.current_round_id += 1
-        self.current_opponent = None
         self.current_chat_messages = []
 
     def update_status_message(self, new_status_message: str):
@@ -189,11 +189,20 @@ class ArgumentaBot:
 
 
 class HumanBot:
-    def __init__(self, name: str, uid: str, listen_func: Callable, update_ai_func: Callable):
+    def __init__(
+        self,
+        name: str,
+        uuid: str,
+        listen_func: Callable,
+        get_func: Callable,
+        update_ai_func: Callable,
+    ):
         self.name = name
-        self.uid = uid
+        self.uuid = uuid
         self.listen_func = listen_func
+        self.get_func = get_func
         self.update_ai_func = update_ai_func
+        self.user_input_from_last_message = None
 
     def __call__(self, state: ArgumentState) -> ArgumentState:
         # Update messages in db
@@ -205,20 +214,37 @@ class HumanBot:
         print("------------------------")
         print("------------------------")
         print("WAITING......")
-        result = self.listen_func(self._wait_for_user_input)
+        self.listen_func(self._wait_for_user_input)
+        while True:
+            print(".", self.user_input_from_last_message, end="")
+            if self.user_input_from_last_message is not None:
+                break
+            else:
+                time.sleep(0.5)
+
         human_msg = HumanMessage(
-            result, name=self.name, additional_kwargs={"sender": f"{self.name} ({self.uid})"}
+            self.user_input_from_last_message,
+            name=self.name,
+            additional_kwargs={"sender": f"{self.name} ({self.uuid})"},
         )
+        self.user_input_from_last_message = None
         return {"messages": [human_msg]}
 
     def __str__(self):
-        return f"Agent: {self.name} ({self.uid})"
+        return f"Agent: {self.name} ({self.uuid})"
 
-    def _wait_for_user_input(player_state: dict) -> str:
+    def _wait_for_user_input(self, app_state) -> None:
         """Wait for the user to select an agent."""
-        is_user_done = player_state.get("is_done_talking")
-        if is_user_done:
-            return "__exit__"
-        messages = player_state["messages"]
-        user_response = messages[-1]["content"]
-        return user_response
+        if app_state.event_type == "put":
+            # You can technically get the fine grained put updates of each subkey in app_state.path
+            # and app_state.app_data but it's easier to get the entire state and check if the keys
+            app_data = self.get_func()
+            if app_data:
+                is_user_done = app_data.get("is_done_talking")
+                if is_user_done:
+                    return "__exit__"
+                messages = app_data["messages"]
+                if messages[-1]["name"] == self.uuid:
+                    print("Setting user input")
+                    self.user_input_from_last_message = messages[-1]["content"]
+                return

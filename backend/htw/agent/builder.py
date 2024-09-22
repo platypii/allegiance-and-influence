@@ -5,8 +5,12 @@ import json
 import os
 
 
-def get_agents(llm_builder: LLMBuilderWithoutModel, num_agents: int) -> list[ArgumentaBot]:
+def get_agents(
+    llm_builder: LLMBuilderWithoutModel, num_agents: int, seed: int
+) -> list[ArgumentaBot]:
     """Generate list of agents."""
+    random.seed(seed)
+
     root_message = "You are in a game with one other player. You and this other player are going to have a conversation where we are trying to persuade each other to join each others teams. You will join whatever team but only if it aligns with the characteristics of your character, subjects and themes that you care about. To start, introduce yourself and learn something about the other player. Then try to convince them to join your side but ultimately you want to be on the best side. Your character is influenced by the following attributes: Charisma, Intellect, Stubbornness, Empathy, Influence Range, Loyalty, Curiosity, Consistency. Where you are high on the attribute means you are more likely to be persuaded by that characteristic. You will be given a list of characters and their attributes. You will be randomly assigned one of these characters, never break character. You are particularly susceptible to the core principles behind Dale Carnegie's book 'How to Win Friends and Influence People'."
 
     # Load characters from JSON file
@@ -27,11 +31,15 @@ def get_agents(llm_builder: LLMBuilderWithoutModel, num_agents: int) -> list[Arg
     # Create ArgumentaBot instances
     agents = []
     for character in selected_characters:
-        system_message = f"You are {character['Character']}, {character['Description']}. Your attributes are: Charisma: {character['Charisma']}, Intellect: {character['Intellect']}, Stubbornness: {character['Stubbornness']}, Empathy: {character['Empathy']}, Influence Range: {character['Influence Range']}, Loyalty: {character['Loyalty']}, Curiosity: {character['Curiosity']}, Consistency: {character['Consistency']}. After every message state as ""Status:"" if you want to stay on your current team, say neutral or join the character that you are talking toos team.\n\n{root_message}"
+        system_message = (
+            f"You are {character['Character']}, {character['Description']}. Your attributes are: Charisma: {character['Charisma']}, Intellect: {character['Intellect']}, Stubbornness: {character['Stubbornness']}, Empathy: {character['Empathy']}, Influence Range: {character['Influence Range']}, Loyalty: {character['Loyalty']}, Curiosity: {character['Curiosity']}, Consistency: {character['Consistency']}. After every message state as "
+            "Status:"
+            " if you want to stay on your current team, say neutral or join the character that you are talking toos team.\n\n{root_message}"
+        )
         agents.append(
             ArgumentaBot(
-                name=character['Character'],
-                uuid=character['UID'],
+                name=character["Character"],
+                uuid=character["UID"],
                 system_message=system_message,
                 current_status_message="",
                 llm_builder=llm_builder,

@@ -1,3 +1,4 @@
+from functools import partial
 import os
 from typing import Any, Callable
 
@@ -100,6 +101,18 @@ def listen_to_round_state(callback: Callable):
 
 def get_round_state() -> dict:
     return get_key("current_state/round_state")
+
+
+def delete_current_state() -> bool:
+    return delete_key("current_state/")
+
+
+def get_player_red() -> dict:
+    return get_key("current_state/round_state/player_red")
+
+
+def get_player_blue() -> dict:
+    return get_key("current_state/round_state/player_blue")
 
 
 # /state
