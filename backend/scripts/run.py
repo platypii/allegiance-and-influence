@@ -29,10 +29,10 @@ def main() -> None:
     # llm_model_name = "gpt-3.5-turbo"
     # llm_builder = partial(get_openai_llm, model=llm_model_name)
 
-    agent = get_agents(llm_builder)[0]
+    agents = get_agents(llm_builder, num_agents=4)  # or any other desired number
     human_agent = HumanBot(name="Diego")
     # IMPORTANT: make sure agent is first
-    graph_builder = _build_graph(agent, human_agent)
+    graph_builder = _build_graph(agents[0], human_agent)
     compiled_graphs = compile_graphs([graph_builder], memory=None)
     all_results = _run_agent_graph(compiled_graphs[0], verbose=False)
     print(all_results)
