@@ -23,12 +23,12 @@ export default function Home() {
       player_red: {
         choose: null,
         messages: [],
-        doneTalking: false,
+        done_talking: false,
       },
       player_blue: {
         choose: null,
         messages: [],
-        doneTalking: false,
+        done_talking: false,
       },
       agents_complete: false,
     },
@@ -52,7 +52,7 @@ export default function Home() {
       setState(state)
 
       if (!playerName) return
-      if (!state?.round_state[playerName]) return
+      if (!state?.round_state?.[playerName]) return
       const character = characters.find(character => character.UID === state?.round_state[playerName].choose)
       if (character) setChatWith(character)
     })

@@ -16,12 +16,12 @@ export interface RoundState {
     player_red: {
       choose: string | null
       messages: Message[]
-      doneTalking: boolean
+      done_talking: boolean
     }
     player_blue: {
       choose: string | null
       messages: Message[]
-      doneTalking: boolean
+      done_talking: boolean
     }
     agents_complete: boolean
   }
@@ -64,9 +64,13 @@ export default function Round({ state }: RoundProps) {
     <div className={styles.round}>
       <h1>
         Round {state.round_number}
-        {!state.round_state?.agents_complete && <div className={styles.spinner} />}
       </h1>
-      <div>{state.current_agents?.length} Agents</div>
+      <div>
+        {state.current_agents?.length} Agents
+      </div>
+      <sub>
+        {!state.round_state?.agents_complete && '(in progress)'}
+      </sub>
       {round && statsRound >= 0 && <>
         <h2>Previous Round {statsRound}</h2>
         {round.current_pairing.map(([agent1, agent2], index) => (
@@ -81,7 +85,7 @@ export default function Round({ state }: RoundProps) {
                 {agent2}
               </div>
             </div>
-            <div>{round.pairing_summaries[index]}</div>
+            <div>{round.pairing_summaries?.[index]}</div>
           </div>
         ))}
       </>}

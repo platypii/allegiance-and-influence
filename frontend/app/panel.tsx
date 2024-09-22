@@ -40,8 +40,9 @@ export default function Panel({ playerName, chatWith, firemessages, onClose }: P
   }, [firemessages])
 
   function handleDone() {
-    // TODO: Send messages to Firebase
-    // database.ref('/current_state').update()
+    // Set done talking to true
+    const dbRef = ref(database, `/current_state/round_state/${playerName}`)
+    update(dbRef, { done_talking: true })
   }
 
   return (
