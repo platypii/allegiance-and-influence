@@ -5,7 +5,7 @@
   top: 0;
   width: 700px;
   background: linear-gradient(to bottom, #8B5A2B, #5C4033);
-  border-right: 3px solid #3B2F2F;
+  border-right: 1px solid #3B2F2F;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
   color: #f5f0e1;
   overflow: hidden;
@@ -20,7 +20,6 @@
   gap: 10px;
   width: 440px;
   height: 100vh;
-  padding: 20px;
 }
 .panelBio {
   width: 240px;
@@ -33,10 +32,8 @@
   border: 2px solid #3B2F2F; /* Dark brown border to resemble old photo frames */
 }
 
-.panelBio p {
-  font-family: 'Courier New', Courier, monospace; /* Typewriter-like font for a vintage feel */
-  font-size: 14px;
-  color: #3B2F2F; /* Matching dark brown text color */
+.panelStats {
+  color: #3B2F2F;
   line-height: 1.5;
   margin-top: 10px;
   padding: 10px;
@@ -44,12 +41,16 @@
   border: 1px solid #3B2F2F; /* Dark border to match the theme */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
 }
-.panelBio ul {
+.panelStats p {
+  font-weight: bold;
+}
+.panelStats ul {
+  font-size: 14px;
   margin-top: 20px;
   list-style-type: none;
   padding: 0;
 }
-.panelBio ul li {
+.panelStats ul li {
   display: flex;
   justify-content: space-between;
 }
@@ -87,29 +88,30 @@
   gap: 10px;
   overflow-y: auto;
   padding: 10px;
-  background: rgba(0, 0, 0, 0.6);
-  border: 2px solid #3B2F2F;
+  background: url('/images/notebook.png') no-repeat center/cover;
   border-radius: 8px;
 }
 .chatArea > div {
   border-radius: 12px;
   line-height: 1.4em;
-  padding: 6px 12px;
+  padding: 10px 40px 20px 20px;
 }
 .assistant {
-  background: linear-gradient(#d8d8db, #d4d4d8);
+  font-family: cursive;
   color: #333;
   margin-right: 40px;
 }
 .user {
-  background: linear-gradient(#2280cc, #17d);
-  color: #eee;
+  font-family: 'Courier New', Courier, monospace;
+  color: #333;
   margin-left: 40px;
+  text-align: right;
 }
 
 .inputArea {
   display: flex;
   gap: 10px;
+  margin: 10px;
 }
 .inputArea input {
   flex: 1;

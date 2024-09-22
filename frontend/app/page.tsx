@@ -5,11 +5,12 @@ import Welcome from "./welcome"
 import Panel from "./panel"
 import ForceGraph, { Edge } from "./forcegraph"
 import { GraphNode } from "./forcegraph"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import characters, { Character } from "./characters"
 import { randomEdges } from "./utils"
 import { teamColor } from "./teamColor"
 import { database } from "./firebase"
+import { onValue, ref } from "firebase/database"
 
 export default function Home() {
   const [chatWith, setChatWith] = useState<Character | undefined>()
@@ -20,6 +21,26 @@ export default function Home() {
   }
 
   console.log("Firebase initialized", database)
+  useEffect(() => {
+    // /state
+    // {
+    //   roundNumber: 3,
+    //   roundState: {
+    //     player1: {
+    //       choose: 'gary'
+    //       messages: [{}, {}]
+    //       doneTalking: false
+    //     },
+    //     player2: ...
+    //     agentsCompleted: false
+    //   }
+    const dataRef = ref(database, '/rounders')
+    onValue(dataRef, (snapshot) => {
+      const rounds = snapshot.val()
+      const { agents } = rounds[rounds.length - 1]
+      console.log("Data updated", agents)
+    })
+  }, [])
 
   const nodes: GraphNode[] = characters.map((character, i) => {
     const team = Math.random() * 2 - 1

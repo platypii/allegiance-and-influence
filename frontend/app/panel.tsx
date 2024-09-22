@@ -1,6 +1,7 @@
 import { useRef, useState } from "react"
 import styles from "./panel.module.css"
 import { Character } from "./characters"
+import { database } from "./firebase"
 
 interface PanelProps {
   chatWith: Character | undefined
@@ -31,25 +32,31 @@ export default function Panel({ chatWith, onClose }: PanelProps) {
     }
   }
 
+  function handleDone() {
+    // TODO: Send messages to Firebase
+    // database.ref('/state').update()
+  }
+
   return (
     <div className={styles.panel} style={chatWith ? {} : {width: "0px"}}>
       <div className={styles.panelContent}>
-        <h1>{chatWith?.Character}</h1>
         <div className={styles.chatArea}>
           {messages.map((message, index) => (
             <div key={index} className={styles[message.role]}>
-              {message.text}
+              {message.role}: {message.text}
             </div>
           ))}
         </div>
         <form className={styles.inputArea} onSubmit={handleInput}>
           <input ref={inputRef} type="text" placeholder="Make an argument" />
+          <button onClick={handleDone}>Done Talking</button>
         </form>
       </div>
       <div className={styles.panelBio}>
         <img src={`/images/agents/${chatWith?.UID}.jpg`} alt={chatWith?.Character} />
-        <p>
-          {chatWith?.Description}
+        <div className={styles.panelStats}>
+          <h1>{chatWith?.Character}</h1>
+          <p>{chatWith?.Description}</p>
           <ul>
             <li>Charisma: <span>{chatWith?.Charisma}</span></li>
             <li>Intellect: <span>{chatWith?.Intellect}</span></li>
@@ -60,7 +67,7 @@ export default function Panel({ chatWith, onClose }: PanelProps) {
             <li>Curiosity: <span>{chatWith?.Curiosity}</span></li>
             <li>Consistency: <span>{chatWith?.Consistency}</span></li>
           </ul>
-        </p>
+        </div>
       </div>
       <div className={styles.close} onClick={onClose}>X</div>
     </div>

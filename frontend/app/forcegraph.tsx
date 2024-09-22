@@ -33,7 +33,7 @@ export default function ForceGraph({
   nodes: initialNodes,
   edges,
   chargeStrength = 400,
-  linkDistance = 100,
+  linkDistance = 80,
   linkForce = 0.004,
   friction = 0.9,
   gravityStrength = 0.1, // Default gravity strength
