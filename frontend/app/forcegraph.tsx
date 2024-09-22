@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useEffect, useRef, useState } from 'react'
 import styles from "./graph.module.css"
 
@@ -145,6 +147,14 @@ export default function ForceGraph({
         node.vx = (node.vx + fx) * friction
         node.vy = (node.vy + fy) * friction
 
+        if (node.vx > 100 || node.vy > 100) {
+          console.log('High velocity', node.vx, fx, node)
+        }
+        // if (node.vx > 100) node.vx = 10
+        // if (node.vx < -10) node.vx = -10
+        // if (node.vy > 10) node.vy = 10
+        // if (node.vy < -10) node.vy = -10
+
         // Update position
         node.x += node.vx
         node.y += node.vy
@@ -152,6 +162,10 @@ export default function ForceGraph({
         // Boundary conditions (optional: keep nodes within the viewport)
         node.x = Math.max(-width / 2, Math.min(width / 2, node.x))
         node.y = Math.max(-height / 2, Math.min(height / 2, node.y))
+
+        if (isNaN(node.x) || isNaN(node.y)) {
+          console.log('NaN node', node, dimensions)
+        }
       })
 
       setNodes([...nodes])
@@ -179,9 +193,19 @@ export default function ForceGraph({
           const source = nodes.find(node => node.id === edge.source)
           const target = nodes.find(node => node.id === edge.target)
           if (source && target) {
+            if (isNaN(source.x) || isNaN(source.y)) {
+              console.log('NaN source', source, dimensions)
+              // source.x = 0
+              // source.y = 0
+            }
+            if (isNaN(target.x) || isNaN(target.y)) {
+              console.log('NaN target', source, dimensions)
+              // target.x = 0
+              // target.y = 0
+            }
             const length = Math.sqrt(
               Math.pow(target.x - source.x, 2) + Math.pow(target.y - source.y, 2)
-            )
+            ) + 1
             const strokeWidth = Math.max(3, Math.min(8, 800 / length))
             return (
               <line

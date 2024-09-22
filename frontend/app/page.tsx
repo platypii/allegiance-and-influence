@@ -159,7 +159,7 @@ export default function Home() {
         {!playerName && <Welcome setPlayerName={setPlayerName} />}
         {state && <Round state={state} round={round} />}
         {status && <div className={styles.status}>{status}</div>}
-        {false && <Endgame playerName={redCount > blueCount ? 'player_red' : 'player_blue'} />}
+        {state?.round_number === 10 && <Endgame playerName={redCount > blueCount ? 'player_red' : 'player_blue'} />}
       </main>
     </div>
   )
