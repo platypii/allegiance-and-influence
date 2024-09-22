@@ -7,7 +7,7 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
-from htw.agent.agent import ArgumentaBot, ArgumentState
+from htw.agent.agent import ArgumentaBot, ArgumentState, has_agent_been_persuaded
 from htw.config import LANGGRAPH_CONFIG, SEED_MESSAGE
 
 
@@ -27,8 +27,9 @@ def _build_graph(agent1: ArgumentaBot, agent2: ArgumentaBot) -> StateGraph:
     graph_builder = StateGraph(ArgumentState)
     graph_builder.add_node(agent1.name, agent1)
     graph_builder.add_node(agent2.name, agent2)
-    graph_builder.add_edge(agent1.name, agent2.name)
-    graph_builder.add_edge(agent2.name, agent1.name)
+
+    graph_builder.add_conditional_edges(agent1.name, lambda state: "end" if has_agent_been_persuaded(state["messages"][-1].content) else "continue", {"continue": agent2.name, "end": END})
+    graph_builder.add_conditional_edges(agent2.name, lambda state: "end" if has_agent_been_persuaded(state["messages"][-1].content) else "continue", {"continue": agent1.name, "end": END})
     graph_builder.add_edge(START, agent1.name)
     return graph_builder
 

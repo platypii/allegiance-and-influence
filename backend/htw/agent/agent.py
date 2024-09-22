@@ -78,6 +78,10 @@ def build_input_messages(
         new_messages = new_messages[1:]
     return [system_message, *new_messages]
 
+def has_agent_been_persuaded(response: str) -> bool:
+    """Check if the agent has been persuaded."""
+    status_line = response.split("\n")[-1].lower()
+    return "status:" in status_line and "join" in status_line
 
 class ArgumentaBot:
     def __init__(
@@ -114,14 +118,10 @@ class ArgumentaBot:
             input_messages = [self.system_message, *state["messages"]]
         response = self.llm.invoke(input_messages)
         response.name = self.name
-        # new_side = ArgumentSide.NEUTRAL if response == "neutral" else ArgumentSide.OTHER
-        # self.update_side(new_side)
-        
         # Check if the bot has been persuaded
-        status_line = response.content.split("\n")[-1].lower()
-        if "status:" in status_line and "join" in status_line:
-            return {"messages": [response], "stop_reason": "persuaded"}
-        
+        persuaded = has_agent_been_persuaded(response.content)
+        if persuaded:
+            self.update_side(ArgumentSide.OTHER)
         return {"messages": [response]}
 
     def __str__(self):

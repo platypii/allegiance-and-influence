@@ -29,7 +29,6 @@ def get_agents(llm_builder: LLMBuilderWithoutModel, num_agents: int) -> list[Arg
     for character in selected_characters:
         system_message = f"You are {character['Character']}, {character['Description']}. Your attributes are: Charisma: {character['Charisma']}, Intellect: {character['Intellect']}, Stubbornness: {character['Stubbornness']}, Empathy: {character['Empathy']}, Influence Range: {character['Influence Range']}, Loyalty: {character['Loyalty']}, Curiosity: {character['Curiosity']}, Consistency: {character['Consistency']}. After every message state as ""Status:"" if you want to stay on your current team, say neutral or join the character that you are talking toos team.\n\n{root_message}"
         agents.append(
-            # TODO (Diego): Add UUID and add in the status message
             ArgumentaBot(
                 name=character['Character'],
                 uuid=character['UID'],
