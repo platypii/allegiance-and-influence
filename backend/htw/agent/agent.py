@@ -7,7 +7,7 @@ from typing import Annotated, Callable, Sequence
 
 from anthropic import BaseModel
 from htw.config import MODEL_CONFIG
-from htw.firebase import update_agent_state
+from htw.firebase import listen_to_player_red, update_agent_state
 from htw.llm import LLMBuilderWithoutModel
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage, AIMessage
@@ -59,6 +59,11 @@ def serialize_messages(messages: Sequence[BaseMessage]) -> str:
     return "\n\n".join(messages_str)
 
 
+def simplify_messages(messages: Sequence[BaseMessage]) -> list[dict]:
+    """Serialize messages for storage in Firebase."""
+    return [{"content": m.content, "name": m.name} for m in messages]
+
+
 def build_input_messages(
     system_message: SystemMessage, messages: Sequence[BaseMessage]
 ) -> Sequence[BaseMessage]:
@@ -78,10 +83,17 @@ def build_input_messages(
         new_messages = new_messages[1:]
     return [system_message, *new_messages]
 
+
 def has_agent_been_persuaded(response: str) -> bool:
     """Check if the agent has been persuaded."""
     status_line = response.split("\n")[-1].lower()
     return "status:" in status_line and "join" in status_line
+
+
+def has_agent_quit(response: str) -> bool:
+    """Check if the agent has quit."""
+    return "__exit__" in response
+
 
 class ArgumentaBot:
     def __init__(
@@ -116,6 +128,7 @@ class ArgumentaBot:
             )
         else:
             input_messages = [self.system_message, *state["messages"]]
+        self.current_chat_messages = simplify_messages(input_messages)
         response = self.llm.invoke(input_messages)
         response.name = self.name
         # Check if the bot has been persuaded
@@ -125,12 +138,11 @@ class ArgumentaBot:
         return {"messages": [response]}
 
     def __str__(self):
-        return f"Agent: {self.name} ({self.uid})"
+        return f"Agent: {self.name} ({self.uuid})"
 
     def _state_dict(self) -> dict:
         """Generate state dict for FE."""
         return {
-            "name": self.name,
             "side": self.side,
             "current_opponent": self.current_opponent,
             "current_chat_messages": self.current_chat_messages,
@@ -177,22 +189,36 @@ class ArgumentaBot:
 
 
 class HumanBot:
-    def __init__(self, name: str, uid: str):
+    def __init__(self, name: str, uid: str, listen_func: Callable, update_ai_func: Callable):
         self.name = name
         self.uid = uid
+        self.listen_func = listen_func
+        self.update_ai_func = update_ai_func
 
     def __call__(self, state: ArgumentState) -> ArgumentState:
+        # Update messages in db
+        self.update_ai_func(simplify_messages(state["messages"]))
         print("MESSAGES SO FAR")
         for msg in state["messages"]:
-            sender = msg.additional_kwargs.get('sender', 'Unknown')
+            sender = msg.additional_kwargs.get("sender", "Unknown")
             print(f"{sender}: {msg.content}")
         print("------------------------")
         print("------------------------")
-        result = input(f"{self.name} ({self.uid})>>> ")
-        if result == "exit":
-            raise SystemExit
-        human_msg = HumanMessage(result, name=self.name, additional_kwargs={'sender': f"{self.name} ({self.uid})"})
+        print("WAITING......")
+        result = self.listen_func(self._wait_for_user_input)
+        human_msg = HumanMessage(
+            result, name=self.name, additional_kwargs={"sender": f"{self.name} ({self.uid})"}
+        )
         return {"messages": [human_msg]}
 
     def __str__(self):
         return f"Agent: {self.name} ({self.uid})"
+
+    def _wait_for_user_input(player_state: dict) -> str:
+        """Wait for the user to select an agent."""
+        is_user_done = player_state.get("is_done_talking")
+        if is_user_done:
+            return "__exit__"
+        messages = player_state["messages"]
+        user_response = messages[-1]["content"]
+        return user_response

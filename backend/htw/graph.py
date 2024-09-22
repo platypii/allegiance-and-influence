@@ -1,17 +1,15 @@
 import concurrent.futures
-from functools import partial
 import random
+from functools import partial
 
-from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import BaseMessage
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
-from htw.agent.agent import ArgumentaBot, ArgumentState, has_agent_been_persuaded
-from htw.config import LANGGRAPH_CONFIG, SEED_MESSAGE, MODEL_NAME, LLM_CONFIG
-from htw.llm import get_antropic_llm
+from htw.agent.agent import ArgumentaBot, ArgumentState, has_agent_been_persuaded, has_agent_quit
+from htw.config import LANGGRAPH_CONFIG, SEED_MESSAGE
 
-from typing import List
 
 def random_pairings(
     agents: list[ArgumentaBot], seed: int
@@ -25,13 +23,25 @@ def random_pairings(
     return [(agents[i], agents[i + 1]) for i in range(0, len(shuffled_agents), 2)]
 
 
+def _graph_exit(state: ArgumentState) -> str:
+    if has_agent_been_persuaded(state["messages"][-1].content):
+        return END
+    elif has_agent_quit(state["messages"][-1].content):
+        return END
+    return "continue"
+
+
 def _build_graph(agent1: ArgumentaBot, agent2: ArgumentaBot) -> StateGraph:
     graph_builder = StateGraph(ArgumentState)
     graph_builder.add_node(agent1.name, agent1)
     graph_builder.add_node(agent2.name, agent2)
 
-    graph_builder.add_conditional_edges(agent1.name, lambda state: "end" if has_agent_been_persuaded(state["messages"][-1].content) else "continue", {"continue": agent2.name, "end": END})
-    graph_builder.add_conditional_edges(agent2.name, lambda state: "end" if has_agent_been_persuaded(state["messages"][-1].content) else "continue", {"continue": agent1.name, "end": END})
+    graph_builder.add_conditional_edges(
+        agent1.name, _graph_exit, {"continue": agent2.name, END: END}
+    )
+    graph_builder.add_conditional_edges(
+        agent2.name, _graph_exit, {"continue": agent1.name, END: END}
+    )
     graph_builder.add_edge(START, agent1.name)
     return graph_builder
 
@@ -86,11 +96,12 @@ def compile_graphs(graphs: list[StateGraph], memory: SqliteSaver) -> list[Compil
     return compiled_graphs
 
 
-
 def _run_agent_graph(compiled_graph: CompiledStateGraph, verbose: bool, llm_builder) -> list[dict]:
     initial_state = ArgumentState(
-        messages=[BaseMessage(content=SEED_MESSAGE, type="human", additional_kwargs={'sender': 'SYSTEM'})],
-        sender="STARTING"
+        messages=[
+            BaseMessage(content=SEED_MESSAGE, type="human", additional_kwargs={"sender": "SYSTEM"})
+        ],
+        sender="STARTING",
     )
     results = []
     all_messages = []
@@ -98,29 +109,31 @@ def _run_agent_graph(compiled_graph: CompiledStateGraph, verbose: bool, llm_buil
         for event in compiled_graph.stream(initial_state, config=LANGGRAPH_CONFIG, debug=False):
             if verbose:
                 for k, v in event.items():
-                    sender = v['messages'][0].additional_kwargs.get('sender', k)
+                    sender = v["messages"][0].additional_kwargs.get("sender", k)
                     print(f"{sender}: {v['messages'][0].content}")
                     print()
             results.append(event)
-            all_messages.extend(event[k]['messages'] for k in event)
-            
+            all_messages.extend(event[k]["messages"] for k in event)
+
             # Check if any agent has been persuaded
-            if any(v.get('stop_reason') == 'persuaded' for v in event.values()):
+            if any(v.get("stop_reason") == "persuaded" for v in event.values()):
                 if verbose:
                     print("Conversation ended: An agent has been persuaded!")
                 break
     except Exception as e:
         print(e)
-    
+
     # Generate and print the summary
-    summary = summarize_conversation(all_messages, llm_builder)
-    print("\nConversation Summary:")
-    print(summary)
-    
+    # summary = summarize_conversation(all_messages, llm_builder)
+    # print("\nConversation Summary:")
+    # print(summary)
+
     return results
 
 
-def run_graphs(compiled_graphs: list[CompiledStateGraph], verbose: bool, llm_builder) -> list[list[dict]]:
+def run_graphs(
+    compiled_graphs: list[CompiledStateGraph], verbose: bool, llm_builder
+) -> list[list[dict]]:
     """In same thread, run the compiled graphs serially."""
     results = []
     for i, graph in enumerate(compiled_graphs):
