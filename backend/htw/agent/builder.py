@@ -34,7 +34,7 @@ def get_agents(
         system_message = (
             f"You are {character['Character']}, {character['Description']}. Your attributes are: Charisma: {character['Charisma']}, Intellect: {character['Intellect']}, Stubbornness: {character['Stubbornness']}, Empathy: {character['Empathy']}, Influence Range: {character['Influence Range']}, Loyalty: {character['Loyalty']}, Curiosity: {character['Curiosity']}, Consistency: {character['Consistency']}. After every message state as "
             "Status:"
-            " if you want to stay on your current team, say neutral or join the character that you are talking toos team.\n\n{root_message}"
+            " if you want to stay on your current team [STAY], stay neutral [STAY] or join the character that you are talking toos team[JOIN].\n\n{root_message}"
         )
         agents.append(
             ArgumentaBot(

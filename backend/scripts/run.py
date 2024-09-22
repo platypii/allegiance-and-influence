@@ -11,7 +11,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from typing_extensions import TypedDict
 
-from htw.agent.agent import HumanBot, ArgumentaBot
+from htw.agent.agent import HumanBot, ArgumentaBot, has_agent_been_persuaded
 from htw.agent.builder import get_agents
 from htw.config import MODEL_NAME
 from htw.graph import _build_graph, _run_agent_graph, compile_graphs
@@ -40,9 +40,11 @@ def run_bot_vs_bot(llm_builder):
 def print_persuasion_result(results):
     for result in results:
         for agent, data in result.items():
-            if data.get("stop_reason") == "persuaded":
-                print(f"{agent} was persuaded to join the other team!")
-                return
+            if "messages" in data and data["messages"]:
+                last_message = data["messages"][-1].content
+                if has_agent_been_persuaded(last_message):
+                    print(f"{agent} was persuaded to join the other team!")
+                    return
     print("No agent was persuaded. The conversation ended without a clear winner.")
 
 
