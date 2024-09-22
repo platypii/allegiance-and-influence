@@ -15,6 +15,7 @@ import Round, { RoundState } from "./round"
 
 export default function Home() {
   const [chatWith, setChatWith] = useState<Character | undefined>()
+  const [playerName, setPlayerName] = useState<string | undefined>()
   const [state, setState] = useState<RoundState>({
     round_number: 1,
     current_agents: [],
@@ -34,6 +35,11 @@ export default function Home() {
   })
 
   function clickNode(id: string) {
+    if (!playerName) return
+    if (playerName !== "player_red" && playerName !== "player_blue") return
+    if (state.round_state[playerName].choose) return console.log("Already made a choice")
+    // Set the player's choice
+    database.ref(`/current_state/round_state/${playerName}/choose`).set(id)
     const character = characters.find(character => character.UID === id)
     setChatWith(chatWith => chatWith?.UID === id ? undefined : character)
   }
@@ -44,8 +50,13 @@ export default function Home() {
       const state = snapshot.val()
       console.log("Data updated", state)
       setState(state)
+
+      if (!playerName) return
+      if (playerName !== "player_red" && playerName !== "player_blue") return
+      const character = characters.find(character => character.UID === state?.round_state[playerName].choose)
+      if (character) setChatWith(character)
     })
-  }, [])
+  }, [playerName])
 
   const nodes: GraphNode[] = state?.current_agents?.map((id, i) => {
     const character = characters.find(character => character.UID === id)
@@ -98,7 +109,7 @@ export default function Home() {
           -
           <div className={styles.blue}>{blueCount}</div>
         </div>
-        <Welcome />
+        {!playerName && <Welcome setPlayerName={setPlayerName} />}
         {state && <Round state={state} />}
       </main>
     </div>

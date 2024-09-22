@@ -1,17 +1,16 @@
-import { useState, useEffect } from "react"
 import styles from "./welcome.module.css"
 
-export default function Welcome() {
-  const [dismissed, setDismissed] = useState(false)
+interface WelcomeProps {
+  setPlayerName: (name: string) => void
+}
 
+export default function Welcome({ setPlayerName }: WelcomeProps) {
   function clickPlayer1() {
-    setDismissed(true)
+    setPlayerName("player_red")
   }
   function clickPlayer2() {
-    setDismissed(true)
+    setPlayerName("player_blue")
   }
-
-  if (dismissed) return null
 
   return (
     <div className={styles.welcome}>
