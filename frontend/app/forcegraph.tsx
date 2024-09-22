@@ -25,7 +25,6 @@ interface ForceGraphProps {
   chargeStrength?: number
   linkDistance?: number
   friction?: number
-  velocityThreshold?: number // New prop for velocity threshold
 }
 
 export default function ForceGraph({
@@ -34,7 +33,6 @@ export default function ForceGraph({
   chargeStrength = -30,
   linkDistance = 100,
   friction = 0.9,
-  velocityThreshold = 0.1, // Default threshold value
 }: ForceGraphProps) {
   const [nodes, setNodes] = useState<Node[]>(() =>
     initialNodes.map(node => ({ ...node, vx: 0, vy: 0 }))
@@ -45,39 +43,15 @@ export default function ForceGraph({
   // Create a map for quick node lookup
   const nodeMap = useRef<Map<string, Node>>(new Map())
 
-  // Dimensions of the graph container
-  const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
-    width: 800,
-    height: 600,
-  })
+  const width = graphRef.current?.clientWidth || 800
+  const height = graphRef.current?.clientHeight || 600
 
-  // Update nodeMap whenever nodes change
   useEffect(() => {
     nodeMap.current = new Map(nodes.map(node => [node.id, node]))
   }, [nodes])
 
-  // Update dimensions on mount and when the window resizes
-  useEffect(() => {
-    const updateDimensions = () => {
-      if (graphRef.current) {
-        setDimensions({
-          width: graphRef.current.clientWidth,
-          height: graphRef.current.clientHeight,
-        })
-      }
-    }
-
-    updateDimensions()
-    window.addEventListener('resize', updateDimensions)
-    return () => {
-      window.removeEventListener('resize', updateDimensions)
-    }
-  }, [])
-
   useEffect(() => {
     const simulate = () => {
-      let shouldContinue = false // Flag to determine if animation should continue
-
       // Apply forces
       nodes.forEach(node => {
         // Initialize forces
@@ -116,53 +90,36 @@ export default function ForceGraph({
         node.vx = (node.vx + fx) * friction
         node.vy = (node.vy + fy) * friction
 
-        // Calculate velocity magnitude
-        const velocity = Math.sqrt(node.vx * node.vx + node.vy * node.vy)
-
-        if (velocity >= velocityThreshold) {
-          shouldContinue = true // At least one node is still moving
-        } else {
-          // Stop the node by setting its velocity to zero
-          node.vx = 0
-          node.vy = 0
-        }
-
         // Update position
         node.x += node.vx
         node.y += node.vy
 
         // Boundary conditions
-        node.x = Math.max(0, Math.min(dimensions.width, node.x))
-        node.y = Math.max(0, Math.min(dimensions.height, node.y))
+        node.x = Math.max(0, Math.min(width, node.x))
+        node.y = Math.max(0, Math.min(height, node.y))
       })
 
       setNodes([...nodes])
-
-      if (shouldContinue) {
-        animationRef.current = requestAnimationFrame(simulate)
-      } else {
-        // All nodes have velocities below the threshold; stop the animation
-        animationRef.current = null
-      }
-    }
-
-    // Start the simulation
-    if (animationRef.current === null) {
       animationRef.current = requestAnimationFrame(simulate)
     }
 
+    animationRef.current = requestAnimationFrame(simulate)
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current)
     }
-  }, [nodes, edges, chargeStrength, linkDistance, friction, dimensions, velocityThreshold])
+  }, [nodes, edges, chargeStrength, linkDistance, friction, width, height])
 
   return (
-    <div className={styles.graph} ref={graphRef}>
+    <div
+      className={styles.graph}
+      ref={graphRef}
+    >
       {/* Render edges as SVG lines */}
       <svg
         className={styles.edges}
-        width={dimensions.width}
-        height={dimensions.height}
+        width={width}
+        height={height}
+        style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}
       >
         {edges.map((edge, index) => {
           const source = nodes.find(node => node.id === edge.source)
@@ -175,8 +132,8 @@ export default function ForceGraph({
                 y1={source.y}
                 x2={target.x}
                 y2={target.y}
-                stroke="#333"
-                strokeWidth={2}
+                stroke="#999"
+                strokeWidth={1}
               />
             )
           }

@@ -60,6 +60,11 @@
   background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  font-size: 40px;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  text-shadow: 0 0 4px #3B2F2F;
   padding: 10px 20px;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
@@ -70,14 +75,10 @@
   background: rgba(0, 0, 0, 0.7);
   border-radius: 4px;
   padding: 2px 4px;
-  font-size: 40px;
-  font-family: 'Courier New', Courier, monospace;
-  font-weight: bold;
-  text-shadow: 0 0 4px #3B2F2F;
 }
 .red {
-  color: #f11;
+  color: rgb(239, 133, 133);
 }
 .blue {
-  color: #22f;
+  color: rgb(132, 132, 233);
 }

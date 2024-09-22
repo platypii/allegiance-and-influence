@@ -66,6 +66,7 @@ export default function Home() {
         />
         <div className={styles.overlay}>
           <div className={styles.red}>{redCount}</div>
+          -
           <div className={styles.blue}>{blueCount}</div>
         </div>
         <Welcome />
