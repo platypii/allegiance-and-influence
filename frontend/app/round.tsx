@@ -8,7 +8,7 @@ interface Message {
 export interface RoundState {
   round_number: number
   current_agents: string[]
-  roundState: {
+  round_state: {
     player1: {
       choose: string | null
       messages: Message[]
@@ -19,7 +19,7 @@ export interface RoundState {
       messages: Message[]
       doneTalking: boolean
     }
-    agentsCompleted: boolean
+    agents_complete: boolean
   }
 }
 
@@ -30,7 +30,10 @@ interface RoundProps {
 export default function Round({ state }: RoundProps) {
   return (
     <div className={styles.round}>
-      <h1>Round {state.round_number}</h1>
+      <h1>
+        Round {state.round_number}
+        {!state.round_state?.agents_complete && <div className={styles.spinner} />}
+      </h1>
     </div>
   )
 }

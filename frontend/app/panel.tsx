@@ -43,7 +43,7 @@ export default function Panel({ chatWith, onClose }: PanelProps) {
         <div className={styles.chatArea}>
           {messages.map((message, index) => (
             <div key={index} className={styles[message.role]}>
-              {message.role}: {message.text}
+              {message.role === 'user' ? 'user' : chatWith?.Character}: {message.text}
             </div>
           ))}
         </div>

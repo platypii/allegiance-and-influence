@@ -18,7 +18,7 @@ export default function Home() {
   const [state, setState] = useState<RoundState>({
     round_number: 1,
     current_agents: [],
-    roundState: {
+    round_state: {
       player1: {
         choose: null,
         messages: [],
@@ -29,7 +29,7 @@ export default function Home() {
         messages: [],
         doneTalking: false,
       },
-      agentsCompleted: false,
+      agents_complete: false,
     },
   })
 
@@ -38,7 +38,6 @@ export default function Home() {
     setChatWith(chatWith => chatWith?.UID === id ? undefined : character)
   }
 
-  console.log("Firebase initialized", database)
   useEffect(() => {
     const stateRef = ref(database, '/current_state')
     onValue(stateRef, (snapshot) => {
