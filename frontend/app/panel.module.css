@@ -57,8 +57,8 @@
 }
 
 .panel button {
-  background: #5e3a1d;
-  border: 2px solid #3B2F2F;
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid #271f1f;
   padding: 10px 15px;
   color: #f5f0e1;
   cursor: pointer;
@@ -69,7 +69,7 @@
 
 .panel button:hover,
 .panel button:active {
-  background: #3b2116;
+  background: #1a3011;
 }
 
 .panel h1 {
@@ -96,7 +96,7 @@
 .chatArea > div {
   border-radius: 12px;
   line-height: 1.4em;
-  padding: 10px;
+  padding: 20px 10px;
   color: #333;
   font-family: "Playwrite DE Grund", cursive;
   white-space: pre-wrap;
@@ -114,22 +114,43 @@
 
 .inputArea {
   display: flex;
+  flex-direction: column;
   gap: 10px;
   margin: 10px;
 }
-.inputArea input {
+.inputArea form {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+}
+.inputArea textarea {
   flex: 1;
   padding: 10px;
-  border: 2px solid #3B2F2F;
+  border: 2px solid #271f1f;
   border-radius: 5px;
   background: rgba(0, 0, 0, 0.6);
   color: #f5f0e1;
   transition: border 0.3s;
+  min-height: 40px;
 }
-.inputArea input:active,
-.inputArea input:focus {
+.inputArea textarea:active,
+.inputArea textarea:focus {
   border: 2px solid #acc2de;
   outline: 0;
+}
+.inputArea button {
+  height: 40px;
+}
+.panel button.sendit {
+  background: url('/images/send.svg') no-repeat center/contain;
+  background-size: 30px;
+  background-color: rgba(0, 0, 0, 0.6);
+  width: 56px;
+  height: 56px;
+}
+.panel button.sendit:hover,
+.panel button.sendit:active {
+  background-color: #1a3011;
 }
 
 button.close {
@@ -141,6 +162,6 @@ button.close {
   border-radius: 4px;
   color: #f5f0e1;
   cursor: pointer;
-  padding: 8px 12px;
+  padding: 6px 10px;
   transition: background 0.3s;
 }

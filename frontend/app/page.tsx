@@ -111,6 +111,8 @@ export default function Home() {
 
   const messages = playerName ? state?.round_state?.[playerName]?.messages || [] : []
 
+  const status = playerName ? (state?.round_state?.[playerName]?.choose ? null : 'Select an agent') : null
+
   return (
     <div className={styles.page}>
       {playerName && <Panel
@@ -136,6 +138,7 @@ export default function Home() {
         </div>
         {!playerName && <Welcome setPlayerName={setPlayerName} />}
         {state && <Round state={state} />}
+        {status && <div className={styles.status}>{status}</div>}
       </main>
     </div>
   )

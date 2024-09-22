@@ -18,7 +18,7 @@ interface Message {
 
 export default function Panel({ playerName, chatWith, firemessages, onClose }: PanelProps) {
   const [messages, setMessages] = useState<Message[]>(firemessages)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
   function handleInput(event: React.FormEvent) {
     event.preventDefault()
@@ -43,6 +43,7 @@ export default function Panel({ playerName, chatWith, firemessages, onClose }: P
     // Set done talking to true
     const dbRef = ref(database, `/current_state/round_state/${playerName}`)
     update(dbRef, { done_talking: true })
+    onClose()
   }
 
   return (
@@ -55,10 +56,13 @@ export default function Panel({ playerName, chatWith, firemessages, onClose }: P
             </div>
           ))}
         </div>
-        <form className={styles.inputArea} onSubmit={handleInput}>
-          <input ref={inputRef} type="text" placeholder="Make your argument" />
+        <div className={styles.inputArea}>
+          <form onSubmit={handleInput}>
+            <textarea ref={inputRef} placeholder="Make your argument" />
+            <button className={styles.sendit}></button>
+          </form>
           <button onClick={handleDone}>Done Talking</button>
-        </form>
+        </div>
       </div>
       <div className={styles.panelBio}>
         <img src={`/images/agents/${chatWith?.UID}.jpg`} alt={chatWith?.Character} />
