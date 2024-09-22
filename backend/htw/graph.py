@@ -2,14 +2,16 @@ import concurrent.futures
 from functools import partial
 import random
 
-from langchain_core.messages import BaseMessage
+from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 
 from htw.agent.agent import ArgumentaBot, ArgumentState, has_agent_been_persuaded
-from htw.config import LANGGRAPH_CONFIG, SEED_MESSAGE
+from htw.config import LANGGRAPH_CONFIG, SEED_MESSAGE, MODEL_NAME, LLM_CONFIG
+from htw.llm import get_antropic_llm
 
+from typing import List
 
 def random_pairings(
     agents: list[ArgumentaBot], seed: int
@@ -56,12 +58,40 @@ def compile_graphs(graphs: list[StateGraph], memory: SqliteSaver) -> list[Compil
     return compiled_graphs
 
 
-def _run_agent_graph(compiled_graph: CompiledStateGraph, verbose: bool) -> list[dict]:
+def summarize_conversation(messages: List[BaseMessage], llm_builder) -> str:
+    """
+    Summarize the entire conversation between two agents.
+    
+    Args:
+    messages (List[BaseMessage]): List of messages from the conversation.
+    llm_builder: Function to build the LLM.
+
+    Returns:
+    str: A concise summary of the conversation.
+    """
+    llm = llm_builder(model=MODEL_NAME, config=LLM_CONFIG)
+    
+    # Flatten the list of messages
+    flattened_messages = [msg for sublist in messages for msg in (sublist if isinstance(sublist, list) else [sublist])]
+    
+    conversation_text = "\n".join([f"{msg.additional_kwargs.get('sender', 'Unknown')}: {msg.content}" for msg in flattened_messages])
+    
+    prompt = [
+        SystemMessage(content="You are a highly efficient summarizer."),
+        HumanMessage(content=f"Based on the following conversation, summarize what happened and call out any decisive moments where one argument won over the other. The summary should be no more than 5 simple bullets. Be extremely concise and to the point.\n\nConversation:\n{conversation_text}")
+    ]
+    
+    response = llm.invoke(prompt)
+    return response.content
+
+
+def _run_agent_graph(compiled_graph: CompiledStateGraph, verbose: bool, llm_builder) -> list[dict]:
     initial_state = ArgumentState(
         messages=[BaseMessage(content=SEED_MESSAGE, type="human", additional_kwargs={'sender': 'SYSTEM'})],
         sender="STARTING"
     )
     results = []
+    all_messages = []
     try:
         for event in compiled_graph.stream(initial_state, config=LANGGRAPH_CONFIG, debug=False):
             if verbose:
@@ -70,6 +100,7 @@ def _run_agent_graph(compiled_graph: CompiledStateGraph, verbose: bool) -> list[
                     print(f"{sender}: {v['messages'][0].content}")
                     print()
             results.append(event)
+            all_messages.extend(event[k]['messages'] for k in event)
             
             # Check if any agent has been persuaded
             if any(v.get('stop_reason') == 'persuaded' for v in event.values()):
@@ -78,10 +109,16 @@ def _run_agent_graph(compiled_graph: CompiledStateGraph, verbose: bool) -> list[
                 break
     except Exception as e:
         print(e)
+    
+    # Generate and print the summary
+    summary = summarize_conversation(all_messages, llm_builder)
+    print("\nConversation Summary:")
+    print(summary)
+    
     return results
 
 
-def run_graphs(compiled_graphs: list[CompiledStateGraph], verbose: bool) -> list[list[dict]]:
+def run_graphs(compiled_graphs: list[CompiledStateGraph], verbose: bool, llm_builder) -> list[list[dict]]:
     """In same thread, run the compiled graphs serially."""
     results = []
     for i, graph in enumerate(compiled_graphs):
@@ -91,7 +128,7 @@ def run_graphs(compiled_graphs: list[CompiledStateGraph], verbose: bool) -> list
             print("------------------")
             print("NEW GRAPH")
             print("------------------")
-        results.append(_run_agent_graph(graph, verbose))
+        results.append(_run_agent_graph(graph, verbose, llm_builder))
     return results
 
 
