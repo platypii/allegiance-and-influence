@@ -46,7 +46,7 @@ export default function Home() {
 
   useEffect(() => {
     const stateRef = ref(database, '/current_state')
-    onValue(stateRef, (snapshot) => {
+    const unsubscribe = onValue(stateRef, (snapshot) => {
       const state = snapshot.val()
       console.log("State updated", state)
       setState(state)
@@ -56,6 +56,8 @@ export default function Home() {
       const character = characters.find(character => character.UID === state?.round_state[playerName].choose)
       if (character) setChatWith(character)
     })
+
+    return () => unsubscribe()
   }, [playerName])
 
   const nodes: GraphNode[] = state?.current_agents?.map((id, i) => {

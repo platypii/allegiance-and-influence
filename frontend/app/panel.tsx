@@ -56,7 +56,7 @@ export default function Panel({ playerName, chatWith, firemessages, onClose }: P
           ))}
         </div>
         <form className={styles.inputArea} onSubmit={handleInput}>
-          <input ref={inputRef} type="text" placeholder="Make an argument" />
+          <input ref={inputRef} type="text" placeholder="Make your argument" />
           <button onClick={handleDone}>Done Talking</button>
         </form>
       </div>

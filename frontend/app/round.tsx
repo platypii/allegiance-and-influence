@@ -48,16 +48,19 @@ export default function Round({ state }: RoundProps) {
 
   const statsRound = state.round_state?.agents_complete ? state.round_number : state.round_number - 1
   useEffect(() => {
+    let unsubscribe: () => void
     // get data from firebase
     if (statsRound >= 0) {
       const roundRef = ref(database, '/rounds')
-      onValue(roundRef, (snapshot) => {
+      unsubscribe = onValue(roundRef, (snapshot) => {
         const rounds = snapshot.val()
         const round = rounds?.[statsRound]
         setRound(round)
         console.log("Round data", round)
       })
     }
+
+    return () => unsubscribe?.()
   }, [statsRound])
 
   return (
