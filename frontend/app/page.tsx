@@ -36,19 +36,19 @@ export default function Home() {
 
   function clickNode(id: string) {
     if (!playerName) return
-    if (state.round_state[playerName].choose) return console.log("Already made a choice")
+    if (state.round_state[playerName]?.choose) return console.log("Already made a choice")
     // Set the player's choice
     const dbRef = ref(database, `/current_state/round_state/${playerName}`)
     update(dbRef, { choose: id })
     const character = characters.find(character => character.UID === id)
-    setChatWith(chatWith => chatWith?.UID === id ? undefined : character)
+    setChatWith(character)
   }
 
   useEffect(() => {
     const stateRef = ref(database, '/current_state')
     onValue(stateRef, (snapshot) => {
       const state = snapshot.val()
-      console.log("Data updated", state)
+      console.log("State updated", state)
       setState(state)
 
       if (!playerName) return
@@ -109,9 +109,14 @@ export default function Home() {
           edges={edges}
         />
         <div className={styles.overlay}>
-          <div className={styles.red}>{redCount}</div>
-          -
-          <div className={styles.blue}>{blueCount}</div>
+          <div className={styles.score}>
+            <div className={styles.red}>{redCount}</div>
+            -
+            <div className={styles.blue}>{blueCount}</div>
+          </div>
+          <div className={playerName === 'player_red' ? styles.red : styles.blue}>
+            Player {playerName === 'player_red' ? 'Red' : 'Blue'}
+          </div>
         </div>
         {!playerName && <Welcome setPlayerName={setPlayerName} />}
         {state && <Round state={state} />}

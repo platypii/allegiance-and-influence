@@ -65,8 +65,8 @@ export default function Round({ state }: RoundProps) {
       <div>{state.current_agents?.length} Agents</div>
       {round && <>
         <h2>Previous Round {statsRound}</h2>
-        {round.current_pairing.map(([agent1, agent2]) => (
-          <div>{agent1} - {agent2}</div>
+        {round.current_pairing.map(([agent1, agent2], index) => (
+          <div key={index}>{agent1} - {agent2}</div>
         ))}
       </>}
     </div>
