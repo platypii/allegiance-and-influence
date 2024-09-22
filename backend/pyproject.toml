@@ -17,6 +17,7 @@ langchain-community = "^0.3.0"
 langgraph-checkpoint = "^1.0.10"
 langgraph-checkpoint-sqlite = "^1.0.3"
 langchain-openai = "^0.2.0"
+firebase-admin = "^6.5.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4.0"

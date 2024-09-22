@@ -13,6 +13,7 @@ from typing_extensions import TypedDict
 
 from htw.agent.agent import HumanBot, ArgumentaBot
 from htw.agent.builder import get_agents
+from htw.config import MODEL_NAME
 from htw.graph import _build_graph, _run_agent_graph, compile_graphs
 from htw.llm import get_antropic_llm
 
@@ -36,8 +37,7 @@ def run_bot_vs_bot(llm_builder):
 def main():
     set_llm_cache(SQLiteCache(database_path=".langchain.db"))
 
-    llm_model_name = "claude-3-haiku-20240307"
-    llm_builder = partial(get_antropic_llm, model=llm_model_name)
+    llm_builder = partial(get_antropic_llm, model=MODEL_NAME)
 
     while True:
         mode = input("Enter mode (1 for Human vs Bot, 2 for Bot vs Bot, q to quit): ")
