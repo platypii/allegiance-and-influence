@@ -23,7 +23,7 @@
 }
 
 .main {
-  background: url('/images/background.png') no-repeat center/cover;
+  background: url('/images/background.jpg') no-repeat center/cover;
   display: flex;
   flex: 1;
   flex-direction: column;

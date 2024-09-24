@@ -14,7 +14,7 @@ export default function Welcome({ setPlayerName }: WelcomeProps) {
 
   return (
     <div className={styles.welcome}>
-      <img src="/images/splash_logo.png" alt="Allegiance & Influence" />
+      <img src="/images/splash_logo.jpg" alt="Allegiance & Influence" />
       
       <div className={styles.choose}>
         <button style={{ color: '#ef8585' }} onClick={clickPlayer1}>Player 1</button>

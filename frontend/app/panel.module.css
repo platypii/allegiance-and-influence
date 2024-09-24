@@ -9,7 +9,7 @@
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
   color: #f5f0e1;
   overflow: hidden;
-  background: url('/images/panel.png');
+  background: url('/images/panel.jpg');
   background-position: 20%;
   transition: width 0.3s;
   z-index: 1000;
