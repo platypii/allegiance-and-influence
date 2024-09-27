@@ -25,6 +25,27 @@
 4. **Scoring**: Points awarded for each AI agent in a player's faction.
 5. **Victory Condition**: The player with the largest faction at the end of the game wins.
 
+## Running
+
+Requires generating firebase realtime database access key, and a claude api key.
+
+### Backend
+
+You must have poetry installed.
+
+```bash
+cd backend
+python3 scripts/launch.py --num-agents 6 --num-rounds 8
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
 ## Contributing
 
 We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) file for details on how to get started.
