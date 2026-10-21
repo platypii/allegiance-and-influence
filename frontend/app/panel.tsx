@@ -1,93 +1,40 @@
 import { useEffect, useRef, useState } from "react"
 import styles from "./panel.module.css"
-import { Character } from "./characters"
-import { database } from "./firebase"
-import { ref, set, update } from "firebase/database"
+import type { Character } from "./characters"
+import type { Chat, Seat } from "./client"
 
-interface PanelProps {
-  playerName: 'player_red' | 'player_blue'
-  chatWith: Character | undefined
-  firemessages: Message[]
-  onClose: () => void
-}
-
-interface Message {
-  name: string
-  content: string
-}
-
-export default function Panel({ playerName, chatWith, firemessages, onClose }: PanelProps) {
-  const [messages, setMessages] = useState<Message[]>(firemessages)
-  const inputRef = useRef<HTMLTextAreaElement>(null)
-
-  function handleInput(event: React.FormEvent) {
-    event.preventDefault()
-    if (inputRef.current) {
-      const content = inputRef.current.value
-      setMessages(messages => [
-        ...messages,
-        { name: playerName, content },
-      ])
-      // Send message to Firebase
-      const dbRef = ref(database, `/current_state/round_state/${playerName}`)
-      update(dbRef, {messages: [...messages, { name: playerName, content }]})
-      inputRef.current.value = ""
-    }
-  }
-
-  useEffect(() => {
-    setMessages(firemessages)
-    // Scroll to bottom of chat
-    setTimeout(() => {
-      const chatArea = document.querySelector(`.${styles.chatArea}`)
-      chatArea?.scrollTo(0, chatArea.scrollHeight)
-    }, 100)
-  }, [firemessages])
-
-  function handleDone() {
-    // Set done talking to true
-    const dbRef = ref(database, `/current_state/round_state/${playerName}`)
-    update(dbRef, { done_talking: true })
-    onClose()
-  }
-
-  return (
-    <div className={styles.panel} style={chatWith ? {} : {width: "0px"}}>
-      <div className={styles.panelContent}>
-        <div className={styles.chatArea}>
-          {messages.map((message, index) => (
-            <div key={index} className={styles[message.name]}>
-              {message.name?.startsWith('player_') ? 'user' : chatWith?.Character}: {message.content}
-            </div>
-          ))}
-          {messages.length === 0 && <div>Thinking...</div>}
-        </div>
-        <div className={styles.inputArea}>
-          <form onSubmit={handleInput}>
-            <textarea ref={inputRef} placeholder={`Make your case for ${playerName === 'player_red' ? 'red' : 'blue'} team...`} />
-            <button className={styles.sendit}></button>
-          </form>
-          <button onClick={handleDone}>Done Talking</button>
-        </div>
+export default function Panel({ playerName, character, chat, enabled, busy, onMessage, onDone, onClose }: {
+  playerName: Seat; character: Character; chat: Chat; enabled: boolean; busy: boolean
+  onMessage: (text: string) => Promise<boolean>; onDone: () => void; onClose: () => void
+}) {
+  const [text, setText] = useState("")
+  const scroll = useRef<HTMLDivElement>(null)
+  const count = chat.messages.filter(m => m.name === playerName).length
+  useEffect(() => { scroll.current?.scrollTo({ top: scroll.current.scrollHeight }) }, [chat.messages])
+  useEffect(() => setText(""), [character.UID])
+  return <section className={styles.panel} aria-label={`Conversation with ${character.Character}`}>
+    <div className={styles.panelContent}>
+      <div className={styles.chatArea} ref={scroll} role="log" aria-label="Conversation">
+        {chat.messages.map((message, i) => <div key={i} className={message.name === playerName ? styles[playerName] : styles.assistant}>
+          <strong>{message.name === playerName ? "You" : character.Character}: </strong>{message.content}
+        </div>)}
       </div>
-      <div className={styles.panelBio}>
-        <img src={`/images/agents/${chatWith?.UID}.jpg`} alt={chatWith?.Character} />
-        <div className={styles.panelStats}>
-          <h1>{chatWith?.Character}</h1>
-          <p>{chatWith?.Description}</p>
-          <ul>
-            <li>Charisma: <span>{chatWith?.Charisma}</span></li>
-            <li>Intellect: <span>{chatWith?.Intellect}</span></li>
-            <li>Stubbornness: <span>{chatWith?.Stubbornness}</span></li>
-            <li>Empathy: <span>{chatWith?.Empathy}</span></li>
-            <li>Influence Range: <span>{chatWith?.['Influence Range']}</span></li>
-            <li>Loyalty: <span>{chatWith?.Loyalty}</span></li>
-            <li>Curiosity: <span>{chatWith?.Curiosity}</span></li>
-            <li>Consistency: <span>{chatWith?.Consistency}</span></li>
-          </ul>
-        </div>
+      <div className={styles.inputArea}>
+        <p>{chat.done ? "Conversation finished. Waiting for the other player." : !enabled ? "Waiting for the other player to choose." : `${count}/5 messages · two recruit in this demo`}</p>
+        <form onSubmit={async e => { e.preventDefault(); if (await onMessage(text)) setText("") }}>
+          <textarea aria-label="Your message" value={text} maxLength={2000} onChange={e => setText(e.target.value)} disabled={!enabled || busy || count >= 5} placeholder="Make your case…" />
+          <button aria-label="Send message" className={styles.sendit} disabled={!enabled || busy || !text.trim() || count >= 5} />
+        </form>
+        <button disabled={!enabled || busy} onClick={onDone}>Done talking</button>
       </div>
-      <button className={styles.close} onClick={onClose}>X</button>
     </div>
-  )
+    <div className={styles.panelBio}>
+      <img src={`/images/agents/${character.UID}.jpg`} alt={character.Character} />
+      <div className={styles.panelStats}>
+        <h1>{character.Character}</h1><p>{character.Description}</p>
+        <ul>{(["Charisma", "Intellect", "Stubbornness", "Empathy", "Influence Range", "Loyalty", "Curiosity", "Consistency"] as const).map(key => <li key={key}>{key}: <span>{character[key]}</span></li>)}</ul>
+      </div>
+    </div>
+    <button className={styles.close} aria-label="Close conversation" onClick={onClose}>×</button>
+  </section>
 }

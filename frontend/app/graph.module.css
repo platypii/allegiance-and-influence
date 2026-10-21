@@ -16,7 +16,7 @@
 .node:hover {
   transform: translate(-50%, -50%) scale(1.2);
 }
-.node > div {
+.node > button {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   width: var(--node-size);
   height: var(--node-size);
@@ -30,7 +30,7 @@
   overflow: hidden;
   position: relative;
 }
-.node > div > img {
+.node > button > img {
   width: 110%;
   height: 110%;
 }
@@ -42,3 +42,7 @@
   left: 0;
   pointer-events: none;
 }
+
+.node > button { padding: 0; background: #ddd; position: relative; }
+.node > button:enabled { cursor: pointer; }
+.node > button:focus-visible { outline: 3px solid #f7db87; outline-offset: 5px; }
