@@ -41,6 +41,5 @@ a {
   }
 }
 
-nextjs-portal {
-  display: none !important;
-}
+button:disabled { cursor: default; }
+button, a, input, textarea { touch-action: manipulation; }

@@ -1,80 +1,19 @@
 import styles from "./round.module.css"
-import { teamColor } from "./teamColor"
 import characters from "./characters"
+import { teamColor } from "./teamColor"
+import type { Game } from "./client"
 
-interface Message {
-  name: string
-  content: string
-}
-
-export interface RoundState {
-  round_number: number
-  current_agents: string[]
-  current_pairing: [string, string][]
-  round_state: {
-    player_red: {
-      choose: string | null
-      messages: Message[]
-      done_talking: boolean
-    }
-    player_blue: {
-      choose: string | null
-      messages: Message[]
-      done_talking: boolean
-    }
-    agents_complete: boolean
-  }
-}
-
-export interface RoundType {
-  agents: {[key: string]: {
-    current_chat_messages: {
-      name?: string
-      content: string
-    }[]
-    side: number
-  }}
-  current_pairing: [string, string][]
-  pairing_summaries: string[]
-}
-
-interface RoundProps {
-  state: RoundState
-  round?: RoundType
-}
-
-export default function Round({ state, round }: RoundProps) {
-  const statsRound = state.round_state?.agents_complete ? state.round_number : state.round_number - 1
-
-  return (
-    <div className={styles.round}>
-      <h1>
-        Round {state.round_number ? state.round_number + 1 : 1}
-      </h1>
-      <div>
-        {state.current_agents?.length} Agents
-      </div>
-      <sub>
-        {!state.round_state?.agents_complete && '(in progress)'}
-      </sub>
-      {round && statsRound >= 0 && <>
-        {state.round_number !== statsRound && <h2>Previous Round {statsRound + 1}</h2>}
-        {round.current_pairing.map(([agent1, agent2], index) => (
-          <div className={styles.pairing} key={index}>
-            <div className={styles.pair}>
-              <div>
-                <img src={`/images/agents/${agent1}.jpg`} alt={agent1} style={{ borderColor: teamColor(round.agents?.[agent1]?.side || 0) }} />
-                {characters.find(character => character.UID === agent1)?.Character}
-              </div>
-              <div>
-                <img src={`/images/agents/${agent2}.jpg`} alt={agent2} style={{ borderColor: teamColor(round.agents?.[agent2]?.side || 0) }} />
-                {characters.find(character => character.UID === agent2)?.Character}
-              </div>
-            </div>
-            <div>{round.pairing_summaries?.[index]}</div>
-          </div>
-        ))}
-      </>}
-    </div>
-  )
+export default function Round({ game }: { game: Game }) {
+  const latest = game.history.at(-1)
+  return <aside className={styles.round} aria-label="Round details">
+    <h1>Round {game.round_number} of {game.config.num_rounds}</h1>
+    <div>{game.agents.length} characters</div>
+    <sub>{game.phase.replaceAll("_", " ")}</sub>
+    {latest && <><h2>Round {latest.round_number} recap</h2>{latest.summaries.map((summary, i) => <div className={styles.pairing} key={i}>
+      <div className={styles.pair}>{summary.pair.map(id => <div key={id}>
+        <img src={`/images/agents/${id}.jpg`} alt="" style={{ borderColor: teamColor(game.agents.find(a => a.UID === id)?.side || (id === "player_red" ? -1 : id === "player_blue" ? 1 : 0)) }} />
+        {characters.find(c => c.UID === id)?.Character}
+      </div>)}</div><div>{summary.text}</div>
+    </div>)}</>}
+  </aside>
 }

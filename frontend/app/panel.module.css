@@ -180,3 +180,9 @@ button.close {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+.panel { max-width: 100vw; bottom: 0; }
+.panelContent { min-width: 0; }
+.inputArea p { color: #f5f0e1; background: #332719; padding: 8px; font-size: 12px; }
+.inputArea button:disabled { opacity: .45; }
+@media (max-width: 760px) { .panelBio { display: none; } .panelContent { width: 100vw; } }

@@ -1,166 +1,80 @@
 "use client"
 
+import { useEffect, useMemo, useState } from "react"
 import styles from "./page.module.css"
 import Welcome from "./welcome"
 import Panel from "./panel"
-import ForceGraph, { Edge } from "./forcegraph"
-import { GraphNode } from "./forcegraph"
-import { useEffect, useState } from "react"
-import characters, { Character } from "./characters"
+import ForceGraph, { GraphNode } from "./forcegraph"
+import characters from "./characters"
 import { teamColor } from "./teamColor"
-import { database } from "./firebase"
-import { onValue, ref, update } from "firebase/database"
-import Round, { RoundState, RoundType } from "./round"
+import Round from "./round"
 import Endgame from "./endgame"
+import { Game, useGame } from "./client"
 
 export default function Home() {
-  const [chatWith, setChatWith] = useState<Character | undefined>()
-  const [playerName, setPlayerName] = useState<'player_red' | 'player_blue' | undefined>()
-  const [state, setState] = useState<RoundState>({
-    round_number: 1,
-    current_agents: [],
-    current_pairing: [],
-    round_state: {
-      player_red: {
-        choose: null,
-        messages: [],
-        done_talking: false,
-      },
-      player_blue: {
-        choose: null,
-        messages: [],
-        done_talking: false,
-      },
-      agents_complete: false,
-    },
-  })
-  const [round, setRound] = useState<RoundType | undefined>()
+  const { game, connection, error, busy, create, join, command, replay } = useGame()
+  const [closedChat, setClosedChat] = useState(false)
+  const [closedEnd, setClosedEnd] = useState(false)
+  const [frames, setFrames] = useState<Game[] | null>(null)
+  const [frame, setFrame] = useState(0)
+  const [copied, setCopied] = useState(false)
+  const shown = frames ? frames[frame] : game
+  const player = game?.you
+  const chat = player && shown ? shown.conversations[player] : null
+  const character = shown?.agents.find(a => a.UID === chat?.target)
 
-  function clickNode(id: string) {
-    if (!playerName) return
-    if (state.round_state[playerName]?.choose) return console.log("Already made a choice")
-    if (id.startsWith('player_')) return console.log("Can't choose a player")
-    // Set the player's choice
-    const dbRef = ref(database, `/current_state/round_state/${playerName}`)
-    update(dbRef, { choose: id })
-    const character = characters.find(character => character.UID === id)
-    setChatWith(character)
-  }
-
-  useEffect(() => {
-    const stateRef = ref(database, '/current_state')
-    const unsubscribe = onValue(stateRef, (snapshot) => {
-      const state = snapshot.val()
-      console.log("State updated", state)
-      setState(state)
-
-      if (!playerName) return
-      if (!state?.round_state?.[playerName]) return
-      if (state?.round_state?.[playerName].done_talking) return
-      const { choose } = state?.round_state[playerName]
-      const character = characters.find(character => character.UID === choose)
-      if (character) setChatWith(character)
-
-      if (state.round_state.agents_complete) {
-        setChatWith(undefined)
-      }
-    })
-
-    return () => unsubscribe()
-  }, [playerName])
-
-  useEffect(() => {
-    const roundRef = ref(database, '/rounds')
-    const unsubscribe = onValue(roundRef, (snapshot) => {
-      const rounds = snapshot.val()
-      const round = rounds?.[state.round_number - 1]
-      setRound(round)
-    })
-
-    return () => unsubscribe()
-  }, [state?.round_number])
-
-  const agents = [...(state?.current_agents || []), 'player_red', 'player_blue']
-  const nodes: GraphNode[] = agents.map(id => {
-    const character = characters.find(character => character.UID === id)
-    if (!character) throw new Error(`Character not found: ${id}`)
-    // Get score from round
-    let team = round?.agents?.[id]?.side || 0
-    if (id === 'player_red') team = -1
-    if (id === 'player_blue') team = 1
-    // scale -1 red to 0 grey to 1 blue
-    const borderColor = teamColor(team)
-    return {
-      id: character.UID,
-      x: Math.random() * 800,
-      y: Math.random() * 600,
-      team,
-      element: <div
-        onClick={() => clickNode(character.UID)}
+  useEffect(() => { setClosedChat(false) }, [game?.round_number, chat?.target])
+  const nodes: GraphNode[] = useMemo(() => {
+    if (!shown) return []
+    return [...shown.agents.map(a => ({ ...a, team: a.side })), ...characters.filter(c => c.UID.startsWith("player_")).map(c => ({ ...c, team: c.UID === "player_red" ? -1 : 1 }))].map(c => {
+      const isPlayer = c.UID.startsWith("player_")
+      const taken = Object.values(shown.conversations).some(conv => conv.target === c.UID)
+      const canChoose = !frames && !!player && shown.phase === "selecting" && !chat?.target && !taken && !isPlayer
+      const borderColor = teamColor(c.team)
+      return { id: c.UID, team: c.team, element: <button
+        aria-label={`${isPlayer ? "Player" : "Recruit"} ${c.Character}`}
+        title={c.Character} disabled={!canChoose || busy}
+        onClick={() => command({ kind: "select", target: c.UID })}
         style={{ borderColor }}>
-        <img src={`/images/agents/${character.UID}.jpg`} alt={character.Character} />
-        <div style={{
-          position: "absolute",
-          bottom: 0,
-          top: 0,
-          left: 0,
-          right: 0,
-          backgroundColor: borderColor,
-          opacity: 0.3,
-          mixBlendMode: "multiply",
-        }} />
-      </div>,
-    }
-  }) || []
+        <img src={`/images/agents/${c.UID}.jpg`} alt={c.Character} />
+        <span style={{ position: "absolute", inset: 0, backgroundColor: borderColor, opacity: 0.3, mixBlendMode: "multiply", pointerEvents: "none" }} />
+      </button> }
+    })
+  // command is rebound by the hook; rendering it here keeps the current state and credentials.
+  }, [shown, frames, player, chat?.target, busy, command])
 
-  // Make random connections, at most one connection per person
-  const edges: Edge[] = state?.current_pairing?.map(([agent1, agent2]) => {
-    const source = nodes.find(node => node.id === agent1)
-    const target = nodes.find(node => node.id === agent2)
-    if (source && target) {
-      return {
-        source: source.id,
-        target: target.id,
-      }
-    }
-    return null
-  }).filter(edge => edge !== null) as Edge[] || []
+  const status = !game ? "" : game.phase === "lobby" ? "Share the link and wait for the other player to join" : game.phase === "selecting" ? chat?.target ? "Waiting for the other player to choose" : "Select a character to recruit" : game.phase === "conversing" ? chat?.done ? "Waiting for the other conversation to finish" : "Make your case" : game.phase === "round_complete" ? "Round complete — review what changed" : "Game finished"
 
-  const redCount = nodes?.filter(node => node.team < 0)?.length
-  const blueCount = nodes?.filter(node => node.team > 0)?.length
-
-  const messages = playerName ? state?.round_state?.[playerName]?.messages || [] : []
-
-  const status = playerName ? (state?.round_state?.[playerName]?.choose ? null : 'Select a character to recruit') : null
-
-  return (
-    <div className={styles.page}>
-      {playerName && <Panel
-        playerName={playerName}
-        chatWith={chatWith}
-        firemessages={messages}
-        onClose={() => setChatWith(undefined)}
-      />}
-      <main className={styles.main}>
-        <ForceGraph
-          nodes={nodes}
-          edges={edges}
-        />
+  return <div className={styles.page}>
+    <main className={styles.main}>
+      <ForceGraph nodes={nodes} edges={(shown?.pairings || []).map(([source, target]) => ({ source, target }))} />
+      {shown && <>
         <div className={styles.overlay}>
-          <div className={styles.score}>
-            <div className={styles.red}>{redCount}</div>
-            -
-            <div className={styles.blue}>{blueCount}</div>
-          </div>
-          <div className={playerName === 'player_red' ? styles.red : styles.blue}>
-            You Are Player {playerName === 'player_red' ? 'Red' : 'Blue'}
-          </div>
+          <div className={styles.score} aria-label="Score"><div className={styles.red}>{shown.scores.player_red}</div>–<div className={styles.blue}>{shown.scores.player_blue}</div></div>
+          <div>{player ? `You are ${player === "player_red" ? "Red" : "Blue"}` : "Spectator"}</div>
         </div>
-        {!playerName && <Welcome setPlayerName={setPlayerName} />}
-        {state && <Round state={state} round={round} />}
-        {status && <div className={styles.status}>{status}</div>}
-        {state?.round_number === 10 && <Endgame playerName={redCount > blueCount ? 'player_red' : 'player_blue'} />}
-      </main>
-    </div>
-  )
+        <Round game={shown} />
+        <div className={styles.toolbar}>
+          <span role="status">{connection}</span><span>Scripted demo</span>
+          <button onClick={async () => { try { await navigator.clipboard.writeText(location.href); setCopied(true) } catch { setCopied(false) } }}>{copied ? "Link copied" : "Copy invite link"}</button>
+          <a href="/">New game</a>
+          {player && <button disabled={busy} onClick={async () => { const result = await replay(); if (result) { setFrames(result.frames); setFrame(result.frames.length - 1) } }}>Review replay</button>}
+          {frames && <><label>Replay step <input aria-label="Replay step" type="range" min={0} max={frames.length - 1} value={frame} onChange={e => setFrame(Number(e.target.value))} /></label><button onClick={() => setFrames(null)}>Back to live game</button></>}
+        </div>
+        <div className={styles.status}>
+          {frames ? `Replay · step ${frame + 1} of ${frames.length}` : status}
+          {!frames && game?.phase === "round_complete" && player && <button disabled={busy} onClick={() => command({ kind: "advance" })}>Next round</button>}
+          {!frames && character && closedChat && game?.phase === "conversing" && <button onClick={() => setClosedChat(false)}>Open conversation</button>}
+        </div>
+      </>}
+      {(!game || (!player && game.phase === "lobby")) && <Welcome game={game} busy={busy} onCreate={create} onJoin={join} />}
+      {error && <div role="alert" className={styles.error}>{error} <a href="/">Start page</a></div>}
+      {!frames && game?.phase === "finished" && !closedEnd && <Endgame game={game} onClose={() => setClosedEnd(true)} />}
+    </main>
+    {!frames && character && player && chat && !closedChat && (game?.phase === "selecting" || game?.phase === "conversing") && <Panel
+      playerName={player} character={character} chat={chat} busy={busy}
+      enabled={game.phase === "conversing" && !chat.done}
+      onMessage={text => command({ kind: "message", text })}
+      onDone={() => command({ kind: "done" })} onClose={() => setClosedChat(true)} />}
+  </div>
 }

@@ -1,16 +1,13 @@
 import styles from "./welcome.module.css"
+import type { Game } from "./client"
 
-interface EndgameProps {
-  playerName: 'player_red' | 'player_blue'
-}
-
-export default function Endgame({ playerName }: EndgameProps) {
-  return (
-    <div className={styles.welcome}>
-      <img src={`/images/win/${playerName}.png`} alt="Allegiance & Influence" width={500} />
-      <div className={styles.win} style={{ color: playerName === 'player_red' ? '#ef8585' : '#8484e9' }}>
-        {playerName === 'player_red' ? 'Red' : 'Blue'} Wins!
-      </div>
+export default function Endgame({ game, onClose }: { game: Game; onClose: () => void }) {
+  return <div className={styles.welcome}>
+    <img src={game.winner === "tie" ? "/images/splash_logo.jpg" : `/images/win/${game.winner}.png`} alt="Allegiance & Influence" width={480} />
+    <div className={styles.setup}>
+      <h1>{game.winner === "tie" ? "A shared victory — it’s a tie!" : `${game.winner === "player_red" ? "Red" : "Blue"} wins!`}</h1>
+      <p>Final score: Red {game.scores.player_red} · Blue {game.scores.player_blue}</p>
+      <button onClick={onClose}>Review final board</button> <a href="/">New game</a>
     </div>
-  )
+  </div>
 }

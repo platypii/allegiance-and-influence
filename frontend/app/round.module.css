@@ -54,3 +54,4 @@
 .pairing > div {
   white-space: pre-wrap;
 }
+@media (max-width: 760px) { .round { width: 180px; padding: 10px; max-height: 220px; } .round h1 { font-size: 18px; } .round h2 { font-size: 16px; } .pair img { width: 50px; } }
