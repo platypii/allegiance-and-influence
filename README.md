@@ -2,7 +2,7 @@
 
 Recruit historical characters, build a faction, and watch influence spread across the room. The game is being modernized into a local multiplayer game and a repeatable AI experiment test bed while preserving its original artwork.
 
-The current baseline runs **entirely locally with scripted characters**. No Firebase project, API key, Docker, or separate database server is needed. It supports two human players, saved games, reconnects, and replay. Live generative models are a subsequent milestone.
+The current baseline runs **entirely locally with scripted characters**. No Firebase project, API key, Docker, or separate database server is needed. It supports two human players, saved games, reconnects, replay, and a provider-neutral asynchronous agent runtime. Live generative models are a subsequent milestone.
 
 ## Run locally
 
@@ -17,7 +17,7 @@ bash scripts/run-local.sh
 
 Open **http://127.0.0.1:8000**. Create a game, choose Red, then open the game address in another independent tab or browser and choose Blue. The two tabs keep separate player keys. Reuse each player's existing tab to resume after a server restart; reload preserves the key. Closing a tab may discard its key: durable account recovery is not part of this baseline.
 
-Both players choose different characters. In this scripted demo, sending two messages recruits the character when the round resolves; up to five messages are allowed. Click **Done talking** on both sides, review the recap, and click **Next round**. The final result counts recruited characters only and supports ties. **Review replay** steps through committed states without making model calls.
+Both players choose different characters. In this scripted demo, sending two messages recruits the character when the round resolves; up to five messages are allowed. While a reply is pending, you can **Cancel reply**. Failed/cancelled replies can be retried without sending your message twice. Click **Done talking** on both sides, review the recap, and click **Next round**. The final result counts recruited characters only and supports ties. **Review replay** steps through committed states without making model calls.
 
 After setup, one Python process serves the interface, API, WebSockets, and SQLite storage. Node is needed to rebuild the interface, not to serve the built game.
 
@@ -51,6 +51,8 @@ npm --prefix frontend run build
 
 The verifier checks contract fixtures (including deliberate failures), Python rules/API/concurrency/recovery tests, original asset hashes, static build/typechecking, two-player browser workflows, and server errors. Browser tests create an isolated temporary database and write screenshots/traces to `artifacts/`. They do not touch your saved games.
 
+For a visible demonstration of pending replies, start with `GAME_SCRIPTED_DELAY_MS=1000 bash scripts/run-local.sh`. This only slows the offline scripted adapter; it does not enable a live model. If the server restarts during a reply, the game marks it interrupted and lets you retry or finish instead of silently reissuing it.
+
 ## Headless baseline
 
 ```bash
@@ -64,6 +66,7 @@ This drives the same game transitions and persistence boundary with scripted pla
 - [Modernization plan](docs/modernization-plan.md)
 - [Current implementation and progress](state/PROJECT_STATE.md)
 - [Game protocol and rules](docs/game-contract.md)
+- [Agent execution, recovery, and budgets](docs/agent-runtime-contract.md)
 - [Architecture decisions](docs/decision-log.md)
 - [Historical system map](docs/current-system-map.md)
 - [Agent working instructions](AGENTS.md)

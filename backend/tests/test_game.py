@@ -38,7 +38,11 @@ def setup_game(client, rounds=1, agents=6):
 def send(client, game_id, token, kind, **kwargs):
     game = client.get(f"/api/games/{game_id}", headers=auth(token)).json()
     body = {"kind": kind, "command_id": uuid.uuid4().hex, "expected_version": game["version"], **kwargs}
-    return client.post(f"/api/games/{game_id}/commands", headers=auth(token), json=body)
+    response = client.post(f"/api/games/{game_id}/commands", headers=auth(token), json=body)
+    client.portal.call(client.app.state.runtime.drain)
+    if response.status_code == 200:
+        return client.get(f"/api/games/{game_id}", headers=auth(token))
+    return response
 
 
 def choose(client, game):
@@ -106,8 +110,9 @@ def test_duplicate_command_is_safe_and_stale_command_is_rejected(client):
     }
     path = f"/api/games/{game['id']}/commands"
     first = client.post(path, headers=auth(RED), json=body)
+    client.portal.call(client.app.state.runtime.drain)
     retry = client.post(path, headers=auth(RED), json=body)
-    assert first.json() == retry.json()
+    assert retry.json()["version"] == first.json()["version"] + 1
     assert len(retry.json()["conversations"]["player_red"]["messages"]) == 3
     conflict = client.post(path, headers=auth(RED), json={**body, "text": "different"})
     assert conflict.json()["error"]["code"] == "id_conflict"

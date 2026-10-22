@@ -42,7 +42,19 @@ test("two independent players finish, reload, replay, and make no external reque
     await expect(available.nth(1)).toBeEnabled()
     await available.nth(1).click()
     await expect(red.getByLabel("Your message")).toBeEnabled()
-    await message(red, "Let us build something together.")
+    if (round === 1) {
+      await red.getByLabel("Your message").fill("Let us build something together.")
+      await red.getByRole("button", { name: "Send message", exact: true }).click()
+      await expect(red.getByRole("button", { name: "Cancel reply" })).toBeVisible()
+      await red.screenshot({ path: "../artifacts/screenshots/06-agent-pending.png" })
+      await red.getByRole("button", { name: "Cancel reply" }).click()
+      await expect(red.getByText("Reply cancelled.", { exact: false })).toBeVisible()
+      await red.getByRole("button", { name: "Retry reply" }).click()
+      await expect(red.getByRole("button", { name: "Cancel reply" })).not.toBeVisible()
+      await expect(red.getByRole("log").getByText("Let us build something together.", { exact: false })).toHaveCount(1)
+    } else {
+      await message(red, "Let us build something together.")
+    }
     await message(red, "We share a purpose.")
     await red.screenshot({ path: `../artifacts/screenshots/03-conversation-round-${round}.png` })
     await red.getByRole("button", { name: "Done talking" }).click()

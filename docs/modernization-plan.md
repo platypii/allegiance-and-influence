@@ -1,6 +1,6 @@
 # Allegiance & Influence modernization plan
 
-Roadmap, 2026-10-21. The user authorized autonomous execution. The first local foundation is implemented; see `../state/PROJECT_STATE.md` for current evidence and remaining work. Later milestones remain planned.
+Roadmap, 2026-10-21. The user authorized autonomous execution. The local foundation is merged in PR #3. The provider-neutral runtime portion of milestone 4 is implemented on `codex/agent-runtime`; live adapters, streaming, and memory remain subsequent work. See `../state/PROJECT_STATE.md` for current evidence and remaining work. See the scoped [runtime task](../work/agent-runtime.md) and [contract](agent-runtime-contract.md) for this increment.
 
 ## Scope
 
@@ -69,9 +69,9 @@ Prefer a self-contained local server with SQLite persistence and browser connect
 
 The user's preference is to run locally and remove external dependencies where practical. The first implementation follows this design; remaining live-model and hosting capabilities are tracked separately in project state.
 
-- **Application:** Keep the existing React interface and Python game engine. One launcher starts the required local processes. Initially retain the frontend development server; later evaluate serving a static frontend build from Python to simplify distribution. Static export compatibility must be verified before promising a single runtime process.
+- **Application:** Keep the existing React interface and Python game engine. One launcher starts Python, which serves the verified static frontend export and API. The frontend development server is optional for development.
 - **Persistence:** SQLite holds game snapshots, accepted events, transcripts, and experiment metadata on the server's local disk. No separate database service is required. Keep transactions short and serialize authoritative changes per game; never hold a database transaction open while awaiting a model.
-- **Live interaction:** HTTP handles commands/snapshots and WebSocket delivers updates and streamed dialogue. The application owns validation, player/session identity, reconnect handling, event sequence numbers, and duplicate-command protection. Firebase currently supplies persistence and change notifications; replacing it means implementing these application behaviors explicitly.
+- **Live interaction:** HTTP handles commands/snapshots and WebSocket delivers state updates; token streaming remains future work. The application owns validation, player/session identity, reconnect handling, event sequence numbers, and duplicate-command protection. The historical Firebase implementation supplied persistence and change notifications; the local service now implements these application behaviors explicitly.
 - **Multiplayer:** Two browsers connect to the same local server for testing. An explicit LAN mode allows other devices to connect. Internet play uses the same application on a hosted server, with HTTPS, player authorization, backups, and operational monitoring added before public use. Each match has one authoritative coordinator.
 - **Hosting:** Start with one server instance and persistent local storage. SQLite is viable for that topology; multiplayer alone is not a reason to require a cloud database. Multiple server instances and sustained write contention would trigger a separate storage/session-routing design, potentially PostgreSQL. Do not put a SQLite WAL database on a shared network filesystem.
 - **Inference:** Scripted policies and replay run offline. Cloud models remain optional adapters requiring network access and credentials. A local-model adapter is a later option for actual offline generative dialogue; hardware and model quality must be measured. Installing dependencies or downloading model weights can still require an initial connection.

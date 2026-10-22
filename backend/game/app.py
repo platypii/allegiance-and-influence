@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -8,18 +9,32 @@ from fastapi import FastAPI, Header, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+from .agent_contracts import RuntimePolicy, RuntimeReport
 from .core import GameError, view
 from .models import Command, CreateGame, GameView, JoinGame
+from .providers import ScriptedProvider
+from .runtime import AgentRuntime
 from .store import Store
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def create_app(db_path: Path | None = None, static_dir: Path | None = None):
-    app = FastAPI(title="Allegiance & Influence", version="0.1.0")
+def create_app(db_path: Path | None = None, static_dir: Path | None = None, provider=None, policy=None):
+    provider = provider or ScriptedProvider(float(os.environ.get("GAME_SCRIPTED_DELAY_MS", "0")) / 1000)
+    policy = policy or RuntimePolicy()
+
+    @asynccontextmanager
+    async def lifespan(app):
+        store.recover_jobs()
+        yield
+        await runtime.close()
+
+    app = FastAPI(title="Allegiance & Influence", version="0.2.0", lifespan=lifespan)
     store = Store(
         db_path or Path(os.environ.get("GAME_DB", ROOT / "data/game.sqlite3")),
         json.loads((ROOT / "gameplay/characters.json").read_text()),
+        identity=provider.identity,
+        policy=policy,
     )
     app.state.store = store
     # Full snapshots in bounded queues: slow browsers converge to the latest state.
@@ -30,6 +45,9 @@ def create_app(db_path: Path | None = None, static_dir: Path | None = None):
             if queue.full():
                 queue.get_nowait()
             queue.put_nowait(state)
+
+    runtime = AgentRuntime(store, provider, policy, publish)
+    app.state.runtime = runtime
 
     def token_from(authorization):
         if not authorization or not authorization.startswith("Bearer "):
@@ -58,7 +76,7 @@ def create_app(db_path: Path | None = None, static_dir: Path | None = None):
 
     @app.get("/api/health")
     async def health():
-        return {"status": "ok", "mode": "scripted", "schema_version": "1"}
+        return {"status": "ok", "mode": "scripted", "schema_version": "2"}
 
     @app.post("/api/games", status_code=201, response_model=GameView)
     async def create(config: CreateGame):
@@ -79,12 +97,24 @@ def create_app(db_path: Path | None = None, static_dir: Path | None = None):
     async def command(game_id: str, body: Command, authorization: str | None = Header(default=None)):
         state, actor = store.apply(game_id, token_from(authorization), body.model_dump())
         publish(state)
+        if body.kind in {"message", "retry"}:
+            runtime.schedule(state, actor)
+        elif body.kind == "cancel":
+            work = state["conversations"][actor]["work"]
+            # An idempotent replay returns current state, possibly a newer request/round.
+            if work and work["status"] == "cancelled":
+                runtime.cancel(work["request_id"])
         return view(state, actor)
 
     @app.get("/api/games/{game_id}/replay")
     async def replay(game_id: str, authorization: str | None = Header(default=None)):
         actor = store.actor(game_id, token_from(authorization))
-        return {"schema_version": "1", "frames": store.replay(game_id, actor)}
+        return {"schema_version": "2", "frames": store.replay(game_id, actor)}
+
+    @app.get("/api/games/{game_id}/runtime", response_model=RuntimeReport)
+    async def runtime_report(game_id: str, authorization: str | None = Header(default=None)):
+        actor = store.actor(game_id, token_from(authorization))
+        return store.runtime_report(game_id, actor)
 
     @app.websocket("/api/games/{game_id}/live")
     async def live(websocket: WebSocket, game_id: str):

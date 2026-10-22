@@ -38,11 +38,19 @@ class Done(CommandBase):
     kind: Literal["done"]
 
 
+class Retry(CommandBase):
+    kind: Literal["retry"]
+
+
+class Cancel(CommandBase):
+    kind: Literal["cancel"]
+
+
 class Advance(CommandBase):
     kind: Literal["advance"]
 
 
-Command = Annotated[Select | Message | Done | Advance, Field(discriminator="kind")]
+Command = Annotated[Select | Message | Done | Advance | Retry | Cancel, Field(discriminator="kind")]
 COMMAND_ADAPTER = TypeAdapter(Command)
 
 
@@ -66,10 +74,18 @@ class ChatMessage(StrictModel):
     content: str
 
 
+class AgentWork(StrictModel):
+    request_id: str
+    status: Literal["pending", "succeeded", "failed", "cancelled", "interrupted"]
+    error: str | None
+
+
 class Conversation(StrictModel):
     target: str | None
     messages: list[ChatMessage]
     done: bool
+    join_opponent: bool
+    work: AgentWork | None
 
 
 class Players(StrictModel):
@@ -99,7 +115,7 @@ class RoundHistory(StrictModel):
 
 
 class GameState(StrictModel):
-    schema_version: Literal["1"]
+    schema_version: Literal["2"]
     rules_version: Literal["scripted-v1"]
     id: str
     version: int = Field(ge=0)

@@ -3,12 +3,18 @@ import styles from "./panel.module.css"
 import type { Character } from "./characters"
 import type { Chat, Seat } from "./client"
 
-export default function Panel({ playerName, character, chat, enabled, busy, onMessage, onDone, onClose }: {
+export default function Panel({ playerName, character, chat, enabled, busy, onMessage, onDone, onClose, onRetry, onCancel }: {
   playerName: Seat; character: Character; chat: Chat; enabled: boolean; busy: boolean
-  onMessage: (text: string) => Promise<boolean>; onDone: () => void; onClose: () => void
+  onMessage: (text: string) => Promise<boolean>; onDone: () => void; onClose: () => void; onRetry: () => void; onCancel: () => void
 }) {
   const [text, setText] = useState("")
   const scroll = useRef<HTMLDivElement>(null)
+  const waiting = chat.work?.status === "pending"
+  const failed = chat.work && ["failed", "cancelled", "interrupted"].includes(chat.work.status)
+  const explanation: Record<string, string> = {
+    timeout: "The reply took too long.", cancelled: "Reply cancelled.", server_restarted: "The server restarted before the reply finished.",
+    budget_exhausted: "This game's agent budget has been used up.", provider_changed: "This game's agent configuration is unavailable.", provider_bounds_exceeded: "The agent exceeded its usage limits. Finish this conversation to continue.",
+  }
   const count = chat.messages.filter(m => m.name === playerName).length
   useEffect(() => { scroll.current?.scrollTo({ top: scroll.current.scrollHeight }) }, [chat.messages])
   useEffect(() => setText(""), [character.UID])
@@ -21,11 +27,13 @@ export default function Panel({ playerName, character, chat, enabled, busy, onMe
       </div>
       <div className={styles.inputArea}>
         <p>{chat.done ? "Conversation finished. Waiting for the other player." : !enabled ? "Waiting for the other player to choose." : `${count}/5 messages · two recruit in this demo`}</p>
+        {waiting && <p role="status" aria-label="Agent reply">Waiting for a reply… <button disabled={busy} onClick={onCancel}>Cancel reply</button></p>}
+        {failed && !chat.done && <p role="status" aria-label="Agent reply">{explanation[chat.work?.error || ""] || "The character could not reply."} You can retry or finish the conversation. <button disabled={busy || !enabled} onClick={onRetry}>Retry reply</button></p>}
         <form onSubmit={async e => { e.preventDefault(); if (await onMessage(text)) setText("") }}>
-          <textarea aria-label="Your message" value={text} maxLength={2000} onChange={e => setText(e.target.value)} disabled={!enabled || busy || count >= 5} placeholder="Make your case…" />
-          <button aria-label="Send message" className={styles.sendit} disabled={!enabled || busy || !text.trim() || count >= 5} />
+          <textarea aria-label="Your message" value={text} maxLength={2000} onChange={e => setText(e.target.value)} disabled={!enabled || busy || waiting || count >= 5} placeholder="Make your case…" />
+          <button aria-label="Send message" className={styles.sendit} disabled={!enabled || busy || waiting || !text.trim() || count >= 5} />
         </form>
-        <button disabled={!enabled || busy} onClick={onDone}>Done talking</button>
+        <button disabled={!enabled || busy || waiting} onClick={onDone}>Done talking</button>
       </div>
     </div>
     <div className={styles.panelBio}>

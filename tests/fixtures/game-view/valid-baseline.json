@@ -1,0 +1,72 @@
+{
+  "schema_version": "2",
+  "rules_version": "scripted-v1",
+  "id": "fixture-game",
+  "version": 0,
+  "config": {
+    "num_agents": 2,
+    "num_rounds": 3,
+    "seed": 32
+  },
+  "mode": "scripted",
+  "phase": "lobby",
+  "round_number": 1,
+  "players": {
+    "player_red": false,
+    "player_blue": false
+  },
+  "agents": [
+    {
+      "UID": "winston_churchill",
+      "Character": "Winston Churchill",
+      "Description": "British PM during WWII, famed orator",
+      "Charisma": 9,
+      "Intellect": 8,
+      "Stubbornness": 9,
+      "Empathy": 6,
+      "Influence Range": 9,
+      "Loyalty": 8,
+      "Curiosity": 7,
+      "Consistency": 8,
+      "side": 0
+    },
+    {
+      "UID": "albert_einstein",
+      "Character": "Albert Einstein",
+      "Description": "Physicist, E=mc\u00b2 fame",
+      "Charisma": 7,
+      "Intellect": 10,
+      "Stubbornness": 6,
+      "Empathy": 7,
+      "Influence Range": 8,
+      "Loyalty": 7,
+      "Curiosity": 10,
+      "Consistency": 8,
+      "side": 0
+    }
+  ],
+  "conversations": {
+    "player_red": {
+      "target": null,
+      "messages": [],
+      "done": false,
+      "join_opponent": false,
+      "work": null
+    },
+    "player_blue": {
+      "target": null,
+      "messages": [],
+      "done": false,
+      "join_opponent": false,
+      "work": null
+    }
+  },
+  "pairings": [],
+  "history": [],
+  "scores": {
+    "player_red": 0,
+    "player_blue": 0
+  },
+  "winner": null,
+  "you": null
+}
