@@ -75,6 +75,6 @@ export default function Home() {
       playerName={player} character={character} chat={chat} busy={busy}
       enabled={game.phase === "conversing" && !chat.done}
       onMessage={text => command({ kind: "message", text })}
-      onDone={() => command({ kind: "done" })} onClose={() => setClosedChat(true)} />}
+      onDone={() => command({ kind: "done" })} onRetry={() => command({ kind: "retry" })} onCancel={() => command({ kind: "cancel" })} onClose={() => setClosedChat(true)} />}
   </div>
 }

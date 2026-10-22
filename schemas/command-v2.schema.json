@@ -1,0 +1,223 @@
+{
+  "$defs": {
+    "Advance": {
+      "additionalProperties": false,
+      "properties": {
+        "command_id": {
+          "maxLength": 80,
+          "minLength": 16,
+          "pattern": "^[a-zA-Z0-9_-]+$",
+          "title": "Command Id",
+          "type": "string"
+        },
+        "expected_version": {
+          "minimum": 0,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "advance",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "command_id",
+        "expected_version",
+        "kind"
+      ],
+      "title": "Advance",
+      "type": "object"
+    },
+    "Cancel": {
+      "additionalProperties": false,
+      "properties": {
+        "command_id": {
+          "maxLength": 80,
+          "minLength": 16,
+          "pattern": "^[a-zA-Z0-9_-]+$",
+          "title": "Command Id",
+          "type": "string"
+        },
+        "expected_version": {
+          "minimum": 0,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "cancel",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "command_id",
+        "expected_version",
+        "kind"
+      ],
+      "title": "Cancel",
+      "type": "object"
+    },
+    "Done": {
+      "additionalProperties": false,
+      "properties": {
+        "command_id": {
+          "maxLength": 80,
+          "minLength": 16,
+          "pattern": "^[a-zA-Z0-9_-]+$",
+          "title": "Command Id",
+          "type": "string"
+        },
+        "expected_version": {
+          "minimum": 0,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "done",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "command_id",
+        "expected_version",
+        "kind"
+      ],
+      "title": "Done",
+      "type": "object"
+    },
+    "Message": {
+      "additionalProperties": false,
+      "properties": {
+        "command_id": {
+          "maxLength": 80,
+          "minLength": 16,
+          "pattern": "^[a-zA-Z0-9_-]+$",
+          "title": "Command Id",
+          "type": "string"
+        },
+        "expected_version": {
+          "minimum": 0,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "message",
+          "title": "Kind",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "command_id",
+        "expected_version",
+        "kind",
+        "text"
+      ],
+      "title": "Message",
+      "type": "object"
+    },
+    "Retry": {
+      "additionalProperties": false,
+      "properties": {
+        "command_id": {
+          "maxLength": 80,
+          "minLength": 16,
+          "pattern": "^[a-zA-Z0-9_-]+$",
+          "title": "Command Id",
+          "type": "string"
+        },
+        "expected_version": {
+          "minimum": 0,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "retry",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "command_id",
+        "expected_version",
+        "kind"
+      ],
+      "title": "Retry",
+      "type": "object"
+    },
+    "Select": {
+      "additionalProperties": false,
+      "properties": {
+        "command_id": {
+          "maxLength": 80,
+          "minLength": 16,
+          "pattern": "^[a-zA-Z0-9_-]+$",
+          "title": "Command Id",
+          "type": "string"
+        },
+        "expected_version": {
+          "minimum": 0,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "kind": {
+          "const": "select",
+          "title": "Kind",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "command_id",
+        "expected_version",
+        "kind",
+        "target"
+      ],
+      "title": "Select",
+      "type": "object"
+    }
+  },
+  "discriminator": {
+    "mapping": {
+      "advance": "#/$defs/Advance",
+      "cancel": "#/$defs/Cancel",
+      "done": "#/$defs/Done",
+      "message": "#/$defs/Message",
+      "retry": "#/$defs/Retry",
+      "select": "#/$defs/Select"
+    },
+    "propertyName": "kind"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/Select"
+    },
+    {
+      "$ref": "#/$defs/Message"
+    },
+    {
+      "$ref": "#/$defs/Done"
+    },
+    {
+      "$ref": "#/$defs/Advance"
+    },
+    {
+      "$ref": "#/$defs/Retry"
+    },
+    {
+      "$ref": "#/$defs/Cancel"
+    }
+  ]
+}

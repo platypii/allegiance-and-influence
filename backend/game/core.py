@@ -1,5 +1,6 @@
-"""Pure state transitions for the scripted baseline. No I/O or model calls."""
+"""Pure game transitions. Provider work is committed separately by request identity."""
 
+import hashlib
 import random
 from copy import deepcopy
 
@@ -20,13 +21,16 @@ def require(condition: bool, code: str, message: str) -> None:
 
 
 def conversations() -> dict:
-    return {seat: {"target": None, "messages": [], "done": False} for seat in SEATS}
+    return {
+        seat: {"target": None, "messages": [], "done": False, "join_opponent": False, "work": None}
+        for seat in SEATS
+    }
 
 
 def new_game(game_id: str, config: dict, characters: list[dict]) -> dict:
     selected = random.Random(config["seed"]).sample(characters, config["num_agents"])
     return {
-        "schema_version": "1",
+        "schema_version": "2",
         "rules_version": RULES_VERSION,
         "id": game_id,
         "version": 0,
@@ -49,8 +53,7 @@ def resolve_round(state: dict) -> None:
     summaries = []
     for seat, chat in state["conversations"].items():
         agent = by_id[chat["target"]]
-        count = sum(m["name"] == seat for m in chat["messages"])
-        if count >= 2:
+        if chat["join_opponent"]:
             agent["side"] = SIDES[seat]
             result = f"{agent['Character']} joined {seat.removeprefix('player_').title()}."
         else:
@@ -126,24 +129,33 @@ def transition(previous: dict, actor: str, command: dict) -> dict:
                 state["pairings"] = [[c["target"], s] for s, c in state["conversations"].items()]
                 state["pairings"] += [remaining[i : i + 2] for i in range(0, len(remaining) - 1, 2)]
                 state["phase"] = "conversing"
-        elif kind in {"message", "done"}:
+        elif kind in {"message", "done", "retry", "cancel"}:
             require(
                 state["phase"] == "conversing", "wrong_phase", "Wait until both players choose a character."
             )
             require(not chat["done"], "conversation_done", "Your conversation has ended.")
-            if kind == "message":
+            pending = chat["work"] and chat["work"]["status"] == "pending"
+            if kind == "cancel":
+                require(pending, "no_pending_work", "There is no reply to cancel.")
+                chat["work"]["status"] = "cancelled"
+                chat["work"]["error"] = "cancelled"
+            elif kind == "retry":
+                require(
+                    chat["work"] and chat["work"]["status"] in {"failed", "cancelled", "interrupted"},
+                    "not_retryable",
+                    "There is no failed reply to retry.",
+                )
+                chat["work"] = pending_work(state, actor, command)
+            elif kind == "message":
+                require(not pending, "reply_pending", "Wait for the reply or cancel it first.")
                 text = command["text"].strip()
                 require(bool(text), "empty_message", "Write a message first.")
                 count = sum(m["name"] == actor for m in chat["messages"])
                 require(count < 5, "message_limit", "Five messages is the limit. Finish your conversation.")
                 chat["messages"].append({"name": actor, "content": text})
-                reply = (
-                    "Tell me more about how we would work together."
-                    if count == 0
-                    else "You have made your case. I will join your faction when this round ends."
-                )
-                chat["messages"].append({"name": chat["target"], "content": reply})
+                chat["work"] = pending_work(state, actor, command)
             else:
+                require(not pending, "reply_pending", "Wait for the reply or cancel it first.")
                 chat["done"] = True
                 if all(c["done"] for c in state["conversations"].values()):
                     resolve_round(state)
@@ -165,5 +177,51 @@ def view(state: dict, actor: str | None) -> dict:
     for seat, chat in result["conversations"].items():
         if seat != actor:
             chat["messages"] = []
+            chat["join_opponent"] = False
+            chat["work"] = None
     result["you"] = actor
     return result
+
+
+def pending_work(state: dict, actor: str, command: dict) -> dict:
+    request_id = hashlib.sha256(f"{state['id']}:{actor}:{command['command_id']}".encode()).hexdigest()
+    return {"request_id": request_id, "status": "pending", "error": None}
+
+
+def upgrade_state(original: dict) -> dict:
+    """Read old snapshots without rewriting historical events or inventing provider calls."""
+    state = deepcopy(original)
+    if state["schema_version"] == "1":
+        state["schema_version"] = "2"
+        for seat, chat in state["conversations"].items():
+            chat["join_opponent"] = sum(m["name"] == seat for m in chat["messages"]) >= 2
+            chat["work"] = None
+    return state
+
+
+def complete_work(
+    previous: dict,
+    actor: str,
+    request: dict,
+    status: str,
+    decision: dict | None = None,
+    error: str | None = None,
+) -> dict | None:
+    state = deepcopy(previous)
+    chat = state["conversations"][actor]
+    if (
+        state["phase"] != "conversing"
+        or state["round_number"] != request["round_number"]
+        or chat["target"] != request["character"]["UID"]
+        or chat["done"]
+        or not chat["work"]
+        or chat["work"]["request_id"] != request["request_id"]
+        or chat["work"]["status"] != "pending"
+    ):
+        return None
+    if decision is not None:
+        chat["messages"].append({"name": chat["target"], "content": decision["dialogue"]})
+        chat["join_opponent"] = decision["join_opponent"]
+    chat["work"] = {"request_id": request["request_id"], "status": status, "error": error}
+    state["version"] += 1
+    return state

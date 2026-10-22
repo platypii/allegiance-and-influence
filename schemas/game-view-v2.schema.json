@@ -1,0 +1,456 @@
+{
+  "$defs": {
+    "AgentWork": {
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "succeeded",
+            "failed",
+            "cancelled",
+            "interrupted"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error"
+        }
+      },
+      "required": [
+        "request_id",
+        "status",
+        "error"
+      ],
+      "title": "AgentWork",
+      "type": "object"
+    },
+    "Character": {
+      "additionalProperties": false,
+      "properties": {
+        "UID": {
+          "title": "Uid",
+          "type": "string"
+        },
+        "Character": {
+          "title": "Character",
+          "type": "string"
+        },
+        "Description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "Charisma": {
+          "title": "Charisma",
+          "type": "integer"
+        },
+        "Intellect": {
+          "title": "Intellect",
+          "type": "integer"
+        },
+        "Stubbornness": {
+          "title": "Stubbornness",
+          "type": "integer"
+        },
+        "Empathy": {
+          "title": "Empathy",
+          "type": "integer"
+        },
+        "Influence Range": {
+          "title": "Influence Range",
+          "type": "integer"
+        },
+        "Loyalty": {
+          "title": "Loyalty",
+          "type": "integer"
+        },
+        "Curiosity": {
+          "title": "Curiosity",
+          "type": "integer"
+        },
+        "Consistency": {
+          "title": "Consistency",
+          "type": "integer"
+        },
+        "side": {
+          "enum": [
+            -1,
+            0,
+            1
+          ],
+          "title": "Side",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "UID",
+        "Character",
+        "Description",
+        "Charisma",
+        "Intellect",
+        "Stubbornness",
+        "Empathy",
+        "Influence Range",
+        "Loyalty",
+        "Curiosity",
+        "Consistency",
+        "side"
+      ],
+      "title": "Character",
+      "type": "object"
+    },
+    "ChatMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "content": {
+          "title": "Content",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "content"
+      ],
+      "title": "ChatMessage",
+      "type": "object"
+    },
+    "Conversation": {
+      "additionalProperties": false,
+      "properties": {
+        "target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target"
+        },
+        "messages": {
+          "items": {
+            "$ref": "#/$defs/ChatMessage"
+          },
+          "title": "Messages",
+          "type": "array"
+        },
+        "done": {
+          "title": "Done",
+          "type": "boolean"
+        },
+        "join_opponent": {
+          "title": "Join Opponent",
+          "type": "boolean"
+        },
+        "work": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AgentWork"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "target",
+        "messages",
+        "done",
+        "join_opponent",
+        "work"
+      ],
+      "title": "Conversation",
+      "type": "object"
+    },
+    "Conversations": {
+      "additionalProperties": false,
+      "properties": {
+        "player_red": {
+          "$ref": "#/$defs/Conversation"
+        },
+        "player_blue": {
+          "$ref": "#/$defs/Conversation"
+        }
+      },
+      "required": [
+        "player_red",
+        "player_blue"
+      ],
+      "title": "Conversations",
+      "type": "object"
+    },
+    "CreateGame": {
+      "additionalProperties": false,
+      "properties": {
+        "num_agents": {
+          "default": 6,
+          "maximum": 23,
+          "minimum": 2,
+          "title": "Num Agents",
+          "type": "integer"
+        },
+        "num_rounds": {
+          "default": 3,
+          "maximum": 20,
+          "minimum": 1,
+          "title": "Num Rounds",
+          "type": "integer"
+        },
+        "seed": {
+          "default": 32,
+          "maximum": 2147483647,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        }
+      },
+      "title": "CreateGame",
+      "type": "object"
+    },
+    "Players": {
+      "additionalProperties": false,
+      "properties": {
+        "player_red": {
+          "title": "Player Red",
+          "type": "boolean"
+        },
+        "player_blue": {
+          "title": "Player Blue",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "player_red",
+        "player_blue"
+      ],
+      "title": "Players",
+      "type": "object"
+    },
+    "RoundHistory": {
+      "additionalProperties": false,
+      "properties": {
+        "round_number": {
+          "minimum": 1,
+          "title": "Round Number",
+          "type": "integer"
+        },
+        "summaries": {
+          "items": {
+            "$ref": "#/$defs/Summary"
+          },
+          "title": "Summaries",
+          "type": "array"
+        },
+        "scores": {
+          "$ref": "#/$defs/Scores"
+        }
+      },
+      "required": [
+        "round_number",
+        "summaries",
+        "scores"
+      ],
+      "title": "RoundHistory",
+      "type": "object"
+    },
+    "Scores": {
+      "additionalProperties": false,
+      "properties": {
+        "player_red": {
+          "minimum": 0,
+          "title": "Player Red",
+          "type": "integer"
+        },
+        "player_blue": {
+          "minimum": 0,
+          "title": "Player Blue",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "player_red",
+        "player_blue"
+      ],
+      "title": "Scores",
+      "type": "object"
+    },
+    "Summary": {
+      "additionalProperties": false,
+      "properties": {
+        "pair": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Pair",
+          "type": "array"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pair",
+        "text"
+      ],
+      "title": "Summary",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "2",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "rules_version": {
+      "const": "scripted-v1",
+      "title": "Rules Version",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "version": {
+      "minimum": 0,
+      "title": "Version",
+      "type": "integer"
+    },
+    "config": {
+      "$ref": "#/$defs/CreateGame"
+    },
+    "mode": {
+      "const": "scripted",
+      "title": "Mode",
+      "type": "string"
+    },
+    "phase": {
+      "enum": [
+        "lobby",
+        "selecting",
+        "conversing",
+        "round_complete",
+        "finished"
+      ],
+      "title": "Phase",
+      "type": "string"
+    },
+    "round_number": {
+      "minimum": 1,
+      "title": "Round Number",
+      "type": "integer"
+    },
+    "players": {
+      "$ref": "#/$defs/Players"
+    },
+    "agents": {
+      "items": {
+        "$ref": "#/$defs/Character"
+      },
+      "title": "Agents",
+      "type": "array"
+    },
+    "conversations": {
+      "$ref": "#/$defs/Conversations"
+    },
+    "pairings": {
+      "items": {
+        "items": {
+          "type": "string"
+        },
+        "maxItems": 2,
+        "minItems": 2,
+        "type": "array"
+      },
+      "title": "Pairings",
+      "type": "array"
+    },
+    "history": {
+      "items": {
+        "$ref": "#/$defs/RoundHistory"
+      },
+      "title": "History",
+      "type": "array"
+    },
+    "scores": {
+      "$ref": "#/$defs/Scores"
+    },
+    "winner": {
+      "anyOf": [
+        {
+          "enum": [
+            "player_red",
+            "player_blue"
+          ],
+          "type": "string"
+        },
+        {
+          "const": "tie",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Winner"
+    },
+    "you": {
+      "anyOf": [
+        {
+          "enum": [
+            "player_red",
+            "player_blue"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "You"
+    }
+  },
+  "required": [
+    "schema_version",
+    "rules_version",
+    "id",
+    "version",
+    "config",
+    "mode",
+    "phase",
+    "round_number",
+    "players",
+    "agents",
+    "conversations",
+    "pairings",
+    "history",
+    "scores",
+    "winner",
+    "you"
+  ],
+  "title": "GameView",
+  "type": "object"
+}

@@ -1,0 +1,236 @@
+{
+  "$defs": {
+    "AttemptReport": {
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "attempt": {
+          "minimum": 1,
+          "title": "Attempt",
+          "type": "integer"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "charged_tokens": {
+          "minimum": 0,
+          "title": "Charged Tokens",
+          "type": "integer"
+        },
+        "charged_cost": {
+          "minimum": 0,
+          "title": "Charged Cost",
+          "type": "integer"
+        },
+        "usage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Usage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "latency_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Latency Ms"
+        }
+      },
+      "required": [
+        "request_id",
+        "attempt",
+        "status",
+        "charged_tokens",
+        "charged_cost",
+        "usage"
+      ],
+      "title": "AttemptReport",
+      "type": "object"
+    },
+    "ProviderIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "model": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Model",
+          "type": "string"
+        },
+        "prompt_version": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Prompt Version",
+          "type": "string"
+        },
+        "max_input_tokens": {
+          "minimum": 0,
+          "title": "Max Input Tokens",
+          "type": "integer"
+        },
+        "max_output_tokens": {
+          "minimum": 0,
+          "title": "Max Output Tokens",
+          "type": "integer"
+        },
+        "max_cost_microusd": {
+          "minimum": 0,
+          "title": "Max Cost Microusd",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "provider",
+        "model",
+        "prompt_version",
+        "max_input_tokens",
+        "max_output_tokens",
+        "max_cost_microusd"
+      ],
+      "title": "ProviderIdentity",
+      "type": "object"
+    },
+    "RuntimePolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "timeout_seconds": {
+          "default": 10.0,
+          "exclusiveMinimum": 0,
+          "maximum": 120,
+          "title": "Timeout Seconds",
+          "type": "number"
+        },
+        "concurrency": {
+          "default": 4,
+          "maximum": 32,
+          "minimum": 1,
+          "title": "Concurrency",
+          "type": "integer"
+        },
+        "max_queued": {
+          "default": 64,
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Max Queued",
+          "type": "integer"
+        },
+        "max_attempts": {
+          "default": 2,
+          "maximum": 3,
+          "minimum": 1,
+          "title": "Max Attempts",
+          "type": "integer"
+        },
+        "call_limit": {
+          "default": 200,
+          "minimum": 0,
+          "title": "Call Limit",
+          "type": "integer"
+        },
+        "token_limit": {
+          "default": 200000,
+          "minimum": 0,
+          "title": "Token Limit",
+          "type": "integer"
+        },
+        "cost_limit_microusd": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Cost Limit Microusd",
+          "type": "integer"
+        }
+      },
+      "title": "RuntimePolicy",
+      "type": "object"
+    },
+    "Usage": {
+      "additionalProperties": false,
+      "properties": {
+        "input_tokens": {
+          "minimum": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "minimum": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "cost_microusd": {
+          "minimum": 0,
+          "title": "Cost Microusd",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "input_tokens",
+        "output_tokens",
+        "cost_microusd"
+      ],
+      "title": "Usage",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "identity": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ProviderIdentity"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "policy": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RuntimePolicy"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "attempts": {
+      "items": {
+        "$ref": "#/$defs/AttemptReport"
+      },
+      "title": "Attempts",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "identity",
+    "policy",
+    "attempts"
+  ],
+  "title": "RuntimeReport",
+  "type": "object"
+}

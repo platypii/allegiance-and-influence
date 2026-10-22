@@ -4,9 +4,15 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import type { Character } from "./characters"
 
 export type Seat = "player_red" | "player_blue"
-export interface Chat { target: string | null; messages: { name: string; content: string }[]; done: boolean }
+export interface Chat {
+  target: string | null
+  messages: { name: string; content: string }[]
+  done: boolean
+  join_opponent: boolean
+  work: { request_id: string; status: "pending" | "succeeded" | "failed" | "cancelled" | "interrupted"; error: string | null } | null
+}
 export interface Game {
-  schema_version: "1"
+  schema_version: "2"
   rules_version: string
   mode: "scripted"
   id: string
@@ -23,7 +29,7 @@ export interface Game {
   winner: Seat | "tie" | null
   you: Seat | null
 }
-export type Action = { kind: "select"; target: string } | { kind: "message"; text: string } | { kind: "done" } | { kind: "advance" }
+export type Action = { kind: "select"; target: string } | { kind: "message"; text: string } | { kind: "done" } | { kind: "advance" } | { kind: "retry" } | { kind: "cancel" }
 
 function randomId() {
   return Array.from(crypto.getRandomValues(new Uint8Array(24)), byte => byte.toString(16).padStart(2, "0")).join("")

@@ -1,0 +1,158 @@
+{
+  "$defs": {
+    "Character": {
+      "additionalProperties": false,
+      "properties": {
+        "UID": {
+          "title": "Uid",
+          "type": "string"
+        },
+        "Character": {
+          "title": "Character",
+          "type": "string"
+        },
+        "Description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "Charisma": {
+          "title": "Charisma",
+          "type": "integer"
+        },
+        "Intellect": {
+          "title": "Intellect",
+          "type": "integer"
+        },
+        "Stubbornness": {
+          "title": "Stubbornness",
+          "type": "integer"
+        },
+        "Empathy": {
+          "title": "Empathy",
+          "type": "integer"
+        },
+        "Influence Range": {
+          "title": "Influence Range",
+          "type": "integer"
+        },
+        "Loyalty": {
+          "title": "Loyalty",
+          "type": "integer"
+        },
+        "Curiosity": {
+          "title": "Curiosity",
+          "type": "integer"
+        },
+        "Consistency": {
+          "title": "Consistency",
+          "type": "integer"
+        },
+        "side": {
+          "enum": [
+            -1,
+            0,
+            1
+          ],
+          "title": "Side",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "UID",
+        "Character",
+        "Description",
+        "Charisma",
+        "Intellect",
+        "Stubbornness",
+        "Empathy",
+        "Influence Range",
+        "Loyalty",
+        "Curiosity",
+        "Consistency",
+        "side"
+      ],
+      "title": "Character",
+      "type": "object"
+    },
+    "ChatMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "content": {
+          "title": "Content",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "content"
+      ],
+      "title": "ChatMessage",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1",
+      "default": "1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "request_id": {
+      "title": "Request Id",
+      "type": "string"
+    },
+    "game_id": {
+      "title": "Game Id",
+      "type": "string"
+    },
+    "round_number": {
+      "minimum": 1,
+      "title": "Round Number",
+      "type": "integer"
+    },
+    "character": {
+      "$ref": "#/$defs/Character"
+    },
+    "opponent": {
+      "enum": [
+        "player_red",
+        "player_blue"
+      ],
+      "title": "Opponent",
+      "type": "string"
+    },
+    "opponent_side": {
+      "enum": [
+        -1,
+        1
+      ],
+      "title": "Opponent Side",
+      "type": "integer"
+    },
+    "messages": {
+      "items": {
+        "$ref": "#/$defs/ChatMessage"
+      },
+      "maxItems": 11,
+      "minItems": 1,
+      "title": "Messages",
+      "type": "array"
+    }
+  },
+  "required": [
+    "request_id",
+    "game_id",
+    "round_number",
+    "character",
+    "opponent",
+    "opponent_side",
+    "messages"
+  ],
+  "title": "AgentRequest",
+  "type": "object"
+}

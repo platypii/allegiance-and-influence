@@ -7,8 +7,11 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 
-from .core import GameError, new_game, transition
+from .agent_contracts import RuntimePolicy
+from .core import GameError, new_game, transition, upgrade_state
+from .jobs import Jobs
 from .models import GameState
+from .providers import ScriptedProvider
 
 
 def encode(value: dict) -> str:
@@ -19,9 +22,11 @@ def digest(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
 
-class Store:
-    def __init__(self, path: Path, characters: list[dict]):
+class Store(Jobs):
+    def __init__(self, path: Path, characters: list[dict], identity=None, policy=None):
         self.path, self.characters = path, characters
+        self.identity = identity or ScriptedProvider.identity
+        self.policy = policy or RuntimePolicy()
         path.parent.mkdir(parents=True, exist_ok=True)
         with self.connection() as db:
             db.execute("PRAGMA journal_mode=WAL")
@@ -35,6 +40,8 @@ class Store:
                     command TEXT, state TEXT,
                     PRIMARY KEY(game_id, version), UNIQUE(game_id, command_id));
             """)
+
+            self.init_jobs(db)
 
     @contextmanager
     def connection(self):
@@ -50,7 +57,7 @@ class Store:
         row = db.execute("SELECT state FROM games WHERE id=?", (game_id,)).fetchone()
         if row is None:
             raise GameError("not_found", "Game not found. Create a new game.", 404)
-        return json.loads(row["state"])
+        return upgrade_state(json.loads(row["state"]))
 
     def load(self, game_id):
         with self.connection() as db:
@@ -135,6 +142,17 @@ class Store:
             if command["expected_version"] != state["version"]:
                 raise GameError("stale_version", "The game changed. Review the board and try again.")
             state = transition(state, actor, command)
+            if command["kind"] in {"message", "retry"}:
+                self.attach_job(db, state, actor)
+            elif command["kind"] == "cancel":
+                request_id = state["conversations"][actor]["work"]["request_id"]
+                db.execute(
+                    "UPDATE agent_jobs SET status='cancelled',error='cancelled' WHERE id=?", (request_id,)
+                )
+                db.execute(
+                    "UPDATE agent_attempts SET status='cancelled' WHERE request_id=? AND status='running'",
+                    (request_id,),
+                )
             self._save(db, state, actor, command)
         return state, actor
 
@@ -145,4 +163,4 @@ class Store:
             rows = db.execute(
                 "SELECT version, state FROM events WHERE game_id=? ORDER BY version", (game_id,)
             ).fetchall()
-        return [view(json.loads(row["state"]), actor) for row in rows]
+        return [view(upgrade_state(json.loads(row["state"])), actor) for row in rows]

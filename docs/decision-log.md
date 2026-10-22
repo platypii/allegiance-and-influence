@@ -21,3 +21,11 @@ Use Python 3.12 with a root uv lockfile and current pinned Next.js/React package
 ## 2026-10-21 — Operating boundaries
 
 This baseline has one authoritative server process. It supports local/LAN multiplayer, not public account management or distributed deployment. Do not add speculative managed-service adapters. Add capacity/hosting infrastructure when a measured workload and deployment decision require it.
+
+## 2026-10-21 — Provider boundary and durable work
+
+PR #3 was merged after the user's review. Task #4 extracts human-facing character replies into an asynchronous provider protocol. SQLite commits pending requests before execution and binds accepted results to request/round/character identity. Replies and recruitment decisions are validated; the core retains scoring authority. The default scripted provider preserves the demo. Ambient AI pair resolution is still deterministic.
+
+Provider identity and policy are pinned per game; attempts reserve calls/tokens/micro-USD before invocation. Uncertain failures retain their reservation, and reported usage is distinct from budget charge. Cost defaults to zero. Restart interrupts work rather than automatically reissuing potentially billed calls. Cancelled/late work cannot mutate a later conversation.
+
+Game view v2 projects v1 saved states and replay frames without rewriting their recorded history. New clients expose pending/cancel/retry controls; original artwork remains unchanged. Live inference, token streaming, cross-round memory, and paid evaluation are subsequent scoped tasks.

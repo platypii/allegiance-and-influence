@@ -1,0 +1,21 @@
+{
+  "schema_version": "1",
+  "identity": {
+    "provider": "scripted",
+    "model": "scripted-v1",
+    "prompt_version": "scripted-v1",
+    "max_input_tokens": 0,
+    "max_output_tokens": 0,
+    "max_cost_microusd": 0
+  },
+  "policy": {
+    "timeout_seconds": 10.0,
+    "concurrency": 4,
+    "max_queued": 64,
+    "max_attempts": 2,
+    "call_limit": 200,
+    "token_limit": 200000,
+    "cost_limit_microusd": 0
+  },
+  "attempts": []
+}
