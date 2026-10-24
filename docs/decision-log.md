@@ -41,3 +41,9 @@ Paired persuasion experiments reuse the two-seat game, durable runtime, and shar
 Keep named model profiles, character overrides, and experiment budgets in `data/models.json`. Keep credentials in a separate owner-only file or server environment; an explicitly selected key file takes precedence. A setup helper creates files without overwriting, lists the public model catalog, and checks local assignments without inference. No key is collected in conversation or embedded in game reports.
 
 The user wants a web app now and may later ship iPhone/Android clients. Preserve the server-owned HTTP/WebSocket boundary and keep model credentials/budgets there. Defer the mobile wrapper/native choice until gameplay is established, with hosted identity/recovery and reconnect behavior as prerequisites.
+
+## 2026-10-24 — First live candidate configuration and evidence
+
+After the user saved a private key and confirmed its spending cap, selected Haiku, Gemini Flash Lite, and Luna profiles from the public OpenRouter catalog. The local setup assigns Haiku by default/Einstein and Gemini to Churchill, with Luna available as an alternative. A credential-free dated snapshot records exact IDs, parameters, price ceilings, and a $1 per-game ceiling. These are tested starting candidates, not a claim of best models. Keep live experiments separate from the credential-free verifier.
+
+Five paired runs covered assignment swaps, speaking-order reversal, and a third-model smoke check; all 18 replies passed validation. One additional live browser reply succeeded. Total recorded charge was $0.004381. No paired reply accepted recruitment. Preserve that result as evidence and test longer dialogue/concrete incentives next, rather than altering acceptance merely to manufacture successful persuasion. See [live validation](live-validation-2026-10-24.md) for limitations and local report hashes.

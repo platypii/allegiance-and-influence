@@ -29,3 +29,9 @@ Token streaming, cross-round memory, local model downloads, model rankings, a br
 ## Setup follow-up — 2026-10-24
 
 The user requested file-based model options and identified mobile as a possible later client. Added a setup helper for initialization, public catalog browsing, offline assignment/budget inspection, and hidden terminal key entry. Key files remain separate and ignored; launcher/experiment flags support them. Added credential handling and non-overwrite regression checks. Recorded web-first/mobile-later architecture without adding a mobile framework.
+
+## Assess and resolve — live validation, 2026-10-24
+
+The user supplied the private key locally and confirmed its spending cap. Selected three concrete models from the current public catalog and configured a $1 whole-game cap. Five live paired runs produced 18 valid replies; a real two-player browser game produced one further reply. Recorded total: $0.004381. Assignment/order controls succeeded without retries or output repair; all paired recruitment decisions were false. [Dated evidence](../docs/live-validation-2026-10-24.md) records settings, measurements, limitations, and report hashes. This is compatibility evidence, not a model ranking.
+
+The first browser automation attempt selected before a WebSocket update; the server correctly rejected the stale version before inference. Both selection workflows now wait for the other browser to observe the reserved target. The complete offline gate passed afterward: 79 backend tests, 3 browser workflows, schemas/fixtures, lint, build/types, 58 artwork hashes, clean server logs, and whitespace. Gameplay incentives and longer/repeated comparisons remain follow-up work.

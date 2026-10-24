@@ -25,7 +25,7 @@ The complete local `bash scripts/agent-verify.sh` gate passed: **79 backend test
 
 Model-mode and welcome captures were inspected. The scripted pair control completed four turns with four attempts and zero charges. `artifacts/pair-mock-report.json` is explicitly labelled `mock-http`. Other ignored evidence: `artifacts/screenshots/`, `artifacts/browser-tests/`, `artifacts/e2e*-server.log`, and paired run output directories.
 
-**No live OpenRouter request was made.** No `OPENROUTER_API_KEY` was available. Current checks establish protocol, accounting, and lifecycle behavior; model availability, latency, personality quality, and persuasion effectiveness remain unmeasured. Hosted CI evidence belongs to the PR and is separate from the local gate.
+After the user configured a key and confirmed its spending cap, five live paired runs completed **18 valid replies**, followed by **one successful live browser reply**. The recorded total was **$0.004381**. All requested model IDs matched the receipts; no repairs or retries were needed. All paired decisions declined recruitment. This validates compatibility and the end-to-end path, not model superiority or general persuasion quality. See [dated results and limitations](../docs/live-validation-2026-10-24.md). The full offline gate passed again after synchronizing browser selection assertions with WebSocket updates. Hosted CI evidence belongs to [PR #7](https://github.com/platypii/allegiance-and-influence/pull/7) and is separate from these local/live checks.
 
 ## Known limits
 
@@ -38,8 +38,8 @@ Model-mode and welcome captures were inspected. The scripted pair control comple
 
 ## Next work
 
-The local editable `data/models.json` has been initialized with placeholders. Configure the private key using `scripts/model_setup.py key`, then choose concrete model IDs, price ceilings, and a bounded spend policy. Run the paired scenario, swap models between personas, reverse order, and inspect actual transcripts/latency/cost before choosing candidates. The commands are in `docs/model-experiments.md`.
+The local editable `data/models.json` now uses Haiku by default and for Einstein, Gemini Flash Lite for Churchill, and a selectable Luna profile. Credentials remain in a separate ignored file. A credential-free [verified configuration snapshot](../config/models.verified-2026-10-24.json) records the tested IDs/settings and $1 per-game ceiling. The initial assignment/order controls and a Luna smoke check are complete. The commands are in `docs/model-experiments.md`.
 
-Then add repeated comparisons and broader scenarios, integrate model-driven ambient conversations, and move into human playtesting and small gameplay changes. The offline gate remains mandatory throughout.
+Next, test longer conversations and concrete character-relevant incentives with repeated comparisons: the short abstract coalition scenario produced no allegiance changes. Then integrate model-driven ambient conversations and move into human playtesting and small gameplay changes. The offline gate remains mandatory throughout.
 
 Client direction: web app now; possible iPhone/Android clients later should reuse the hosted game API. Credentials and model options stay server-side. Mobile packaging remains undecided until gameplay is established.

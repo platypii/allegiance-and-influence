@@ -64,7 +64,7 @@ Model options live in an editable setup file (`data/models.json`), separate from
 .venv/bin/python scripts/experiment.py --output artifacts/pair-control
 ```
 
-Real model quality/latency needs a separately configured live run. Offline HTTP fixtures are labelled as mocks; they do not establish persuasion quality. The original board's ambient AI interactions remain deterministic for now.
+The [first live validation](docs/live-validation-2026-10-24.md) completed 18 paired replies and one browser reply across three configured models for under $0.01. This establishes compatibility, not a model ranking. Offline HTTP fixtures are labelled as mocks. The original board's ambient AI interactions remain deterministic for now.
 
 ## Headless baseline
 

@@ -1,0 +1,63 @@
+{
+  "schema_version": "1",
+  "default_profile": "haiku",
+  "profiles": {
+    "control": {
+      "kind": "scripted",
+      "model": "scripted-v1",
+      "max_input_tokens": 32768,
+      "max_output_tokens": 512,
+      "max_prompt_usd_per_million": 0.0,
+      "max_completion_usd_per_million": 0.0,
+      "upstream_provider": null,
+      "output_format": "json_schema",
+      "temperature": 0.7
+    },
+    "haiku": {
+      "kind": "openrouter",
+      "model": "anthropic/claude-haiku-5.5",
+      "max_input_tokens": 32768,
+      "max_output_tokens": 2048,
+      "max_prompt_usd_per_million": 0.125,
+      "max_completion_usd_per_million": 0.625,
+      "upstream_provider": null,
+      "output_format": "json_schema",
+      "temperature": null
+    },
+    "gemini_flash": {
+      "kind": "openrouter",
+      "model": "google/gemini-3.1-flash-lite",
+      "max_input_tokens": 32768,
+      "max_output_tokens": 2048,
+      "max_prompt_usd_per_million": 0.3125,
+      "max_completion_usd_per_million": 1.875,
+      "upstream_provider": null,
+      "output_format": "json_schema",
+      "temperature": 0.7
+    },
+    "luna": {
+      "kind": "openrouter",
+      "model": "openai/gpt-6-luna",
+      "max_input_tokens": 32768,
+      "max_output_tokens": 2048,
+      "max_prompt_usd_per_million": 0.125,
+      "max_completion_usd_per_million": 0.625,
+      "upstream_provider": null,
+      "output_format": "json_schema",
+      "temperature": null
+    }
+  },
+  "characters": {
+    "albert_einstein": "haiku",
+    "winston_churchill": "gemini_flash"
+  },
+  "policy": {
+    "timeout_seconds": 90.0,
+    "concurrency": 2,
+    "max_queued": 64,
+    "max_attempts": 1,
+    "call_limit": 40,
+    "token_limit": 1500000,
+    "cost_limit_microusd": 1000000
+  }
+}

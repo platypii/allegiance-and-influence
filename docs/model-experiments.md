@@ -65,7 +65,7 @@ Current schemas: game view v3; agent request/result v2 (accepting legacy v1 payl
 
 The normal verifier clears live configuration/credentials. Adapter tests use HTTP mocks with explicitly labelled receipts; tests exercise mixed-model relay, assignments, shared budgets, conservative failures, timeout/cancellation, malformed and incomplete replies, missing usage, usage overruns, HTTP errors, and privacy. Browser tests include a model-mode fixture server using scripted responses, which verifies interface labels without inference.
 
-Live validation requires a configured OpenRouter key and selected model IDs/spend ceiling. Offline captures prove protocol and lifecycle behavior, not real model availability, personality quality, latency, or persuasion effectiveness.
+The [2026-10-24 live validation](live-validation-2026-10-24.md) completed 18 paired replies across assignment/order controls and a third-model smoke check, plus one real browser reply, for $0.004381 in recorded charges. The [tested configuration](../config/models.verified-2026-10-24.json) contains no credentials; availability and prices can change. All paired replies declined recruitment, so these runs do not establish a winning persuasion model. Offline captures separately prove protocol and lifecycle behavior.
 
 ## Official API basis
 
