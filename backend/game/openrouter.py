@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from .agent_contracts import Decision, ProviderIdentity, ProviderResult, Receipt, Usage
 from .model_config import fingerprint
-from .persona import DECISION_SCHEMA, PROMPT, messages_for
+from .persona import DECISION_SCHEMA, OPPONENT_PROMPT, PROMPT, messages_for
 from .providers import ProviderFailure, RetryableProviderError, ScriptedProvider
 
 ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
@@ -16,7 +16,7 @@ MAX_RESPONSE_BYTES = 262144
 
 
 class OpenRouterProvider:
-    def __init__(self, profile, api_key, transport=None):
+    def __init__(self, profile, api_key, transport=None, *, opponent=False):
         if not api_key or not api_key.strip():
             raise ValueError("Set OPENROUTER_API_KEY in the server environment")
         self.profile = profile.model_copy(deep=True)
@@ -24,8 +24,14 @@ class OpenRouterProvider:
         self.identity = ProviderIdentity(
             provider="openrouter",
             model=profile.model,
-            prompt_version="persona-v1:"
-            + fingerprint({"prompt": PROMPT, "schema": DECISION_SCHEMA, "profile": profile.model_dump()}),
+            prompt_version=("opponent-v1:" if opponent else "persona-v1:")
+            + fingerprint(
+                {
+                    "prompt": OPPONENT_PROMPT if opponent else PROMPT,
+                    "schema": DECISION_SCHEMA,
+                    "profile": profile.model_dump(),
+                }
+            ),
             max_input_tokens=profile.max_input_tokens,
             max_output_tokens=profile.max_output_tokens,
             max_cost_microusd=profile.cost_ceiling(),
@@ -60,7 +66,11 @@ class OpenRouterProvider:
             "usage": {"include": True},
             "response_format": {
                 "type": "json_schema",
-                "json_schema": {"name": "recruitment_decision", "strict": True, "schema": DECISION_SCHEMA},
+                "json_schema": {
+                    "name": "recruitment_decision",
+                    "strict": True,
+                    "schema": DECISION_SCHEMA,
+                },
             },
         }
         if p.temperature is None:
@@ -72,7 +82,10 @@ class OpenRouterProvider:
                 transport=self._transport, timeout=110, trust_env=False, follow_redirects=False
             ) as client:
                 async with client.stream(
-                    "POST", ENDPOINT, json=body, headers={"Authorization": "Bearer " + self._api_key}
+                    "POST",
+                    ENDPOINT,
+                    json=body,
+                    headers={"Authorization": "Bearer " + self._api_key},
                 ) as response:
                     if response.status_code in {429, 502, 503, 504}:
                         raise RetryableProviderError("OpenRouter temporarily unavailable")
@@ -153,6 +166,12 @@ class CharacterRouter:
         self.config = config.model_copy(deep=True)
         self.profiles = {
             name: ScriptedProvider() if p.kind == "scripted" else OpenRouterProvider(p, api_key, transport)
+            for name, p in self.config.profiles.items()
+        }
+        self.opponent_profiles = {
+            name: ScriptedProvider()
+            if p.kind == "scripted"
+            else OpenRouterProvider(p, api_key, transport, opponent=True)
             for name, p in self.config.profiles.items()
         }
         identities = [p.identity for p in self.profiles.values()]

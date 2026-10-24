@@ -12,7 +12,8 @@ from fastapi.staticfiles import StaticFiles
 from .agent_contracts import RuntimePolicy, RuntimeReport
 from .core import GameError, view
 from .model_config import configured_provider
-from .models import Command, CreateGame, GameView, JoinGame
+from .models import Command, CreateGame, GameView, JoinGame, OpponentOptions
+from .opponent import OpponentDriver
 from .runtime import AgentRuntime
 from .store import Store
 
@@ -29,16 +30,25 @@ def create_app(db_path: Path | None = None, static_dir: Path | None = None, prov
     @asynccontextmanager
     async def lifespan(app):
         store.recover_jobs()
+        with store.connection() as db:
+            states = [store._load(db, row[0]) for row in db.execute("SELECT id FROM games")]
+        for state in states:
+            opponent.wake(state)
         yield
+        await opponent.close()
         await runtime.close()
 
-    app = FastAPI(title="Allegiance & Influence", version="0.2.0", lifespan=lifespan)
+    app = FastAPI(title="Allegiance & Influence", version="0.3.0", lifespan=lifespan)
     store = Store(
         db_path or Path(os.environ.get("GAME_DB", ROOT / "data/game.sqlite3")),
         roster,
         identity=provider.identity,
         policy=policy,
         routes=getattr(provider, "routes", None),
+        opponents={
+            name: p.identity.model_dump()
+            for name, p in getattr(provider, "opponent_profiles", {"scripted": provider}).items()
+        },
     )
     app.state.store = store
     # Full snapshots in bounded queues: slow browsers converge to the latest state.
@@ -49,9 +59,12 @@ def create_app(db_path: Path | None = None, static_dir: Path | None = None, prov
             if queue.full():
                 queue.get_nowait()
             queue.put_nowait(state)
+        opponent.wake(state)
 
     runtime = AgentRuntime(store, provider, policy, publish)
     app.state.runtime = runtime
+    opponent = OpponentDriver(store, runtime, publish)
+    app.state.opponent = opponent
 
     def token_from(authorization):
         if not authorization or not authorization.startswith("Bearer "):
@@ -83,7 +96,17 @@ def create_app(db_path: Path | None = None, static_dir: Path | None = None, prov
         return {
             "status": "ok",
             "mode": "scripted" if provider.identity.provider == "scripted" else "model",
-            "schema_version": "3",
+            "schema_version": "4",
+        }
+
+    @app.get("/api/options", response_model=OpponentOptions)
+    async def options():
+        return {
+            "schema_version": "1",
+            "opponents": [
+                {"profile": name, "model": identity["model"], "kind": identity["provider"]}
+                for name, identity in store.opponents.items()
+            ],
         }
 
     @app.post("/api/games", status_code=201, response_model=GameView)
@@ -117,7 +140,7 @@ def create_app(db_path: Path | None = None, static_dir: Path | None = None, prov
     @app.get("/api/games/{game_id}/replay")
     async def replay(game_id: str, authorization: str | None = Header(default=None)):
         actor = store.actor(game_id, token_from(authorization))
-        return {"schema_version": "3", "frames": store.replay(game_id, actor)}
+        return {"schema_version": "4", "frames": store.replay(game_id, actor)}
 
     @app.get("/api/games/{game_id}/runtime", response_model=RuntimeReport)
     async def runtime_report(game_id: str, authorization: str | None = Header(default=None)):

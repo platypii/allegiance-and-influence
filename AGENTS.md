@@ -6,6 +6,8 @@ Read `state/PROJECT_STATE.md`, `docs/modernization-plan.md`, and the relevant co
 
 Use Scope, Plan, Execute, Assess, Resolve for substantive changes. The user authorized autonomous execution of the modernization plan on 2026-10-21; routine implementation inside that scope does not require repeated approval. Record new architectural decisions in `docs/decision-log.md` and progress in `state/PROJECT_STATE.md`. Keep future live-model spending and public hosting separate from this offline baseline.
 
+Track actionable playtest bugs and feature requests as repository issues, with reproduction details or acceptance criteria, before substantive implementation. Link the issue in the task packet and PR; use the project state for continuity.
+
 Work from a `codex/` branch. Use a scoped task, explicit acceptance criteria, and evidence. Local task packets live in `work/` and can be mirrored to GitHub. Do not claim a task complete until its checks pass. Do not modify unrelated user work.
 
 ## Architecture

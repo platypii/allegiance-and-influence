@@ -42,10 +42,10 @@ Each attempt records request identity, status, latency where known, reported usa
 
 ## Contracts and verification
 
-- `schemas/agent-request-v2.schema.json`
+- `schemas/agent-request-v3.schema.json`
 - `schemas/agent-result-v2.schema.json`
 - `schemas/runtime-report-v2.schema.json`
-- `schemas/command-v2.schema.json`, `schemas/game-view-v3.schema.json`
+- `schemas/command-v2.schema.json`, `schemas/game-view-v4.schema.json`
 - Positive/negative contract fixtures under `tests/fixtures/`; validation through `scripts/contracts.py` and the shared verifier.
 
 Runtime tests cover scripted compatibility, observation privacy, malformed/blank decisions, arbitrary errors, transient retry, budget exhaustion, overshoot, cancellation before/during execution, late responses, capacity, shared concurrency, interrupted recovery, provider mismatch, and legacy snapshot/replay reads. Browser tests exercise waiting/cancel/retry through the real local service.
@@ -54,6 +54,14 @@ Runtime tests cover scripted compatibility, observation privacy, malformed/blank
 
 Game view v2 adds `join_opponent` and `work` to conversations. Stored v1 snapshots remain untouched until the next committed transition; on read, the adapter derives the previous scripted decision from historical human-message counts and sets work to null. Replay projects those old frames into v3 without inventing model attempts or changing their event versions. Archived v1 schemas remain in the repository.
 
-Clients must understand game view v3; after updating the server, rebuild and reload the static interface. Provider protocol version remains independent of game-view version. Unknown future formats require an explicit migration, not guessed defaults.
+Clients must understand game view v4; after updating the server, rebuild and reload the static interface. Provider protocol version remains independent of game-view version. Unknown future formats require an explicit migration, not guessed defaults.
 
 Current agent request/result v2 adds optional opponent character and provider receipt fields while accepting legacy v1 payloads. Runtime report v2 includes each attempt’s selected identity and receipt; existing rows have null metadata when none was recorded. Game view v3 exposes model mode. New routing tables/columns are additive migrations.
+
+## Solo opponent requests (request v3 / game view v4)
+
+Request v3 adds `purpose`: `character_reply` (default for legacy requests) or `opponent_argument`. Opponent arguments use the selected profile and a separately fingerprinted recruiter prompt. Their observation contains the Blue recruiter persona, target's public persona, and Blue's conversation only. Human dialogue, credentials, and other games never enter this observation. The same strict two-field decision shape is used, but the opponent's `join_opponent` is ignored: its dialogue becomes an ordinary Blue message, and a separate character job evaluates recruitment.
+
+An argument job and its pending opponent state commit together. A successful argument, the resulting Blue message, and the next character job also commit atomically. Request/round/target/pending guards reject stale arguments. One bounded driver per game schedules at most two arguments and two target replies per round, subject to the shared runtime concurrency, timeout, identity, and whole-game budget. No new model fallback or automatic experiment rerun is added.
+
+The public solo state exposes the chosen model and safe status/error codes, not Blue's dialogue. Its arguments and target replies are both charged to Blue in the existing seat-filtered runtime report; complete accounting remains available to the operator. A terminal argument or character error ends Blue's conversation visibly so the human can finish. Startup marks pending jobs interrupted, then ends affected Blue turns without repeating those requests; completed results remain durable. The human still controls advancing rounds. No cross-round model memory is added.

@@ -202,9 +202,23 @@ class Jobs:
                 return None
             state = self._load(db, row["game_id"])
             request = json.loads(row["request"])
-            updated = complete_work(
-                state, row["actor"], request, status, result["decision"] if result else None, error
-            )
+            if request.get("purpose") == "opponent_argument":
+                from .opponent import complete_argument
+
+                updated = complete_argument(
+                    state, request, status, result["decision"] if result else None, error
+                )
+                if updated and result:
+                    self.attach_job(db, updated, "player_blue")
+            else:
+                updated = complete_work(
+                    state,
+                    row["actor"],
+                    request,
+                    status,
+                    result["decision"] if result else None,
+                    error,
+                )
             db.execute(
                 "UPDATE agent_jobs SET status=?, error=? WHERE id=?",
                 (

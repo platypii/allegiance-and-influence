@@ -52,3 +52,5 @@
 .setup button:disabled { opacity: .5; }
 .setup a { display: inline-block; text-decoration: underline; margin-top: 12px; }
 .setup .choose { justify-content: center; margin-top: 16px; }
+
+.setup select { max-width: min(340px, 65vw); padding: 8px; color: #241c14; background: #fff; }

@@ -1,16 +1,16 @@
-# Game protocol v3
+# Game protocol v4
 
 Purpose: give browsers and headless experiments the same authoritative game lifecycle, with saved state and replay. The initial rules version is `scripted-v1`; it is a deterministic infrastructure baseline, not an approximation of a modern LLM's persuasion judgment.
 
 ## State and authority
 
-The server owns each game. A game has an unguessable ID, monotonically increasing version, configuration, participants, phase, one-based round number, characters, conversations, pairings, round history, scores, and winner. New state carries `schema_version: "3"`. Scripted games use `rules_version: "scripted-v1"` and `mode: "scripted"`; configured character models use `rules_version: "persuasion-v1"` and `mode: "model"`. Rules still own recruitment and scoring.
+The server owns each game. A game has an unguessable ID, monotonically increasing version, configuration, participants, phase, one-based round number, characters, conversations, pairings, round history, scores, and winner. New state carries `schema_version: "4"`. Scripted games use `rules_version: "scripted-v1"` and `mode: "scripted"`; configured character models use `rules_version: "persuasion-v1"` and `mode: "model"`. Rules still own recruitment and scoring.
 
-Lifecycle: `lobby → selecting → conversing → round_complete → selecting … → finished`. The last round moves directly from conversing to finished. Both seats must be claimed before selecting; both distinct targets must be selected before conversing. The first accepted selection owns a target for that round. Either player may advance a completed round; duplicates/stale versions cannot advance it twice.
+Lifecycle: `lobby → selecting → conversing → round_complete → selecting … → finished`. The last round moves directly from conversing to finished. Both seats must be occupied before selecting; solo creation reserves Blue for the configured opponent and only Red must join; both distinct targets must be selected before conversing. The first accepted selection owns a target for that round. Either player may advance a completed round; duplicates/stale versions cannot advance it twice.
 
 Clients send `select`, `message`, `done`, `advance`, `retry`, or `cancel`. Each command carries a unique `command_id` and `expected_version`; the authenticated seat is inferred from its player key. Extra fields are rejected. A duplicate ID with the same actor and exact payload returns the current state without applying twice. Reusing an ID for a different payload or actor fails. A new stale-version command fails with `stale_version`; the client refreshes and asks the user to retry. A transport failure may retry the exact command once with the same ID.
 
-The command and view schemas live in `schemas/command-v2.schema.json` and `schemas/game-view-v3.schema.json`. They are generated from runtime validation models. `scripts/contracts.py` checks drift and valid/invalid fixtures. Unknown fields fail, including attempted client-written scores or allegiance.
+The command and view schemas live in `schemas/command-v2.schema.json` and `schemas/game-view-v4.schema.json`. They are generated from runtime validation models. `scripts/contracts.py` checks drift and valid/invalid fixtures. Unknown fields fail, including attempted client-written scores or allegiance.
 
 ## Scripted rules
 
@@ -24,7 +24,8 @@ The command and view schemas live in `schemas/command-v2.schema.json` and `schem
 
 ## HTTP and live updates
 
-- `POST /api/games`: create from agent count, round count, and seed; defaults 6/3/32.
+- `GET /api/options`: credential-free allowlist of configured opponent profile names, model IDs, and provider kinds.
+- `POST /api/games`: create from agent count, round count, seed (defaults 6/3/32), and optional `opponent_profile`. Null means two humans; a configured profile reserves Blue for the model. Unknown profiles fail before any game is created. See `create-game-v2` and `opponent-options-v1` schemas.
 - `GET /api/games/{id}`: snapshot, optionally authenticated.
 - `POST /api/games/{id}/join`: claim `player_red` or `player_blue` using a client-generated bearer key. Retrying the same seat/key is idempotent.
 - `POST /api/games/{id}/commands`: validated authenticated command.
@@ -53,4 +54,12 @@ OpenRouter character models and controlled paired experiments are described in [
 
 ## Historical compatibility
 
-The service reads v1/v2 saves and replay frames through a v3 projection without changing their recorded versions or inventing provider calls. Historical scripted recruitment is derived from the existing messages. Subsequent writes use v3. Historical schemas remain archived; the current game view validates v3. Saved scripted games are not silently switched to model mode.
+The service reads v1/v2/v3 saves and replay frames through a v4 projection without changing their recorded versions or inventing provider calls. Historical scripted recruitment is derived from the existing messages. Subsequent writes use v4. Historical schemas remain archived; the current game view validates v4. Old multiplayer games gain null opponent fields and do not become solo games. Saved scripted games are not silently switched to model mode.
+
+## Solo opponent and invites
+
+Solo play starts with a profile from the server allowlist; the browser auto-joins Red with its own seat key. Blue is reserved and cannot be claimed through the join endpoint. The selected model ID and safe work/error status appear in `opponent`. Character model assignments remain independent of the chosen opponent model. The selected opponent identity is pinned in the game's runtime routing context.
+
+After Red selects, the initial deterministic target policy chooses another character, preferring a character not already Blue, then sorting by UID. The chosen model writes up to two adaptive recruitment arguments per round. Each goes through the ordinary character-response pipeline; only the character's validated recruitment decision affects scoring. Blue finishes early on acceptance or ends with a visible error on terminal failure. The human finishes their own conversation and advances rounds. Ambient pairs retain the existing scripted rules. This is model-generated persuasion with a fixed target policy, not model-selected board strategy.
+
+Invites use the server-provided game ID in `/?game=<id>` on the current origin. They contain no player key. The lobby exposes the full selectable URL. Clipboard failure (including ordinary HTTP without the clipboard API) shows and selects the URL for manual copying, never claims success. Opening it joins the same session or watches an occupied game; it does not confer an existing seat.

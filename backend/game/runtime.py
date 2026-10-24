@@ -22,8 +22,8 @@ class AgentRuntime:
         self.provider_tasks = set()
         self.slots = asyncio.Semaphore(self.policy.concurrency)
 
-    def schedule(self, state, actor):
-        work = state["conversations"][actor]["work"]
+    def schedule(self, state, actor, *, opponent=False):
+        work = state["opponent"]["work"] if opponent else state["conversations"][actor]["work"]
         if not work or work["status"] != "pending" or work["request_id"] in self.tasks:
             return
         request_id = work["request_id"]
@@ -64,6 +64,12 @@ class AgentRuntime:
             if hasattr(self.provider, "for_character")
             else self.provider
         )
+        if request.purpose == "opponent_argument":
+            profile = self.store.load(request.game_id)["config"]["opponent_profile"]
+            provider = getattr(self.provider, "opponent_profiles", {"scripted": self.provider}).get(profile)
+            if provider is None:
+                self._finish(request_id, "failed", "provider_changed")
+                return
         route = json.loads(job["route"] or job["identity"])
         if route != provider.identity.model_dump():
             self._finish(request_id, "failed", "provider_changed")

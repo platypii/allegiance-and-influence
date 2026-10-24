@@ -1,0 +1,6 @@
+{
+  "num_agents": 6,
+  "num_rounds": 2,
+  "seed": 32,
+  "opponent_profile": "haiku"
+}

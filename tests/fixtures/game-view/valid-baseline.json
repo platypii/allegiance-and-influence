@@ -1,12 +1,13 @@
 {
-  "schema_version": "3",
+  "schema_version": "4",
   "rules_version": "scripted-v1",
   "id": "fixture-game",
   "version": 0,
   "config": {
     "num_agents": 2,
     "num_rounds": 3,
-    "seed": 32
+    "seed": 32,
+    "opponent_profile": null
   },
   "mode": "scripted",
   "phase": "lobby",
@@ -68,5 +69,6 @@
     "player_blue": 0
   },
   "winner": null,
-  "you": null
+  "you": null,
+  "opponent": null
 }

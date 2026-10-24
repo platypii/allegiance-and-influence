@@ -30,7 +30,8 @@ def conversations() -> dict:
 def new_game(game_id: str, config: dict, characters: list[dict]) -> dict:
     selected = random.Random(config["seed"]).sample(characters, config["num_agents"])
     return {
-        "schema_version": "3",
+        "schema_version": "4",
+        "opponent": None,
         "rules_version": RULES_VERSION,
         "id": game_id,
         "version": 0,
@@ -95,6 +96,8 @@ def transition(previous: dict, actor: str, command: dict) -> dict:
     state = deepcopy(previous)
     require(actor in SEATS, "invalid_seat", "Choose a valid player seat.")
     kind = command["kind"]
+    if kind == "join" and actor == "player_blue":
+        require(not state.get("opponent"), "seat_reserved", "Blue belongs to the model opponent.")
     if kind == "join":
         require(state["phase"] == "lobby", "game_started", "The game has already started.")
         require(not state["players"][actor], "seat_taken", "That player seat is occupied.")
@@ -105,7 +108,11 @@ def transition(previous: dict, actor: str, command: dict) -> dict:
         require(state["players"][actor], "not_joined", "Join a player seat first.")
         chat = state["conversations"][actor]
         if kind == "select":
-            require(state["phase"] == "selecting", "wrong_phase", "It is not time to choose a character.")
+            require(
+                state["phase"] == "selecting",
+                "wrong_phase",
+                "It is not time to choose a character.",
+            )
             require(chat["target"] is None, "already_selected", "You already chose this round.")
             target = command["target"]
             agent = next((a for a in state["agents"] if a["UID"] == target), None)
@@ -131,7 +138,9 @@ def transition(previous: dict, actor: str, command: dict) -> dict:
                 state["phase"] = "conversing"
         elif kind in {"message", "done", "retry", "cancel"}:
             require(
-                state["phase"] == "conversing", "wrong_phase", "Wait until both players choose a character."
+                state["phase"] == "conversing",
+                "wrong_phase",
+                "Wait until both players choose a character.",
             )
             require(not chat["done"], "conversation_done", "Your conversation has ended.")
             pending = chat["work"] and chat["work"]["status"] == "pending"
@@ -151,7 +160,11 @@ def transition(previous: dict, actor: str, command: dict) -> dict:
                 text = command["text"].strip()
                 require(bool(text), "empty_message", "Write a message first.")
                 count = sum(m["name"] == actor for m in chat["messages"])
-                require(count < 5, "message_limit", "Five messages is the limit. Finish your conversation.")
+                require(
+                    count < 5,
+                    "message_limit",
+                    "Five messages is the limit. Finish your conversation.",
+                )
                 chat["messages"].append({"name": actor, "content": text})
                 chat["work"] = pending_work(state, actor, command)
             else:
@@ -160,7 +173,14 @@ def transition(previous: dict, actor: str, command: dict) -> dict:
                 if all(c["done"] for c in state["conversations"].values()):
                     resolve_round(state)
         elif kind == "advance":
-            require(state["phase"] == "round_complete", "wrong_phase", "This round is not ready to advance.")
+            require(
+                state["phase"] == "round_complete",
+                "wrong_phase",
+                "This round is not ready to advance.",
+            )
+            if state.get("opponent"):
+                state["opponent"]["work"] = None
+                state["opponent"]["error"] = None
             state["round_number"] += 1
             state["conversations"] = conversations()
             state["pairings"] = []
@@ -198,6 +218,10 @@ def upgrade_state(original: dict) -> dict:
             chat["work"] = None
     if state["schema_version"] == "2":
         state["schema_version"] = "3"
+    if state["schema_version"] == "3":
+        state["schema_version"] = "4"
+        state["opponent"] = None
+        state["config"].setdefault("opponent_profile", None)
     return state
 
 

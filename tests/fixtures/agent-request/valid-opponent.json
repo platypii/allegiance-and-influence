@@ -1,0 +1,43 @@
+{
+  "schema_version": "3",
+  "request_id": "fixture-request",
+  "game_id": "fixture-game",
+  "round_number": 1,
+  "character": {
+    "UID": "player_blue",
+    "Character": "Blue recruiter",
+    "Description": "British PM during WWII, famed orator",
+    "Charisma": 9,
+    "Intellect": 8,
+    "Stubbornness": 9,
+    "Empathy": 6,
+    "Influence Range": 9,
+    "Loyalty": 8,
+    "Curiosity": 7,
+    "Consistency": 8,
+    "side": 1
+  },
+  "opponent": "player_red",
+  "opponent_side": 1,
+  "messages": [
+    {
+      "name": "player_red",
+      "content": "Let us work together."
+    }
+  ],
+  "purpose": "opponent_argument",
+  "opponent_character": {
+    "UID": "winston_churchill",
+    "Character": "Winston Churchill",
+    "Description": "British PM during WWII, famed orator",
+    "Charisma": 9,
+    "Intellect": 8,
+    "Stubbornness": 9,
+    "Empathy": 6,
+    "Influence Range": 9,
+    "Loyalty": 8,
+    "Curiosity": 7,
+    "Consistency": 8,
+    "side": 0
+  }
+}

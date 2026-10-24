@@ -10,6 +10,7 @@ class StrictModel(BaseModel):
 
 
 class CreateGame(StrictModel):
+    opponent_profile: str | None = Field(default=None, min_length=1, max_length=120)
     num_agents: int = Field(default=6, ge=2, le=23)
     num_rounds: int = Field(default=3, ge=1, le=20)
     seed: int = Field(default=32, ge=0, le=2147483647)
@@ -114,12 +115,30 @@ class RoundHistory(StrictModel):
     scores: Scores
 
 
+class Opponent(StrictModel):
+    model: str
+    work: AgentWork | None = None
+    error: str | None = None
+
+
+class OpponentChoice(StrictModel):
+    profile: str
+    model: str
+    kind: str
+
+
+class OpponentOptions(StrictModel):
+    schema_version: Literal["1"] = "1"
+    opponents: list[OpponentChoice]
+
+
 class GameState(StrictModel):
-    schema_version: Literal["3"]
+    schema_version: Literal["4"]
     rules_version: Literal["scripted-v1", "persuasion-v1"]
     id: str
     version: int = Field(ge=0)
     config: CreateGame
+    opponent: Opponent | None = None
     mode: Literal["scripted", "model"]
     phase: Literal["lobby", "selecting", "conversing", "round_complete", "finished"]
     round_number: int = Field(ge=1)

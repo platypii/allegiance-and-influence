@@ -1,5 +1,5 @@
 {
-  "schema_version": "1",
+  "schema_version": "2",
   "evidence": "scripted",
   "status": "completed",
   "scenario": {
@@ -221,14 +221,15 @@
     }
   },
   "final": {
-    "schema_version": "3",
+    "schema_version": "4",
     "rules_version": "scripted-v1",
     "id": "9f37afd0256d19269a7ff5fb3b6c66c9",
     "version": 14,
     "config": {
       "num_agents": 2,
       "num_rounds": 1,
-      "seed": 32
+      "seed": 32,
+      "opponent_profile": null
     },
     "mode": "scripted",
     "phase": "finished",
@@ -323,18 +324,20 @@
       "player_blue": 1
     },
     "winner": "tie",
-    "you": null
+    "you": null,
+    "opponent": null
   },
   "replay": [
     {
-      "schema_version": "3",
+      "schema_version": "4",
       "rules_version": "scripted-v1",
       "id": "9f37afd0256d19269a7ff5fb3b6c66c9",
       "version": 14,
       "config": {
         "num_agents": 2,
         "num_rounds": 1,
-        "seed": 32
+        "seed": 32,
+        "opponent_profile": null
       },
       "mode": "scripted",
       "phase": "finished",
@@ -429,7 +432,8 @@
         "player_blue": 1
       },
       "winner": "tie",
-      "you": null
+      "you": null,
+      "opponent": null
     }
   ]
 }
