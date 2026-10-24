@@ -3,13 +3,13 @@
 import argparse
 import asyncio
 import json
-import os
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 from game.agent_contracts import RuntimePolicy  # noqa: E402
+from game.credentials import openrouter_key  # noqa: E402
 from game.experiments import PairScenario, run_pair  # noqa: E402
 from game.model_config import ModelConfig  # noqa: E402
 from game.openrouter import CharacterRouter  # noqa: E402
@@ -20,6 +20,9 @@ async def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scenario", type=Path, default=ROOT / "experiments/pair.json")
     parser.add_argument("--config", type=Path, help="Model configuration; omit for scripted control")
+    parser.add_argument(
+        "--key-file", type=Path, help="Server-side OpenRouter key file; never included in reports"
+    )
     parser.add_argument("--live", action="store_true", help="Allow configured OpenRouter inference")
     parser.add_argument("--swap-models", action="store_true", help="Exchange models between the two personas")
     parser.add_argument(
@@ -43,7 +46,7 @@ async def main():
             first = config.characters.get(a, config.default_profile)
             second = config.characters.get(b, config.default_profile)
             config.characters.update({a: second, b: first})
-        provider = CharacterRouter(config, os.environ.get("OPENROUTER_API_KEY"))
+        provider = CharacterRouter(config, openrouter_key(args.key_file) if hosted else None)
         policy, evidence = config.policy, "live-openrouter" if hosted else "scripted"
     elif args.live or args.swap_models:
         parser.error("--live and --swap-models require --config")

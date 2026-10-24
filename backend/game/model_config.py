@@ -66,6 +66,7 @@ class ModelConfig(StrictModel):
 
 
 def configured_provider(roster):
+    from .credentials import openrouter_key
     from .openrouter import CharacterRouter
     from .providers import ScriptedProvider
 
@@ -74,4 +75,5 @@ def configured_provider(roster):
         return ScriptedProvider(float(os.environ.get("GAME_SCRIPTED_DELAY_MS", "0")) / 1000), RuntimePolicy()
     config = ModelConfig.model_validate_json(Path(path).read_text())
     config.validate_roster(roster)
-    return CharacterRouter(config, os.environ.get("OPENROUTER_API_KEY")), config.policy
+    key = openrouter_key() if any(p.kind == "openrouter" for p in config.profiles.values()) else None
+    return CharacterRouter(config, key), config.policy

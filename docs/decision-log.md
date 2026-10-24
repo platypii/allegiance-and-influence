@@ -35,3 +35,9 @@ Game view v2 projects v1 saved states and replay frames without rewriting their 
 The user selected OpenRouter as the hosted gateway so experiments can vary models per character. Personas remain roster data; named model profiles define inference settings and character UID overrides choose the profile. New games pin the configuration, and each job reserves the selected model's allowance. Requested/returned model IDs and upstream receipts remain distinct. Model fallback is disabled; upstream routing can be pinned. Structured-output compatibility is explicit, with a prompt-JSON option that retains local validation.
 
 Paired persuasion experiments reuse the two-seat game, durable runtime, and shared ledger. Each synthetic seat represents the other character's faction; the characters' replies alternate until the fixed turn bound or a failure, then accepted decisions resolve together. Exported transcripts are explicitly experimental evidence, separate from the seat-filtered multiplayer API. Live inference remains opt-in; no credential was available during implementation. Direct OpenAI and Ollama adapters are deferred in favor of the user's hosted gateway choice.
+
+## 2026-10-24 — Operator setup file and future mobile clients
+
+Keep named model profiles, character overrides, and experiment budgets in `data/models.json`. Keep credentials in a separate owner-only file or server environment; an explicitly selected key file takes precedence. A setup helper creates files without overwriting, lists the public model catalog, and checks local assignments without inference. No key is collected in conversation or embedded in game reports.
+
+The user wants a web app now and may later ship iPhone/Android clients. Preserve the server-owned HTTP/WebSocket boundary and keep model credentials/budgets there. Defer the mobile wrapper/native choice until gameplay is established, with hosted identity/recovery and reconnect behavior as prerequisites.

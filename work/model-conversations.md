@@ -25,3 +25,7 @@ Add a controlled pair experiment using the same store, runtime, and round rules.
 ## Non-goals
 
 Token streaming, cross-round memory, local model downloads, model rankings, a broad tournament runner, new gameplay mechanics, public hosting, or replacing ambient AI board interactions. Live quality measurement requires model credentials/configuration and a defined spend cap.
+
+## Setup follow-up — 2026-10-24
+
+The user requested file-based model options and identified mobile as a possible later client. Added a setup helper for initialization, public catalog browsing, offline assignment/budget inspection, and hidden terminal key entry. Key files remain separate and ignored; launcher/experiment flags support them. Added credential handling and non-overwrite regression checks. Recorded web-first/mobile-later architecture without adding a mobile framework.

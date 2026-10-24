@@ -6,7 +6,7 @@ The installed game remains scripted and offline unless `GAME_MODEL_CONFIG` point
 
 ## Configure assignments
 
-Copy `config/models.example.json` to an ignored local location such as `data/models.json`. Replace the placeholder IDs with concrete OpenRouter model IDs. The example assigns Einstein to `model_a`, Churchill to `model_b`, and other characters to the scripted control. Set `default_profile` to a hosted profile to make the rest model-driven.
+Run `.venv/bin/python scripts/model_setup.py init` to create the ignored local setup file `data/models.json`. Existing files are never overwritten. Replace the placeholder IDs with concrete OpenRouter model IDs. The example assigns Einstein to `model_a`, Churchill to `model_b`, and other characters to the scripted control. Set `default_profile` to a hosted profile to make the rest model-driven.
 
 Each profile sets:
 
@@ -23,12 +23,17 @@ The shared `policy.cost_limit_microusd` is the **whole-game** budget for all cha
 Use a positive game budget and appropriate nonzero price caps for paid models. Budget limits are per game, not per account or across repeated runs. OpenRouter account/key spending controls are the external backstop. This adapter rejects BYOK responses because an OpenRouter-only charge would not cover separate upstream billing. Charges exclude credit-purchase fees and taxes.
 
 ```bash
-mkdir -p data
-cp config/models.example.json data/models.json
-# Edit data/models.json: choose models, price ceilings, assignments, and game budget.
-# Configure OPENROUTER_API_KEY securely in the server environment; never put it in JSON or Git.
-GAME_MODEL_CONFIG=data/models.json bash scripts/run-local.sh
+.venv/bin/python scripts/model_setup.py init
+# Browse current options without credentials or inference; filter by model/vendor text.
+.venv/bin/python scripts/model_setup.py catalog --search anthropic --limit 10
+# Edit data/models.json: choose model IDs, named profiles, assignments, and budget.
+.venv/bin/python scripts/model_setup.py check
+# Run this interactively: hidden input, owner-only file, no key in shell history.
+.venv/bin/python scripts/model_setup.py key
+bash scripts/run-local.sh --models data/models.json --key-file data/openrouter.key
 ```
+
+`model_setup.py key` writes `data/openrouter.key` with mode 0600 and refuses to overwrite an existing file. Both local files live under ignored `data/`; keep the key out of model JSON, browser bundles, and chat. `--key-file` (or `OPENROUTER_API_KEY_FILE`) selects this file; an explicitly selected file takes precedence over `OPENROUTER_API_KEY`. Without a file setting, the environment variable remains supported. The catalog command reads OpenRouter's public model catalog, reports prices and supported parameters, and makes no inference requests. `check` validates local assignments and shows budget reservations; it does not claim a model is available or a key is valid.
 
 `.env.example` lists the variable names; the launcher does not automatically source a dotenv file. Model IDs and assignments are server/operator configuration, not browser-controlled input. Create a new game after changing assignments. New games pin routing and policy at creation. Old games keep their identity and fail explicitly if the running configuration no longer matches; returning to the original configuration restores compatibility. Historical scripted saves remain scripted.
 
@@ -43,11 +48,11 @@ The runner represents the pair through the game's two player seats, using the sa
 .venv/bin/python scripts/experiment.py --output artifacts/pair-control
 
 # Explicit live run, using the configured key and bounded game budget.
-.venv/bin/python scripts/experiment.py --config data/models.json --live --output artifacts/pair-live-01
+.venv/bin/python scripts/experiment.py --config data/models.json --key-file data/openrouter.key --live --output artifacts/pair-live-01
 
 # Separate controls for persona/model confounding and order effects.
-.venv/bin/python scripts/experiment.py --config data/models.json --live --swap-models --output artifacts/pair-swapped-01
-.venv/bin/python scripts/experiment.py --config data/models.json --live --reverse-order --output artifacts/pair-reversed-01
+.venv/bin/python scripts/experiment.py --config data/models.json --key-file data/openrouter.key --live --swap-models --output artifacts/pair-swapped-01
+.venv/bin/python scripts/experiment.py --config data/models.json --key-file data/openrouter.key --live --reverse-order --output artifacts/pair-reversed-01
 ```
 
 A run exports `report.json` and a SQLite database. The report includes evidence type (`scripted`, `mock-http`, or `live-openrouter`), exact configuration, per-character identities, prompt/settings fingerprint, scenario and roster hashes, each reply/decision/failure, per-attempt usage/charge/latency, final factions/scores, and public replay frames. The experiment intentionally exports both participants' transcripts; outputs stay under ignored `artifacts/` and contain no player keys. Ordinary game replay and runtime endpoints remain seat-filtered.
@@ -65,3 +70,9 @@ Live validation requires a configured OpenRouter key and selected model IDs/spen
 ## Official API basis
 
 Checked 2026-10-24: [chat completion API](https://openrouter.ai/docs/api/api-reference/chat/create-a-chat-completion), [structured output and compatibility](https://openrouter.ai/docs/guides/features/structured-outputs), [provider routing, fallback, and price caps](https://openrouter.ai/docs/guides/routing/provider-selection), and [reported token usage and cost](https://openrouter.ai/docs/cookbook/administration/usage-accounting).
+
+## Web first, mobile later
+
+The current product is the web app. Keep responsive screens and the server-owned game API as the first delivery target. A later iPhone/Android client can connect to the same hosted HTTP/WebSocket backend; the model setup file remains server configuration, and no shared OpenRouter credential ships in a phone app. SQLite keeps local development self-contained while the API boundary keeps the client independent of storage and inference providers.
+
+Choose a web wrapper versus a dedicated mobile interface after gameplay and usage are measured. Before public/mobile release, add hosted HTTPS, durable player authentication and seat recovery, reconnect behavior across app suspension, and deployment operations. Store-distribution choices, purchases, and platform-specific requirements need a separate current review when that phase begins. No mobile packaging framework is being introduced in this increment.

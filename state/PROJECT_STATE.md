@@ -16,11 +16,12 @@ Updated 2026-10-24. User authorized modernization, approved prior merges, and se
 - Bounded asynchronous HTTP, strict local decisions, native structured output or explicit prompt-JSON mode, no model fallback, optional upstream pin, recorded generation/model/provider receipts, actual usage/cost, and conservative error accounting.
 - Paired character experiment relays replies through the existing store/runtime/round rules and one shared budget. Supports swapping model assignments and reversing turn order; exports transcripts, decisions, configuration/hashes, attempt usage/latency, final state, and replay. Failed turns are labelled, never presented as successful persuasion evidence.
 - Game view v3, agent request/result v2, runtime report v2, and configuration/scenario/report v1 schemas with fixtures/validation. Old game snapshots and attempt tables migrate without inventing metadata or converting scripted saves to model mode.
+- Setup helper creates the editable model file, reads the public model catalog, checks assignments/budgets, and accepts hidden terminal key entry into an owner-only file. Explicit key-file options are supported by the launcher and experiment runner; existing files are never overwritten.
 - Browser text distinguishes model mode from the scripted two-message demo. All 58 artwork files remain unchanged.
 
 ## Verification evidence
 
-The complete local `bash scripts/agent-verify.sh` gate passed: **72 backend tests**, **3 browser workflows**, schema/fixture validation, Python lint, frontend build/typechecking, original artwork hashes, clean server logs, and patch whitespace. New tests exercise real adapter serialization/parsing through mock HTTP, two different models exchanging four replies, shared selected-model budgets, pinned routing, malformed/incomplete responses, usage/identity validation, and timeout cancellation. Browser model mode uses a scripted fixture transport, not live inference.
+The complete local `bash scripts/agent-verify.sh` gate passed: **79 backend tests**, **3 browser workflows**, schema/fixture validation, Python lint, frontend build/typechecking, original artwork hashes, clean server logs, and patch whitespace. New tests exercise real adapter serialization/parsing through mock HTTP, two different models exchanging four replies, shared selected-model budgets, pinned routing, malformed/incomplete responses, usage/identity validation, and timeout cancellation. Browser model mode uses a scripted fixture transport, not live inference.
 
 Model-mode and welcome captures were inspected. The scripted pair control completed four turns with four attempts and zero charges. `artifacts/pair-mock-report.json` is explicitly labelled `mock-http`. Other ignored evidence: `artifacts/screenshots/`, `artifacts/browser-tests/`, `artifacts/e2e*-server.log`, and paired run output directories.
 
@@ -37,6 +38,8 @@ Model-mode and welcome captures were inspected. The scripted pair control comple
 
 ## Next work
 
-Configure an OpenRouter key, concrete model IDs, price ceilings, and a bounded spend policy. Run the paired scenario, swap models between personas, reverse order, and inspect actual transcripts/latency/cost before choosing candidates. The commands are in `docs/model-experiments.md`.
+The local editable `data/models.json` has been initialized with placeholders. Configure the private key using `scripts/model_setup.py key`, then choose concrete model IDs, price ceilings, and a bounded spend policy. Run the paired scenario, swap models between personas, reverse order, and inspect actual transcripts/latency/cost before choosing candidates. The commands are in `docs/model-experiments.md`.
 
 Then add repeated comparisons and broader scenarios, integrate model-driven ambient conversations, and move into human playtesting and small gameplay changes. The offline gate remains mandatory throughout.
+
+Client direction: web app now; possible iPhone/Android clients later should reuse the hosted game API. Credentials and model options stay server-side. Mobile packaging remains undecided until gameplay is established.

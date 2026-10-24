@@ -3,7 +3,7 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 export NEXT_TELEMETRY_DISABLED=1
-unset GAME_MODEL_CONFIG OPENROUTER_API_KEY
+unset GAME_MODEL_CONFIG OPENROUTER_API_KEY OPENROUTER_API_KEY_FILE
 failed=()
 run_check() {
   local check_name=$1

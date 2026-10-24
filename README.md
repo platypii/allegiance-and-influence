@@ -57,7 +57,7 @@ For a visible demonstration of pending replies, start with `GAME_SCRIPTED_DELAY_
 
 Hosted inference is optional and uses OpenRouter. Configure a default model profile and per-character overrides; different characters can use different models in the same game. Assignments and budgets are pinned per game. The browser and default verification stay independent of API credentials.
 
-See [configuration and experiment instructions](docs/model-experiments.md). The paired runner relays two characters’ replies, records recruitment decisions and cost/latency, and supports swapping models between personas and reversing the conversation order.
+Model options live in an editable setup file (`data/models.json`), separate from the private API key. Run `.venv/bin/python scripts/model_setup.py init`, edit the profiles/assignments, and use `model_setup.py key` in a terminal to save a key without displaying it. See [configuration and experiment instructions](docs/model-experiments.md). The paired runner relays two characters’ replies, records recruitment decisions and cost/latency, and supports swapping models between personas and reversing the conversation order.
 
 ```bash
 # Offline paired control, with transcripts and accounting in a new output directory.

@@ -92,6 +92,10 @@ Technical basis: [SQLite deployment guidance](https://sqlite.org/whentouse.html)
 5. Add live providers behind the same interface, then automated participants and larger experiments.
 6. Remove superseded code only after its behavior has a replacement and relevant evidence.
 
+## Client direction: web first, mobile later
+
+The user identified iPhone/Android as a possible later product on 2026-10-24; the current target remains the web app. Retain a responsive web client and a server-owned HTTP/WebSocket game protocol. Model profiles, budgets, and OpenRouter credentials belong on that server. Future mobile clients should reuse this boundary without carrying shared provider keys. Defer mobile packaging/framework selection until gameplay is established; hosted authentication, seat recovery, HTTPS, and reconnect behavior across app suspension precede public/mobile release.
+
 ## Model and experiment design
 
 Choose model candidates from current official provider documentation when implementation begins. Benchmark the actual game tasks: character consistency, persuasion response, decision validity, memory, latency, and cost. Do not hard-code a claimed best model into the architecture.

@@ -4,7 +4,7 @@ cd "$(dirname "$0")/.."
 test_dir=$(mktemp -d)
 trap 'rm -rf "$test_dir"' EXIT
 mkdir -p artifacts
-unset GAME_MODEL_CONFIG OPENROUTER_API_KEY
+unset GAME_MODEL_CONFIG OPENROUTER_API_KEY OPENROUTER_API_KEY_FILE
 test_port=8765
 test_log=artifacts/e2e-server.log
 if [[ "${GAME_TEST_MODE:-scripted}" == model ]]; then
