@@ -1,0 +1,1134 @@
+{
+  "$defs": {
+    "AgentWork": {
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "succeeded",
+            "failed",
+            "cancelled",
+            "interrupted"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error"
+        }
+      },
+      "required": [
+        "request_id",
+        "status",
+        "error"
+      ],
+      "title": "AgentWork",
+      "type": "object"
+    },
+    "AttemptReport": {
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "identity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProviderIdentity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "receipt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Receipt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "attempt": {
+          "minimum": 1,
+          "title": "Attempt",
+          "type": "integer"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "charged_tokens": {
+          "minimum": 0,
+          "title": "Charged Tokens",
+          "type": "integer"
+        },
+        "charged_cost": {
+          "minimum": 0,
+          "title": "Charged Cost",
+          "type": "integer"
+        },
+        "usage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Usage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "latency_ms": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Latency Ms"
+        }
+      },
+      "required": [
+        "request_id",
+        "attempt",
+        "status",
+        "charged_tokens",
+        "charged_cost",
+        "usage"
+      ],
+      "title": "AttemptReport",
+      "type": "object"
+    },
+    "Character": {
+      "additionalProperties": false,
+      "properties": {
+        "UID": {
+          "title": "Uid",
+          "type": "string"
+        },
+        "Character": {
+          "title": "Character",
+          "type": "string"
+        },
+        "Description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "Charisma": {
+          "title": "Charisma",
+          "type": "integer"
+        },
+        "Intellect": {
+          "title": "Intellect",
+          "type": "integer"
+        },
+        "Stubbornness": {
+          "title": "Stubbornness",
+          "type": "integer"
+        },
+        "Empathy": {
+          "title": "Empathy",
+          "type": "integer"
+        },
+        "Influence Range": {
+          "title": "Influence Range",
+          "type": "integer"
+        },
+        "Loyalty": {
+          "title": "Loyalty",
+          "type": "integer"
+        },
+        "Curiosity": {
+          "title": "Curiosity",
+          "type": "integer"
+        },
+        "Consistency": {
+          "title": "Consistency",
+          "type": "integer"
+        },
+        "side": {
+          "enum": [
+            -1,
+            0,
+            1
+          ],
+          "title": "Side",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "UID",
+        "Character",
+        "Description",
+        "Charisma",
+        "Intellect",
+        "Stubbornness",
+        "Empathy",
+        "Influence Range",
+        "Loyalty",
+        "Curiosity",
+        "Consistency",
+        "side"
+      ],
+      "title": "Character",
+      "type": "object"
+    },
+    "ChatMessage": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "content": {
+          "title": "Content",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "content"
+      ],
+      "title": "ChatMessage",
+      "type": "object"
+    },
+    "Conversation": {
+      "additionalProperties": false,
+      "properties": {
+        "target": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Target"
+        },
+        "messages": {
+          "items": {
+            "$ref": "#/$defs/ChatMessage"
+          },
+          "title": "Messages",
+          "type": "array"
+        },
+        "done": {
+          "title": "Done",
+          "type": "boolean"
+        },
+        "join_opponent": {
+          "title": "Join Opponent",
+          "type": "boolean"
+        },
+        "work": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AgentWork"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "target",
+        "messages",
+        "done",
+        "join_opponent",
+        "work"
+      ],
+      "title": "Conversation",
+      "type": "object"
+    },
+    "Conversations": {
+      "additionalProperties": false,
+      "properties": {
+        "player_red": {
+          "$ref": "#/$defs/Conversation"
+        },
+        "player_blue": {
+          "$ref": "#/$defs/Conversation"
+        }
+      },
+      "required": [
+        "player_red",
+        "player_blue"
+      ],
+      "title": "Conversations",
+      "type": "object"
+    },
+    "CreateGame": {
+      "additionalProperties": false,
+      "properties": {
+        "num_agents": {
+          "default": 6,
+          "maximum": 23,
+          "minimum": 2,
+          "title": "Num Agents",
+          "type": "integer"
+        },
+        "num_rounds": {
+          "default": 3,
+          "maximum": 20,
+          "minimum": 1,
+          "title": "Num Rounds",
+          "type": "integer"
+        },
+        "seed": {
+          "default": 32,
+          "maximum": 2147483647,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        }
+      },
+      "title": "CreateGame",
+      "type": "object"
+    },
+    "Decision": {
+      "additionalProperties": false,
+      "properties": {
+        "dialogue": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Dialogue",
+          "type": "string"
+        },
+        "join_opponent": {
+          "title": "Join Opponent",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "dialogue",
+        "join_opponent"
+      ],
+      "title": "Decision",
+      "type": "object"
+    },
+    "ExperimentTurn": {
+      "additionalProperties": false,
+      "properties": {
+        "character": {
+          "title": "Character",
+          "type": "string"
+        },
+        "request_id": {
+          "title": "Request Id",
+          "type": "string"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error"
+        },
+        "decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Decision"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "messages": {
+          "items": {
+            "$ref": "#/$defs/ChatMessage"
+          },
+          "title": "Messages",
+          "type": "array"
+        }
+      },
+      "required": [
+        "character",
+        "request_id",
+        "status",
+        "error",
+        "decision",
+        "messages"
+      ],
+      "title": "ExperimentTurn",
+      "type": "object"
+    },
+    "GameView": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "3",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "rules_version": {
+          "enum": [
+            "scripted-v1",
+            "persuasion-v1"
+          ],
+          "title": "Rules Version",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 0,
+          "title": "Version",
+          "type": "integer"
+        },
+        "config": {
+          "$ref": "#/$defs/CreateGame"
+        },
+        "mode": {
+          "enum": [
+            "scripted",
+            "model"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "phase": {
+          "enum": [
+            "lobby",
+            "selecting",
+            "conversing",
+            "round_complete",
+            "finished"
+          ],
+          "title": "Phase",
+          "type": "string"
+        },
+        "round_number": {
+          "minimum": 1,
+          "title": "Round Number",
+          "type": "integer"
+        },
+        "players": {
+          "$ref": "#/$defs/Players"
+        },
+        "agents": {
+          "items": {
+            "$ref": "#/$defs/Character"
+          },
+          "title": "Agents",
+          "type": "array"
+        },
+        "conversations": {
+          "$ref": "#/$defs/Conversations"
+        },
+        "pairings": {
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "title": "Pairings",
+          "type": "array"
+        },
+        "history": {
+          "items": {
+            "$ref": "#/$defs/RoundHistory"
+          },
+          "title": "History",
+          "type": "array"
+        },
+        "scores": {
+          "$ref": "#/$defs/Scores"
+        },
+        "winner": {
+          "anyOf": [
+            {
+              "enum": [
+                "player_red",
+                "player_blue"
+              ],
+              "type": "string"
+            },
+            {
+              "const": "tie",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Winner"
+        },
+        "you": {
+          "anyOf": [
+            {
+              "enum": [
+                "player_red",
+                "player_blue"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "You"
+        }
+      },
+      "required": [
+        "schema_version",
+        "rules_version",
+        "id",
+        "version",
+        "config",
+        "mode",
+        "phase",
+        "round_number",
+        "players",
+        "agents",
+        "conversations",
+        "pairings",
+        "history",
+        "scores",
+        "winner",
+        "you"
+      ],
+      "title": "GameView",
+      "type": "object"
+    },
+    "ModelConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1",
+          "default": "1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "default_profile": {
+          "title": "Default Profile",
+          "type": "string"
+        },
+        "profiles": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ModelProfile"
+          },
+          "maxProperties": 24,
+          "minProperties": 1,
+          "title": "Profiles",
+          "type": "object"
+        },
+        "characters": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "maxProperties": 23,
+          "title": "Characters",
+          "type": "object"
+        },
+        "policy": {
+          "$ref": "#/$defs/RuntimePolicy"
+        }
+      },
+      "required": [
+        "default_profile",
+        "profiles"
+      ],
+      "title": "ModelConfig",
+      "type": "object"
+    },
+    "ModelProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "default": "openrouter",
+          "enum": [
+            "scripted",
+            "openrouter"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "model": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Model",
+          "type": "string"
+        },
+        "max_input_tokens": {
+          "default": 32768,
+          "maximum": 131072,
+          "minimum": 1024,
+          "title": "Max Input Tokens",
+          "type": "integer"
+        },
+        "max_output_tokens": {
+          "default": 512,
+          "maximum": 4096,
+          "minimum": 64,
+          "title": "Max Output Tokens",
+          "type": "integer"
+        },
+        "max_prompt_usd_per_million": {
+          "default": 0.0,
+          "maximum": 1000,
+          "minimum": 0,
+          "title": "Max Prompt Usd Per Million",
+          "type": "number"
+        },
+        "max_completion_usd_per_million": {
+          "default": 0.0,
+          "maximum": 1000,
+          "minimum": 0,
+          "title": "Max Completion Usd Per Million",
+          "type": "number"
+        },
+        "upstream_provider": {
+          "anyOf": [
+            {
+              "maxLength": 120,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Upstream Provider"
+        },
+        "output_format": {
+          "default": "json_schema",
+          "enum": [
+            "json_schema",
+            "prompt_json"
+          ],
+          "title": "Output Format",
+          "type": "string"
+        },
+        "temperature": {
+          "anyOf": [
+            {
+              "maximum": 2,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0.7,
+          "title": "Temperature"
+        }
+      },
+      "required": [
+        "model"
+      ],
+      "title": "ModelProfile",
+      "type": "object"
+    },
+    "PairScenario": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1",
+          "default": "1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "characters": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Characters",
+          "type": "array"
+        },
+        "opening": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Opening",
+          "type": "string"
+        },
+        "exchanges": {
+          "default": 2,
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Exchanges",
+          "type": "integer"
+        },
+        "seed": {
+          "default": 32,
+          "maximum": 2147483647,
+          "minimum": 0,
+          "title": "Seed",
+          "type": "integer"
+        },
+        "first_seat": {
+          "default": "player_red",
+          "enum": [
+            "player_red",
+            "player_blue"
+          ],
+          "title": "First Seat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "characters",
+        "opening"
+      ],
+      "title": "PairScenario",
+      "type": "object"
+    },
+    "Players": {
+      "additionalProperties": false,
+      "properties": {
+        "player_red": {
+          "title": "Player Red",
+          "type": "boolean"
+        },
+        "player_blue": {
+          "title": "Player Blue",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "player_red",
+        "player_blue"
+      ],
+      "title": "Players",
+      "type": "object"
+    },
+    "ProviderIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "model": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Model",
+          "type": "string"
+        },
+        "prompt_version": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Prompt Version",
+          "type": "string"
+        },
+        "max_input_tokens": {
+          "minimum": 0,
+          "title": "Max Input Tokens",
+          "type": "integer"
+        },
+        "max_output_tokens": {
+          "minimum": 0,
+          "title": "Max Output Tokens",
+          "type": "integer"
+        },
+        "max_cost_microusd": {
+          "minimum": 0,
+          "title": "Max Cost Microusd",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "provider",
+        "model",
+        "prompt_version",
+        "max_input_tokens",
+        "max_output_tokens",
+        "max_cost_microusd"
+      ],
+      "title": "ProviderIdentity",
+      "type": "object"
+    },
+    "Receipt": {
+      "additionalProperties": false,
+      "properties": {
+        "requested_model": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Requested Model",
+          "type": "string"
+        },
+        "actual_model": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Actual Model",
+          "type": "string"
+        },
+        "generation_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Generation Id",
+          "type": "string"
+        },
+        "upstream_provider": {
+          "anyOf": [
+            {
+              "maxLength": 120,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Upstream Provider"
+        }
+      },
+      "required": [
+        "requested_model",
+        "actual_model",
+        "generation_id"
+      ],
+      "title": "Receipt",
+      "type": "object"
+    },
+    "RoundHistory": {
+      "additionalProperties": false,
+      "properties": {
+        "round_number": {
+          "minimum": 1,
+          "title": "Round Number",
+          "type": "integer"
+        },
+        "summaries": {
+          "items": {
+            "$ref": "#/$defs/Summary"
+          },
+          "title": "Summaries",
+          "type": "array"
+        },
+        "scores": {
+          "$ref": "#/$defs/Scores"
+        }
+      },
+      "required": [
+        "round_number",
+        "summaries",
+        "scores"
+      ],
+      "title": "RoundHistory",
+      "type": "object"
+    },
+    "RuntimePolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "timeout_seconds": {
+          "default": 10.0,
+          "exclusiveMinimum": 0,
+          "maximum": 120,
+          "title": "Timeout Seconds",
+          "type": "number"
+        },
+        "concurrency": {
+          "default": 4,
+          "maximum": 32,
+          "minimum": 1,
+          "title": "Concurrency",
+          "type": "integer"
+        },
+        "max_queued": {
+          "default": 64,
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Max Queued",
+          "type": "integer"
+        },
+        "max_attempts": {
+          "default": 2,
+          "maximum": 3,
+          "minimum": 1,
+          "title": "Max Attempts",
+          "type": "integer"
+        },
+        "call_limit": {
+          "default": 200,
+          "minimum": 0,
+          "title": "Call Limit",
+          "type": "integer"
+        },
+        "token_limit": {
+          "default": 200000,
+          "minimum": 0,
+          "title": "Token Limit",
+          "type": "integer"
+        },
+        "cost_limit_microusd": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Cost Limit Microusd",
+          "type": "integer"
+        }
+      },
+      "title": "RuntimePolicy",
+      "type": "object"
+    },
+    "RuntimeReport": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "2",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "identity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProviderIdentity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RuntimePolicy"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "attempts": {
+          "items": {
+            "$ref": "#/$defs/AttemptReport"
+          },
+          "title": "Attempts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "identity",
+        "policy",
+        "attempts"
+      ],
+      "title": "RuntimeReport",
+      "type": "object"
+    },
+    "Scores": {
+      "additionalProperties": false,
+      "properties": {
+        "player_red": {
+          "minimum": 0,
+          "title": "Player Red",
+          "type": "integer"
+        },
+        "player_blue": {
+          "minimum": 0,
+          "title": "Player Blue",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "player_red",
+        "player_blue"
+      ],
+      "title": "Scores",
+      "type": "object"
+    },
+    "Summary": {
+      "additionalProperties": false,
+      "properties": {
+        "pair": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "title": "Pair",
+          "type": "array"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pair",
+        "text"
+      ],
+      "title": "Summary",
+      "type": "object"
+    },
+    "Usage": {
+      "additionalProperties": false,
+      "properties": {
+        "input_tokens": {
+          "minimum": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "minimum": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "cost_microusd": {
+          "minimum": 0,
+          "title": "Cost Microusd",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "input_tokens",
+        "output_tokens",
+        "cost_microusd"
+      ],
+      "title": "Usage",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1",
+      "default": "1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "evidence": {
+      "enum": [
+        "scripted",
+        "mock-http",
+        "live-openrouter"
+      ],
+      "title": "Evidence",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "completed",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "scenario": {
+      "$ref": "#/$defs/PairScenario"
+    },
+    "scenario_hash": {
+      "title": "Scenario Hash",
+      "type": "string"
+    },
+    "roster_hash": {
+      "title": "Roster Hash",
+      "type": "string"
+    },
+    "provider": {
+      "$ref": "#/$defs/ProviderIdentity"
+    },
+    "configuration": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ModelConfig"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "assignments": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ProviderIdentity"
+      },
+      "title": "Assignments",
+      "type": "object"
+    },
+    "policy": {
+      "$ref": "#/$defs/RuntimePolicy"
+    },
+    "turns": {
+      "items": {
+        "$ref": "#/$defs/ExperimentTurn"
+      },
+      "title": "Turns",
+      "type": "array"
+    },
+    "accounting": {
+      "additionalProperties": {
+        "$ref": "#/$defs/RuntimeReport"
+      },
+      "title": "Accounting",
+      "type": "object"
+    },
+    "final": {
+      "$ref": "#/$defs/GameView"
+    },
+    "replay": {
+      "items": {
+        "$ref": "#/$defs/GameView"
+      },
+      "title": "Replay",
+      "type": "array"
+    }
+  },
+  "required": [
+    "evidence",
+    "status",
+    "scenario",
+    "scenario_hash",
+    "roster_hash",
+    "provider",
+    "configuration",
+    "assignments",
+    "policy",
+    "turns",
+    "accounting",
+    "final",
+    "replay"
+  ],
+  "title": "PairReport",
+  "type": "object"
+}

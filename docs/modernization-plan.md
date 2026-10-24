@@ -1,6 +1,6 @@
 # Allegiance & Influence modernization plan
 
-Roadmap, 2026-10-21. The user authorized autonomous execution. The local foundation is merged in PR #3. The provider-neutral runtime portion of milestone 4 is implemented on `codex/agent-runtime`; live adapters, streaming, and memory remain subsequent work. See `../state/PROJECT_STATE.md` for current evidence and remaining work. See the scoped [runtime task](../work/agent-runtime.md) and [contract](agent-runtime-contract.md) for this increment.
+Roadmap, 2026-10-21. The user authorized autonomous execution. The local foundation is merged in PR #3. The provider-neutral runtime merged in PR #5. The next increment uses OpenRouter for per-character model assignments and controlled paired persuasion experiments; streaming and cross-round memory remain subsequent work. See `../state/PROJECT_STATE.md` for current evidence and remaining work. See the scoped [runtime task](../work/agent-runtime.md) and [contract](agent-runtime-contract.md) for this increment.
 
 ## Scope
 

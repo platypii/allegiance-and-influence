@@ -1,0 +1,186 @@
+{
+  "$defs": {
+    "ModelProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "default": "openrouter",
+          "enum": [
+            "scripted",
+            "openrouter"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "model": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Model",
+          "type": "string"
+        },
+        "max_input_tokens": {
+          "default": 32768,
+          "maximum": 131072,
+          "minimum": 1024,
+          "title": "Max Input Tokens",
+          "type": "integer"
+        },
+        "max_output_tokens": {
+          "default": 512,
+          "maximum": 4096,
+          "minimum": 64,
+          "title": "Max Output Tokens",
+          "type": "integer"
+        },
+        "max_prompt_usd_per_million": {
+          "default": 0.0,
+          "maximum": 1000,
+          "minimum": 0,
+          "title": "Max Prompt Usd Per Million",
+          "type": "number"
+        },
+        "max_completion_usd_per_million": {
+          "default": 0.0,
+          "maximum": 1000,
+          "minimum": 0,
+          "title": "Max Completion Usd Per Million",
+          "type": "number"
+        },
+        "upstream_provider": {
+          "anyOf": [
+            {
+              "maxLength": 120,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Upstream Provider"
+        },
+        "output_format": {
+          "default": "json_schema",
+          "enum": [
+            "json_schema",
+            "prompt_json"
+          ],
+          "title": "Output Format",
+          "type": "string"
+        },
+        "temperature": {
+          "anyOf": [
+            {
+              "maximum": 2,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0.7,
+          "title": "Temperature"
+        }
+      },
+      "required": [
+        "model"
+      ],
+      "title": "ModelProfile",
+      "type": "object"
+    },
+    "RuntimePolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "timeout_seconds": {
+          "default": 10.0,
+          "exclusiveMinimum": 0,
+          "maximum": 120,
+          "title": "Timeout Seconds",
+          "type": "number"
+        },
+        "concurrency": {
+          "default": 4,
+          "maximum": 32,
+          "minimum": 1,
+          "title": "Concurrency",
+          "type": "integer"
+        },
+        "max_queued": {
+          "default": 64,
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Max Queued",
+          "type": "integer"
+        },
+        "max_attempts": {
+          "default": 2,
+          "maximum": 3,
+          "minimum": 1,
+          "title": "Max Attempts",
+          "type": "integer"
+        },
+        "call_limit": {
+          "default": 200,
+          "minimum": 0,
+          "title": "Call Limit",
+          "type": "integer"
+        },
+        "token_limit": {
+          "default": 200000,
+          "minimum": 0,
+          "title": "Token Limit",
+          "type": "integer"
+        },
+        "cost_limit_microusd": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Cost Limit Microusd",
+          "type": "integer"
+        }
+      },
+      "title": "RuntimePolicy",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1",
+      "default": "1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "default_profile": {
+      "title": "Default Profile",
+      "type": "string"
+    },
+    "profiles": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ModelProfile"
+      },
+      "maxProperties": 24,
+      "minProperties": 1,
+      "title": "Profiles",
+      "type": "object"
+    },
+    "characters": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "maxProperties": 23,
+      "title": "Characters",
+      "type": "object"
+    },
+    "policy": {
+      "$ref": "#/$defs/RuntimePolicy"
+    }
+  },
+  "required": [
+    "default_profile",
+    "profiles"
+  ],
+  "title": "ModelConfig",
+  "type": "object"
+}

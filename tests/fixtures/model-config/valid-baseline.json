@@ -1,0 +1,40 @@
+{
+  "schema_version": "1",
+  "default_profile": "control",
+  "profiles": {
+    "control": {
+      "kind": "scripted",
+      "model": "scripted-v1"
+    },
+    "model_a": {
+      "kind": "openrouter",
+      "model": "vendor/replace-with-model-a",
+      "max_input_tokens": 32768,
+      "max_output_tokens": 512,
+      "max_prompt_usd_per_million": 0.0,
+      "max_completion_usd_per_million": 0.0,
+      "temperature": 0.7
+    },
+    "model_b": {
+      "kind": "openrouter",
+      "model": "vendor/replace-with-model-b",
+      "max_input_tokens": 32768,
+      "max_output_tokens": 512,
+      "max_prompt_usd_per_million": 0.0,
+      "max_completion_usd_per_million": 0.0,
+      "temperature": 0.7
+    }
+  },
+  "characters": {
+    "albert_einstein": "model_a",
+    "winston_churchill": "model_b"
+  },
+  "policy": {
+    "timeout_seconds": 60.0,
+    "concurrency": 2,
+    "max_attempts": 1,
+    "call_limit": 10,
+    "token_limit": 400000,
+    "cost_limit_microusd": 0
+  }
+}

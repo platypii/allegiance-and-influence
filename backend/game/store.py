@@ -23,10 +23,11 @@ def digest(token: str) -> str:
 
 
 class Store(Jobs):
-    def __init__(self, path: Path, characters: list[dict], identity=None, policy=None):
+    def __init__(self, path: Path, characters: list[dict], identity=None, policy=None, routes=None):
         self.path, self.characters = path, characters
         self.identity = identity or ScriptedProvider.identity
         self.policy = policy or RuntimePolicy()
+        self.routes = routes or {"*": self.identity.model_dump()}
         path.parent.mkdir(parents=True, exist_ok=True)
         with self.connection() as db:
             db.execute("PRAGMA journal_mode=WAL")
@@ -91,11 +92,28 @@ class Store(Jobs):
             ),
         )
 
-    def create(self, config):
+    def create(self, config, *, pair=None):
+        # pair is internal experiment setup, never accepted by the public API.
         state = new_game(secrets.token_hex(16), config, self.characters)
+        if self.identity.provider != "scripted":
+            state["mode"], state["rules_version"] = "model", "persuasion-v1"
+        peers = {}
+        if pair:
+            if config["num_agents"] != 2 or config["num_rounds"] != 1 or len(set(pair)) != 2:
+                raise ValueError("Pair experiments require two distinct characters and one round")
+            by_id = {c["UID"]: c for c in self.characters}
+            state["agents"] = [{**by_id[uid], "side": side} for uid, side in zip(pair, [-1, 1])]
+            peers = dict(zip(["player_red", "player_blue"], state["agents"]))
         GameState.model_validate(state)
         with self.connection() as db:
             db.execute("INSERT INTO games VALUES(?,?)", (state["id"], encode(state)))
+            db.execute(
+                "INSERT INTO runtime_games VALUES(?,?,?)",
+                (state["id"], encode(self.identity.model_dump()), encode(self.policy.model_dump())),
+            )
+            db.execute(
+                "INSERT INTO runtime_context VALUES(?,?,?)", (state["id"], encode(self.routes), encode(peers))
+            )
             db.execute(
                 "INSERT INTO events VALUES(?,?,?,?,?,?)",
                 (

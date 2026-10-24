@@ -27,12 +27,13 @@ class RuntimePolicy(StrictModel):
 
 
 class AgentRequest(StrictModel):
-    schema_version: Literal["1"] = "1"
+    schema_version: Literal["1", "2"] = "2"
     request_id: str
     game_id: str
     round_number: int = Field(ge=1)
     character: Character
     opponent: Seat
+    opponent_character: Character | None = None
     opponent_side: Literal[-1, 1]
     messages: list[ChatMessage] = Field(min_length=1, max_length=11)
 
@@ -54,14 +55,24 @@ class Usage(StrictModel):
     cost_microusd: int = Field(ge=0)
 
 
+class Receipt(StrictModel):
+    requested_model: str = Field(min_length=1, max_length=120)
+    actual_model: str = Field(min_length=1, max_length=120)
+    generation_id: str = Field(min_length=1, max_length=200)
+    upstream_provider: str | None = Field(default=None, min_length=1, max_length=120)
+
+
 class ProviderResult(StrictModel):
-    schema_version: Literal["1"] = "1"
+    schema_version: Literal["1", "2"] = "2"
     decision: Decision
     usage: Usage
+    receipt: Receipt | None = None
 
 
 class AttemptReport(StrictModel):
     request_id: str
+    identity: ProviderIdentity | None = None
+    receipt: Receipt | None = None
     attempt: int = Field(ge=1)
     status: str
     charged_tokens: int = Field(ge=0)
@@ -71,7 +82,7 @@ class AttemptReport(StrictModel):
 
 
 class RuntimeReport(StrictModel):
-    schema_version: Literal["1"]
+    schema_version: Literal["2"]
     identity: ProviderIdentity | None
     policy: RuntimePolicy | None
     attempts: list[AttemptReport]

@@ -2,11 +2,11 @@
 
 Recruit historical characters, build a faction, and watch influence spread across the room. The game is being modernized into a local multiplayer game and a repeatable AI experiment test bed while preserving its original artwork.
 
-The current baseline runs **entirely locally with scripted characters**. No Firebase project, API key, Docker, or separate database server is needed. It supports two human players, saved games, reconnects, replay, and a provider-neutral asynchronous agent runtime. Live generative models are a subsequent milestone.
+The current baseline runs **entirely locally with scripted characters**. No Firebase project, API key, Docker, or separate database server is needed. It supports two human players, saved games, reconnects, replay, and a provider-neutral asynchronous agent runtime. Optional hosted conversations use OpenRouter, with separate model assignments per character and a paired persuasion experiment runner.
 
 ## Run locally
 
-Prerequisites: Python 3.12 through [uv](https://docs.astral.sh/uv/) and Node.js 22 or later with npm. Dependency installation needs an internet connection; running the installed game does not.
+Prerequisites: Python 3.12 through [uv](https://docs.astral.sh/uv/) and Node.js 22 or later with npm. Dependency installation needs an internet connection; running the default scripted game does not.
 
 From this repository's root:
 
@@ -52,6 +52,19 @@ npm --prefix frontend run build
 The verifier checks contract fixtures (including deliberate failures), Python rules/API/concurrency/recovery tests, original asset hashes, static build/typechecking, two-player browser workflows, and server errors. Browser tests create an isolated temporary database and write screenshots/traces to `artifacts/`. They do not touch your saved games.
 
 For a visible demonstration of pending replies, start with `GAME_SCRIPTED_DELAY_MS=1000 bash scripts/run-local.sh`. This only slows the offline scripted adapter; it does not enable a live model. If the server restarts during a reply, the game marks it interrupted and lets you retry or finish instead of silently reissuing it.
+
+## Optional character models and persuasion experiments
+
+Hosted inference is optional and uses OpenRouter. Configure a default model profile and per-character overrides; different characters can use different models in the same game. Assignments and budgets are pinned per game. The browser and default verification stay independent of API credentials.
+
+See [configuration and experiment instructions](docs/model-experiments.md). The paired runner relays two characters’ replies, records recruitment decisions and cost/latency, and supports swapping models between personas and reversing the conversation order.
+
+```bash
+# Offline paired control, with transcripts and accounting in a new output directory.
+.venv/bin/python scripts/experiment.py --output artifacts/pair-control
+```
+
+Real model quality/latency needs a separately configured live run. Offline HTTP fixtures are labelled as mocks; they do not establish persuasion quality. The original board's ambient AI interactions remain deterministic for now.
 
 ## Headless baseline
 

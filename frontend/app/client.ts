@@ -12,9 +12,9 @@ export interface Chat {
   work: { request_id: string; status: "pending" | "succeeded" | "failed" | "cancelled" | "interrupted"; error: string | null } | null
 }
 export interface Game {
-  schema_version: "2"
+  schema_version: "3"
   rules_version: string
-  mode: "scripted"
+  mode: "scripted" | "model"
   id: string
   version: number
   config: { num_agents: number; num_rounds: number; seed: number }

@@ -29,3 +29,9 @@ PR #3 was merged after the user's review. Task #4 extracts human-facing characte
 Provider identity and policy are pinned per game; attempts reserve calls/tokens/micro-USD before invocation. Uncertain failures retain their reservation, and reported usage is distinct from budget charge. Cost defaults to zero. Restart interrupts work rather than automatically reissuing potentially billed calls. Cancelled/late work cannot mutate a later conversation.
 
 Game view v2 projects v1 saved states and replay frames without rewriting their recorded history. New clients expose pending/cancel/retry controls; original artwork remains unchanged. Live inference, token streaming, cross-round memory, and paid evaluation are subsequent scoped tasks.
+
+## 2026-10-24 — Hosted models through OpenRouter, assigned per character
+
+The user selected OpenRouter as the hosted gateway so experiments can vary models per character. Personas remain roster data; named model profiles define inference settings and character UID overrides choose the profile. New games pin the configuration, and each job reserves the selected model's allowance. Requested/returned model IDs and upstream receipts remain distinct. Model fallback is disabled; upstream routing can be pinned. Structured-output compatibility is explicit, with a prompt-JSON option that retains local validation.
+
+Paired persuasion experiments reuse the two-seat game, durable runtime, and shared ledger. Each synthetic seat represents the other character's faction; the characters' replies alternate until the fixed turn bound or a failure, then accepted decisions resolve together. Exported transcripts are explicitly experimental evidence, separate from the seat-filtered multiplayer API. Live inference remains opt-in; no credential was available during implementation. Direct OpenAI and Ollama adapters are deferred in favor of the user's hosted gateway choice.

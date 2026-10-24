@@ -1,0 +1,9 @@
+{
+  "schema_version": "1",
+  "name": "A coalition worth joining",
+  "characters": ["albert_einstein", "winston_churchill"],
+  "opening": "Our factions could accomplish more together. What concrete commitment would make an alliance worth your trust?",
+  "exchanges": 2,
+  "seed": 32,
+  "first_seat": "player_red"
+}

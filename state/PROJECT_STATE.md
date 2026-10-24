@@ -1,42 +1,42 @@
 # Project state
 
-Updated 2026-10-21. User authorized autonomous modernization work and explicitly approved merging the reviewed foundation PR.
+Updated 2026-10-24. User authorized modernization, approved prior merges, and selected OpenRouter for hosted models with different models per character.
 
 ## Milestones
 
-The self-contained local foundation merged in [PR #3](https://github.com/platypii/allegiance-and-influence/pull/3), commit `d0aff12c4c5447ec9d4a3529a36455b0b88219c5`. [Task #2](https://github.com/platypii/allegiance-and-influence/issues/2) is closed. It establishes the factory, authoritative rules, SQLite persistence, local two-player game, replay, shared roster, and offline verification gate under [epic #1](https://github.com/platypii/allegiance-and-influence/issues/1).
-
-Current increment: provider-neutral agent runtime, branch `codex/agent-runtime`, [task #4](https://github.com/platypii/allegiance-and-influence/issues/4), scope in `work/agent-runtime.md`. This completes the offline runtime portion of milestone 4; live adapters, streaming, and memory remain future increments.
+- [PR #3](https://github.com/platypii/allegiance-and-influence/pull/3), local foundation, merged as `d0aff12`: authoritative game rules, SQLite, local multiplayer/replay, original art, and the software factory.
+- [PR #5](https://github.com/platypii/allegiance-and-influence/pull/5), provider-neutral runtime, merged as `03b2a49`: durable asynchronous replies, bounded execution, cancellation/retry, recovery, budgets, and offline conformance.
+- Current increment: branch `codex/model-conversations`, [task #6](https://github.com/platypii/allegiance-and-influence/issues/6), under [epic #1](https://github.com/platypii/allegiance-and-influence/issues/1). Scope: `work/model-conversations.md`.
 
 ## Implemented in this increment
 
-- Async provider boundary with strict dialogue/recruitment decisions and scoped observations; deterministic scripted adapter preserves the local demo.
-- Durable pending jobs and attempt records in SQLite. Result application checks phase, round, character, request identity, and pending status.
-- Visible waiting, cancel, and retry controls. Retries preserve the human message; stale or duplicate results cannot append another reply. Replaying an old cancel cannot affect a newer request.
-- Bounded concurrency, queue capacity, deadlines, and explicitly classified transient retries. Startup interrupts uncertain work without reissuing it.
-- Atomic per-game call/token/cost reservations. Unknown usage retains conservative charges; reported usage is recorded separately. Default allowed spend is zero.
-- Pinned provider/model/prompt identity and policy; authenticated, seat-scoped attempt reports. Opponent dialogue and credentials never enter provider observations.
-- Game contract v2 and provider/report v1 schemas, documentation, positive/negative fixtures, and executable validation. Stored v1 snapshots/replay remain readable without invented provider events.
-- Headless matches use the same runtime and export provider identity/call counts. No cloud service or model API is required.
+- Optional hosted OpenRouter adapter, without vendor-specific SDK coupling. Default local play remains scripted and offline.
+- Model profiles separate from roster personas. Character UID assignments plus a default allow mixed models and scripted controls in one game. Configurations are pinned when a game is created; each job records and reserves its selected model's limits.
+- Versioned persona prompt using existing descriptions/attributes, own conversation history, and optional public opponent persona. No keys, assignments, or unrelated dialogue enter model observations.
+- Bounded asynchronous HTTP, strict local decisions, native structured output or explicit prompt-JSON mode, no model fallback, optional upstream pin, recorded generation/model/provider receipts, actual usage/cost, and conservative error accounting.
+- Paired character experiment relays replies through the existing store/runtime/round rules and one shared budget. Supports swapping model assignments and reversing turn order; exports transcripts, decisions, configuration/hashes, attempt usage/latency, final state, and replay. Failed turns are labelled, never presented as successful persuasion evidence.
+- Game view v3, agent request/result v2, runtime report v2, and configuration/scenario/report v1 schemas with fixtures/validation. Old game snapshots and attempt tables migrate without inventing metadata or converting scripted saves to model mode.
+- Browser text distinguishes model mode from the scripted two-message demo. All 58 artwork files remain unchanged.
 
 ## Verification evidence
 
-The initial browser run passed both workflows, including pending/cancel/retry, full two-player completion, reload/replay, mobile start, and local-only browser requests. The pending-state screenshot was inspected; the controls fit the existing panel and all original artwork remains in use. The headless runner completed two rounds with eight scripted provider calls and zero model calls. The final shared gate passed after the cancel regression fix: 39 backend tests, two browser workflows, schema/fixture validation, Python lint, frontend build/typechecking, 58 artwork hashes, clean server logs, and patch whitespace.
+The complete local `bash scripts/agent-verify.sh` gate passed: **72 backend tests**, **3 browser workflows**, schema/fixture validation, Python lint, frontend build/typechecking, original artwork hashes, clean server logs, and patch whitespace. New tests exercise real adapter serialization/parsing through mock HTTP, two different models exchanging four replies, shared selected-model budgets, pinned routing, malformed/incomplete responses, usage/identity validation, and timeout cancellation. Browser model mode uses a scripted fixture transport, not live inference.
 
-Artifacts (ignored by Git): `artifacts/screenshots/`, `artifacts/browser-tests/`, `artifacts/e2e-server.log`, `artifacts/headless-replay.json`. Hosted CI results belong to the new PR and are separate from local evidence.
+Model-mode and welcome captures were inspected. The scripted pair control completed four turns with four attempts and zero charges. `artifacts/pair-mock-report.json` is explicitly labelled `mock-http`. Other ignored evidence: `artifacts/screenshots/`, `artifacts/browser-tests/`, `artifacts/e2e*-server.log`, and paired run output directories.
+
+**No live OpenRouter request was made.** No `OPENROUTER_API_KEY` was available. Current checks establish protocol, accounting, and lifecycle behavior; model availability, latency, personality quality, and persuasion effectiveness remain unmeasured. Hosted CI evidence belongs to the PR and is separate from the local gate.
 
 ## Known limits
 
-- No generative model adapter, token streaming, cross-round memory, or model benchmark yet. Initial greetings and ambient AI-pair interactions remain deterministic game behavior.
-- One server process; no distributed coordination or public account management. Lost tab keys have no seat-recovery flow, and disconnected players can pause progress indefinitely.
-- Remote execution/billing cannot be exactly once. Reservations rely on a trustworthy adapter's declared bounds; failed/uncertain attempts retain their charge. Misreported usage blocks further game calls.
-- Cancellation prevents late state mutation; adapters must cooperate with cancellation. This is not process isolation for hostile Python code.
-- Replay is snapshot playback. Public headless exports omit private conversations.
-- All 58 original graphic files are preserved. Foundation changes replaced the remote font with a local fallback and made graph initialization deterministic; exact historical deployment parity is not asserted.
-- Tests emit the existing Starlette/httpx migration warning; browser binaries must be installed separately for verification.
+- Per-character hosted configuration is an operator JSON file, not a browser model picker. A changed routing configuration needs a new game (or restoration of the original configuration to continue an old one).
+- The paired experiment is a controlled two-character conversation using synthetic seats. Ambient AI interactions on the multiplayer board and initial greetings remain deterministic.
+- No streaming, cross-round memory, local generative adapter, or tournament/statistical comparison runner yet.
+- Input admission uses a conservative byte allowance, not exact tokenization for every remote model. Reported bound overruns reject the decision and block further game calls. Price/usage guards rely on the remote service's reported contract; budgets are per game, not across an account. BYOK is unsupported.
+- Exactly-once remote inference/billing is not promised. Unknown or failed attempts retain reservations; remote cancellation may still incur charges.
+- Single server process; no public accounts, seat recovery, or distributed scheduling. Old browser tabs must reload after updating the service.
 
-## Next increment
+## Next work
 
-Integrate an opt-in generative provider behind the tested contract, starting with scoped recruitment scenarios. Consult current official provider documentation at implementation time; record model/prompt identity, measured latency and usage, and explicit spend configuration. Keep the default demo and verification offline. A local-model adapter is a separate option to evaluate against available hardware.
+Configure an OpenRouter key, concrete model IDs, price ceilings, and a bounded spend policy. Run the paired scenario, swap models between personas, reverse order, and inspect actual transcripts/latency/cost before choosing candidates. The commands are in `docs/model-experiments.md`.
 
-Then extend the experiment harness with repeated runs, seat swaps, comparable manifests, and failure/cost measurements. Add memory and streaming only with concrete contracts and evidence. Human playtests and incremental gameplay changes follow that measured baseline.
+Then add repeated comparisons and broader scenarios, integrate model-driven ambient conversations, and move into human playtesting and small gameplay changes. The offline gate remains mandatory throughout.

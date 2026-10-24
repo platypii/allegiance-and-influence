@@ -115,12 +115,12 @@ class RoundHistory(StrictModel):
 
 
 class GameState(StrictModel):
-    schema_version: Literal["2"]
-    rules_version: Literal["scripted-v1"]
+    schema_version: Literal["3"]
+    rules_version: Literal["scripted-v1", "persuasion-v1"]
     id: str
     version: int = Field(ge=0)
     config: CreateGame
-    mode: Literal["scripted"]
+    mode: Literal["scripted", "model"]
     phase: Literal["lobby", "selecting", "conversing", "round_complete", "finished"]
     round_number: int = Field(ge=1)
     players: Players
