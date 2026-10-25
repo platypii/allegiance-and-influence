@@ -388,7 +388,7 @@ def test_old_v2_games_stay_scripted_and_old_attempt_tables_migrate(tmp_path):
         assert "receipt" in {r["name"] for r in db.execute("PRAGMA table_info(agent_attempts)")}
     with TestClient(create_app(path)) as client:
         data = client.get(f"/api/games/{game['id']}").json()
-        assert data["schema_version"] == "3" and data["mode"] == "scripted"
+        assert data["schema_version"] == "4" and data["mode"] == "scripted"
         assert client.get("/api/health").json()["mode"] == "scripted"
 
 

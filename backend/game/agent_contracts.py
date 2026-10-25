@@ -27,7 +27,8 @@ class RuntimePolicy(StrictModel):
 
 
 class AgentRequest(StrictModel):
-    schema_version: Literal["1", "2"] = "2"
+    schema_version: Literal["1", "2", "3"] = "3"
+    purpose: Literal["character_reply", "opponent_argument"] = "character_reply"
     request_id: str
     game_id: str
     round_number: int = Field(ge=1)

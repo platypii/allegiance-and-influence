@@ -12,12 +12,13 @@ export interface Chat {
   work: { request_id: string; status: "pending" | "succeeded" | "failed" | "cancelled" | "interrupted"; error: string | null } | null
 }
 export interface Game {
-  schema_version: "3"
+  schema_version: "4"
   rules_version: string
   mode: "scripted" | "model"
   id: string
   version: number
-  config: { num_agents: number; num_rounds: number; seed: number }
+  config: { num_agents: number; num_rounds: number; seed: number; opponent_profile?: string | null }
+  opponent: { model: string; work: { status: string; error: string | null } | null; error: string | null } | null
   phase: "lobby" | "selecting" | "conversing" | "round_complete" | "finished"
   round_number: number
   players: Record<Seat, boolean>
@@ -124,6 +125,13 @@ export function useGame() {
       setToken(null)
       accept(next)
       setGameId(next.id)
+      if (config.opponent_profile) {
+        const key = randomId()
+        sessionStorage.setItem(`player:${next.id}`, key)
+        const joined = await request<Game>(`/api/games/${next.id}/join`, key, { seat: "player_red" })
+        setToken(key)
+        accept(joined)
+      }
     })
   }
 

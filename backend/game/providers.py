@@ -41,6 +41,15 @@ class ScriptedProvider:
 
     async def generate(self, request: AgentRequest) -> dict:
         await asyncio.sleep(self.delay_seconds)
+        if request.purpose == "opponent_argument":
+            return {
+                "schema_version": "2",
+                "decision": {
+                    "dialogue": "Join Blue: we can protect your work and build a shared plan together.",
+                    "join_opponent": False,
+                },
+                "usage": {"input_tokens": 0, "output_tokens": 0, "cost_microusd": 0},
+            }
         count = sum(message.name == request.opponent for message in request.messages)
         dialogue = (
             "Tell me more about how we would work together."

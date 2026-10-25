@@ -10,7 +10,7 @@ from pathlib import Path
 from .agent_contracts import RuntimePolicy
 from .core import GameError, new_game, transition, upgrade_state
 from .jobs import Jobs
-from .models import GameState
+from .models import CreateGame, GameState
 from .providers import ScriptedProvider
 
 
@@ -23,11 +23,20 @@ def digest(token: str) -> str:
 
 
 class Store(Jobs):
-    def __init__(self, path: Path, characters: list[dict], identity=None, policy=None, routes=None):
+    def __init__(
+        self,
+        path: Path,
+        characters: list[dict],
+        identity=None,
+        policy=None,
+        routes=None,
+        opponents=None,
+    ):
         self.path, self.characters = path, characters
         self.identity = identity or ScriptedProvider.identity
         self.policy = policy or RuntimePolicy()
         self.routes = routes or {"*": self.identity.model_dump()}
+        self.opponents = opponents or {"scripted": ScriptedProvider.identity.model_dump()}
         path.parent.mkdir(parents=True, exist_ok=True)
         with self.connection() as db:
             db.execute("PRAGMA journal_mode=WAL")
@@ -94,7 +103,18 @@ class Store(Jobs):
 
     def create(self, config, *, pair=None):
         # pair is internal experiment setup, never accepted by the public API.
+        config = CreateGame.model_validate(config).model_dump()
+        profile = config["opponent_profile"]
+        if profile is not None and profile not in self.opponents:
+            raise GameError("unknown_opponent", "Choose one of the configured opponent models.", 422)
+        if pair and profile:
+            raise ValueError("Pair experiments cannot also have a solo opponent")
         state = new_game(secrets.token_hex(16), config, self.characters)
+        routes = dict(self.routes)
+        if profile:
+            routes["@opponent"] = self.opponents[profile]
+            state["opponent"] = {"model": routes["@opponent"]["model"], "work": None, "error": None}
+            state["players"]["player_blue"] = True
         if self.identity.provider != "scripted":
             state["mode"], state["rules_version"] = "model", "persuasion-v1"
         peers = {}
@@ -112,7 +132,8 @@ class Store(Jobs):
                 (state["id"], encode(self.identity.model_dump()), encode(self.policy.model_dump())),
             )
             db.execute(
-                "INSERT INTO runtime_context VALUES(?,?,?)", (state["id"], encode(self.routes), encode(peers))
+                "INSERT INTO runtime_context VALUES(?,?,?)",
+                (state["id"], encode(routes), encode(peers)),
             )
             db.execute(
                 "INSERT INTO events VALUES(?,?,?,?,?,?)",
@@ -145,10 +166,21 @@ class Store(Jobs):
         return state
 
     def apply(self, game_id, token, command):
+        return self._apply(game_id, token, command)
+
+    def apply_opponent(self, game_id, command):
+        return self._apply(game_id, None, command, opponent=True)[0]
+
+    def _apply(self, game_id, token, command, *, opponent=False):
         with self.connection() as db:
             db.execute("BEGIN IMMEDIATE")
             state = self._load(db, game_id)
-            actor = self._actor(db, game_id, token)
+            if opponent:
+                if not state.get("opponent"):
+                    raise GameError("not_solo", "This game has no model opponent.")
+                actor = "player_blue"
+            else:
+                actor = self._actor(db, game_id, token)
             old = db.execute(
                 "SELECT actor, command FROM events WHERE game_id=? AND command_id=?",
                 (game_id, command["command_id"]),
@@ -165,7 +197,8 @@ class Store(Jobs):
             elif command["kind"] == "cancel":
                 request_id = state["conversations"][actor]["work"]["request_id"]
                 db.execute(
-                    "UPDATE agent_jobs SET status='cancelled',error='cancelled' WHERE id=?", (request_id,)
+                    "UPDATE agent_jobs SET status='cancelled',error='cancelled' WHERE id=?",
+                    (request_id,),
                 )
                 db.execute(
                     "UPDATE agent_attempts SET status='cancelled' WHERE request_id=? AND status='running'",

@@ -1,0 +1,49 @@
+{
+  "$defs": {
+    "OpponentChoice": {
+      "additionalProperties": false,
+      "properties": {
+        "profile": {
+          "title": "Profile",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "profile",
+        "model",
+        "kind"
+      ],
+      "title": "OpponentChoice",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1",
+      "default": "1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "opponents": {
+      "items": {
+        "$ref": "#/$defs/OpponentChoice"
+      },
+      "title": "Opponents",
+      "type": "array"
+    }
+  },
+  "required": [
+    "opponents"
+  ],
+  "title": "OpponentOptions",
+  "type": "object"
+}

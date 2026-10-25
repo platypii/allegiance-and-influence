@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import styles from "./page.module.css"
 import Welcome from "./welcome"
+import Invite from "./invite"
 import Panel from "./panel"
 import ForceGraph, { GraphNode } from "./forcegraph"
 import characters from "./characters"
@@ -17,7 +18,6 @@ export default function Home() {
   const [closedEnd, setClosedEnd] = useState(false)
   const [frames, setFrames] = useState<Game[] | null>(null)
   const [frame, setFrame] = useState(0)
-  const [copied, setCopied] = useState(false)
   const shown = frames ? frames[frame] : game
   const player = game?.you
   const chat = player && shown ? shown.conversations[player] : null
@@ -56,12 +56,14 @@ export default function Home() {
         <Round game={shown} />
         <div className={styles.toolbar}>
           <span role="status">{connection}</span><span>{shown.mode === "scripted" ? "Scripted demo" : "Model experiment"}</span>
-          <button onClick={async () => { try { await navigator.clipboard.writeText(location.href); setCopied(true) } catch { setCopied(false) } }}>{copied ? "Link copied" : "Copy invite link"}</button>
+          {(player || game?.phase !== "lobby") && <Invite gameId={shown.id} />}
+          {shown.opponent && <span>Blue: {shown.opponent.model}</span>}
           <a href="/">New game</a>
           {player && <button disabled={busy} onClick={async () => { const result = await replay(); if (result) { setFrames(result.frames); setFrame(result.frames.length - 1) } }}>Review replay</button>}
           {frames && <><label>Replay step <input aria-label="Replay step" type="range" min={0} max={frames.length - 1} value={frame} onChange={e => setFrame(Number(e.target.value))} /></label><button onClick={() => setFrames(null)}>Back to live game</button></>}
         </div>
         <div className={styles.status}>
+          {!frames && game?.opponent?.error && <span role="alert">Opponent stopped this round ({game.opponent.error}). Finish your conversation to continue. </span>}
           {frames ? `Replay · step ${frame + 1} of ${frames.length}` : status}
           {!frames && game?.phase === "round_complete" && player && <button disabled={busy} onClick={() => command({ kind: "advance" })}>Next round</button>}
           {!frames && character && closedChat && game?.phase === "conversing" && <button onClick={() => setClosedChat(false)}>Open conversation</button>}

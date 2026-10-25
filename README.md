@@ -87,3 +87,9 @@ This drives the same game transitions and persistence boundary with scripted pla
 The original Firebase/LangGraph implementation remains in `backend/htw/` and `backend/scripts/` for reference. Its Poetry environment is historical and is not installed by the new root setup. Its launcher clears its configured database; it is not the supported local entry point.
 
 Licensed under [MIT](LICENSE).
+
+## Solo play and session invites
+
+Choose **Single player**, select an opponent model, and start: you join Red automatically and the model plays Blue. Available choices come from server-configured profiles; the default offline server offers an explicitly scripted opponent. The selected model writes Blue's recruitment arguments while the existing per-character assignments generate character replies. Initial target choice is deterministic; each round allows up to two opponent arguments. **Two players** remains available.
+
+Invite links identify the current session. Over Tailscale HTTP, if browser clipboard access is unavailable, the button shows a selected session URL you can copy manually. Open that full URL on the other computer and join the available side. Keep the host and game process running.

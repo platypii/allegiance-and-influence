@@ -35,7 +35,7 @@ bash scripts/run-local.sh --models data/models.json --key-file data/openrouter.k
 
 `model_setup.py key` writes `data/openrouter.key` with mode 0600 and refuses to overwrite an existing file. Both local files live under ignored `data/`; keep the key out of model JSON, browser bundles, and chat. `--key-file` (or `OPENROUTER_API_KEY_FILE`) selects this file; an explicitly selected file takes precedence over `OPENROUTER_API_KEY`. Without a file setting, the environment variable remains supported. The catalog command reads OpenRouter's public model catalog, reports prices and supported parameters, and makes no inference requests. `check` validates local assignments and shows budget reservations; it does not claim a model is available or a key is valid.
 
-`.env.example` lists the variable names; the launcher does not automatically source a dotenv file. Model IDs and assignments are server/operator configuration, not browser-controlled input. Create a new game after changing assignments. New games pin routing and policy at creation. Old games keep their identity and fail explicitly if the running configuration no longer matches; returning to the original configuration restores compatibility. Historical scripted saves remain scripted.
+`.env.example` lists the variable names; the launcher does not automatically source a dotenv file. Model IDs and character assignments are server/operator configuration. Solo setup may select an opponent profile name from `/api/options`; it cannot submit arbitrary model IDs, prices, provider settings, or credentials. Create a new game after changing assignments. New games pin routing and policy at creation. Old games keep their identity and fail explicitly if the running configuration no longer matches; returning to the original configuration restores compatibility. Historical scripted saves remain scripted.
 
 ## Paired character experiment
 
@@ -61,7 +61,7 @@ A failed turn stops dialogue generation, records the failure, and resolves only 
 
 ## Contracts, migration, and evidence
 
-Current schemas: game view v3; agent request/result v2 (accepting legacy v1 payloads); runtime report v2; model configuration, pair scenario, and pair report v1. Each has fixtures and executable schema checks. Game view v3 adds model mode and the `persuasion-v1` rule label; old state snapshots project to v3 while retaining their original mode, rule label, and version. SQLite adds route and receipt columns without rewriting old attempts.
+Current schemas: game view v4; agent request v3 (accepting legacy v1/v2 payloads); agent result v2; runtime report v2; model configuration and pair scenario v1; pair report v2 (embedding game view v4). Each has fixtures and executable schema checks. Game view v3 adds model mode and the `persuasion-v1` rule label; old state snapshots project to v3 while retaining their original mode, rule label, and version. SQLite adds route and receipt columns without rewriting old attempts.
 
 The normal verifier clears live configuration/credentials. Adapter tests use HTTP mocks with explicitly labelled receipts; tests exercise mixed-model relay, assignments, shared budgets, conservative failures, timeout/cancellation, malformed and incomplete replies, missing usage, usage overruns, HTTP errors, and privacy. Browser tests include a model-mode fixture server using scripted responses, which verifies interface labels without inference.
 

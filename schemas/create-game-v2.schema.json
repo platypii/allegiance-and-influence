@@ -1,0 +1,42 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "opponent_profile": {
+      "anyOf": [
+        {
+          "maxLength": 120,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Opponent Profile"
+    },
+    "num_agents": {
+      "default": 6,
+      "maximum": 23,
+      "minimum": 2,
+      "title": "Num Agents",
+      "type": "integer"
+    },
+    "num_rounds": {
+      "default": 3,
+      "maximum": 20,
+      "minimum": 1,
+      "title": "Num Rounds",
+      "type": "integer"
+    },
+    "seed": {
+      "default": 32,
+      "maximum": 2147483647,
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    }
+  },
+  "title": "CreateGame",
+  "type": "object"
+}

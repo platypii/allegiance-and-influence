@@ -41,7 +41,7 @@ class ExperimentTurn(StrictModel):
 
 
 class PairReport(StrictModel):
-    schema_version: Literal["1"] = "1"
+    schema_version: Literal["2"] = "2"
     evidence: Literal["scripted", "mock-http", "live-openrouter"]
     status: Literal["completed", "failed"]
     scenario: PairScenario

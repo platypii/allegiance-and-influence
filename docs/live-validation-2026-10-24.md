@@ -51,3 +51,9 @@ Report SHA-256 values (receipts/transcripts remain local):
 - `live-20261024-swapped-reversed`: `8abfe77da4bac5a7699dc2354952020d667d39774290d1a84b33ede055082e5a`
 
 Repeat the commands in [model-experiments.md](model-experiments.md) with the verified configuration and a separately supplied key. Remote outputs and latency are not deterministic. The offline verifier continues to use mocks/scripted mode and is not evidence of live provider availability.
+
+## Follow-up: solo model opponent and Tailscale invites
+
+After issues #8/#9 were implemented, one real browser on the Tailscale HTTP address started a six-character, one-round solo game with `luna` as Blue. The human sent one argument to Churchill (Gemini). Blue's deterministic policy selected Einstein (Haiku); Luna supplied two arguments and Einstein accepted after the second. Final score: Red 0, Blue 1. All five calls succeeded with matching model IDs and no JavaScript/server errors, costing **$0.000857** in recorded charges. This is a compatibility/game-completion smoke test, not comparative evidence of model strength or balanced gameplay. The earlier paired runs used different initial allegiances and prompts and are not directly comparable.
+
+A second, inference-free check on the same actual HTTP origin confirmed that clipboard unavailability reveals a complete session URL and that a second browser joins the same session using it. Inspected captures: `artifacts/screenshots/12-live-solo-setup.png` and `13-live-solo-finished.png`. Local accounting: `artifacts/live-solo-accounting.json`; the database retains the complete Blue conversation. The earlier five paired runs are unchanged.
