@@ -1,0 +1,16 @@
+entrypoint = "README.md"
+modules = ["python-3.12", "nodejs-22"]
+run = ["bash", "scripts/replit-preview.sh"]
+hidden = [".venv", ".replit-tools", "frontend/node_modules", "artifacts", "data"]
+
+[packager.features]
+guessImports = false
+
+[deployment]
+build = ["bash", "scripts/replit-build.sh"]
+run = ["bash", "scripts/replit-start.sh"]
+# Select Reserved VM in Publishing: this coordinator needs exactly one worker.
+
+[[ports]]
+localPort = 3000
+externalPort = 80

@@ -11,6 +11,18 @@ jobs:
   agent-verify:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: game_test
+          POSTGRES_PASSWORD: disposable_ci_only
+          POSTGRES_DB: game_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U game_test -d game_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -21,11 +33,15 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-      - run: uv sync --locked --python 3.12
+      - run: uv sync --locked --extra postgres --python 3.12
       - run: npm --prefix frontend ci --no-fund
       - run: npx playwright install --with-deps chromium
         working-directory: frontend
       - run: bash scripts/agent-verify.sh
+      - name: PostgreSQL persistence, recovery and hosted launch
+        run: .venv/bin/python -m pytest -q backend/tests/test_postgres.py
+        env:
+          TEST_DATABASE_URL: postgresql://game_test:disposable_ci_only@127.0.0.1:5432/game_test
       - uses: actions/upload-artifact@v4
         if: always()
         with:

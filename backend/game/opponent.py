@@ -44,7 +44,7 @@ def complete_argument(previous, request, status, decision, error):
 
 def queue_argument(store, game_id):
     with store.connection() as db:
-        db.execute("BEGIN IMMEDIATE")
+        store.begin_write(db)
         state = store._load(db, game_id)
         opponent = state["opponent"]
         chat = state["conversations"]["player_blue"]
@@ -133,7 +133,7 @@ class OpponentDriver:
 
     def fail(self, game_id, error):
         with self.store.connection() as db:
-            db.execute("BEGIN IMMEDIATE")
+            self.store.begin_write(db)
             state = self.store._load(db, game_id)
             if state["phase"] != "conversing" or state["conversations"]["player_blue"]["done"]:
                 return

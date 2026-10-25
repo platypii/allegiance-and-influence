@@ -20,9 +20,9 @@ class Jobs:
                 id TEXT PRIMARY KEY, game_id TEXT NOT NULL, actor TEXT NOT NULL,
                 request TEXT NOT NULL, status TEXT NOT NULL, error TEXT);
             CREATE TABLE IF NOT EXISTS agent_attempts (
-                request_id TEXT, attempt INTEGER, status TEXT NOT NULL,
-                charged_tokens INTEGER NOT NULL, charged_cost INTEGER NOT NULL,
-                usage TEXT, latency_ms INTEGER, started_at REAL,
+                request_id TEXT, attempt BIGINT, status TEXT NOT NULL,
+                charged_tokens BIGINT NOT NULL, charged_cost BIGINT NOT NULL,
+                usage TEXT, latency_ms INTEGER, started_at DOUBLE PRECISION,
                 PRIMARY KEY(request_id, attempt));
             CREATE TABLE IF NOT EXISTS runtime_context (
                 game_id TEXT PRIMARY KEY, routes TEXT NOT NULL, peers TEXT NOT NULL);
@@ -30,8 +30,7 @@ class Jobs:
 
         # Additive migration preserves existing requests and attempt accounting.
         for table, column in [("agent_jobs", "route"), ("agent_attempts", "receipt")]:
-            if column not in {r["name"] for r in db.execute(f"PRAGMA table_info({table})")}:
-                db.execute(f"ALTER TABLE {table} ADD COLUMN {column} TEXT")
+            self.add_column(db, table, column)
 
     def attach_job(self, db, state, actor):
         chat = state["conversations"][actor]
@@ -49,7 +48,7 @@ class Jobs:
             messages=chat["messages"],
         )
         db.execute(
-            "INSERT OR IGNORE INTO runtime_games VALUES(?,?,?)",
+            "INSERT INTO runtime_games VALUES(?,?,?) ON CONFLICT DO NOTHING",
             (
                 state["id"],
                 packed(self.identity.model_dump()),
@@ -87,7 +86,7 @@ class Jobs:
 
     def reserve_attempt(self, request_id):
         with self.connection() as db:
-            db.execute("BEGIN IMMEDIATE")
+            self.begin_write(db)
             job = db.execute("SELECT * FROM agent_jobs WHERE id=?", (request_id,)).fetchone()
             if not job or job["status"] not in {"queued", "running"}:
                 return None
@@ -142,7 +141,7 @@ class Jobs:
 
     def record_attempt(self, request_id, attempt, status, latency_ms, usage=None, receipt=None):
         with self.connection() as db:
-            db.execute("BEGIN IMMEDIATE")
+            self.begin_write(db)
             db.execute(
                 "UPDATE agent_attempts SET receipt=? WHERE request_id=? AND attempt=? AND status='running'",
                 (packed(receipt) if receipt else None, request_id, attempt),
@@ -165,13 +164,16 @@ class Jobs:
             elif usage is not None:
                 db.execute(
                     "UPDATE agent_attempts SET status=?, latency_ms=?, usage=?, "
-                    "charged_tokens=max(charged_tokens,?), charged_cost=max(charged_cost,?) "
+                    "charged_tokens=CASE WHEN charged_tokens>? THEN charged_tokens ELSE ? END, "
+                    "charged_cost=CASE WHEN charged_cost>? THEN charged_cost ELSE ? END "
                     "WHERE request_id=? AND attempt=? AND status='running'",
                     (
                         status,
                         latency_ms,
                         packed(usage),
                         usage["input_tokens"] + usage["output_tokens"],
+                        usage["input_tokens"] + usage["output_tokens"],
+                        usage["cost_microusd"],
                         usage["cost_microusd"],
                         request_id,
                         attempt,
@@ -196,7 +198,7 @@ class Jobs:
         if result is not None:
             result = ProviderResult.model_validate(result).model_dump()
         with self.connection() as db:
-            db.execute("BEGIN IMMEDIATE")
+            self.begin_write(db)
             row = db.execute("SELECT * FROM agent_jobs WHERE id=?", (request_id,)).fetchone()
             if not row or row["status"] not in {"queued", "running"}:
                 return None
