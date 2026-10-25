@@ -324,6 +324,9 @@ test("the live swarm moves, keeps targets separate, and pauses for interaction",
   const reduced = await positions()
   await page.waitForTimeout(250)
   expect(await positions()).toEqual(reduced)
+  await page.emulateMedia({ reducedMotion: "no-preference" })
+  await expect(board).toHaveAttribute("data-motion", "running")
+  await expect.poll(async () => (await positions()).some((r, i) => Math.abs(r.x - reduced[i].x) + Math.abs(r.y - reduced[i].y) > 3)).toBeTruthy()
   await context.close()
 })
 

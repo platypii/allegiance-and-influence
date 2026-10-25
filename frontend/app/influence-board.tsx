@@ -23,8 +23,14 @@ export default function InfluenceBoard({ nodes, edges }: { nodes: GraphNode[]; e
     const graph = graphRef.current
     if (!graph) return
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)")
-    const updatePreference = () => setReduced(preference.matches)
-    updatePreference()
+    // Cache change events: reading MediaQueryList.matches in every animation
+    // frame can consume a pending Chromium preference change before its event.
+    let prefersReducedMotion = preference.matches
+    const updatePreference = (event: MediaQueryListEvent) => {
+      prefersReducedMotion = event.matches
+      setReduced(event.matches)
+    }
+    setReduced(prefersReducedMotion)
     preference.addEventListener("change", updatePreference)
     let bodies: (Body & { element: HTMLElement; imageX: number; imageY: number })[] = []
     let width = 0, height = 0, frame = 0, previousTime = 0, elapsed = 0
@@ -61,7 +67,7 @@ export default function InfluenceBoard({ nodes, edges }: { nodes: GraphNode[]; e
     const animate = (time: number) => {
       const dt = previousTime ? Math.min(2, (time - previousTime) / (1000 / 60)) : 1
       previousTime = time
-      const moving = !preference.matches && !pausedRef.current && !hovered.current && !focused.current && !document.hidden
+      const moving = !prefersReducedMotion && !pausedRef.current && !hovered.current && !focused.current && !document.hidden
       if (moving) {
         elapsed += dt / 60
         const teams = new Map(latest.current.nodes.map(node => [node.id, node.team]))
