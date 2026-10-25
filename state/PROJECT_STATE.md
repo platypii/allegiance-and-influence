@@ -1,6 +1,6 @@
 # Project state
 
-Updated 2026-10-24. User authorized modernization and merging all open PRs, and selected OpenRouter for hosted models with different models per character.
+Updated 2026-10-25. User authorized modernization and merging all open PRs, and selected OpenRouter for hosted models with different models per character.
 
 ## Replit hosting preparation
 
@@ -8,7 +8,7 @@ Issue [#11](https://github.com/platypii/allegiance-and-influence/issues/11), bra
 
 ## Design system and mobile readability
 
-Issues [#13](https://github.com/platypii/allegiance-and-influence/issues/13) and [#15](https://github.com/platypii/allegiance-and-influence/issues/15), branch `codex/game-design-system`, [PR #14](https://github.com/platypii/allegiance-and-influence/pull/14), task `work/game-design-system.md`. Shared tokens, `/design-system/`, responsive setup/board/results, and a native conversation dialog establish the visual system. Following user review, the board again animates continuously with wandering, repulsion, faction gravity and pair attraction; full portrait/label bounds prevent collisions. Pointer/focus stability, a pause control and reduced-motion support preserve reliable targeting. Locally bundled Lora renders dialogue and composer text at 18px and supplies the headings. The desktop conversation backdrop leaves the moving board visible.
+Issues [#13](https://github.com/platypii/allegiance-and-influence/issues/13) and [#15](https://github.com/platypii/allegiance-and-influence/issues/15), branch `codex/game-design-system`, [PR #14](https://github.com/platypii/allegiance-and-influence/pull/14), task `work/game-design-system.md`. Shared tokens, `/design-system/`, responsive setup/board/results, and a native conversation dialog establish the visual system. Following user review, the board again animates continuously with wandering, repulsion, faction gravity and pair attraction; full portrait/label bounds prevent collisions. Pointer/focus stability, a pause control and reduced-motion support preserve reliable targeting. Locally bundled Lora renders dialogue and composer text at 18px and supplies the headings. The desktop conversation backdrop leaves the moving board visible. User feedback [#16](https://github.com/platypii/allegiance-and-influence/issues/16) removes the heavy scenery fade and elliptical crop: the original board illustration now fills the play area with a light tint, while solid label backings preserve readability. The full offline gate passed again and refreshed desktop/mobile captures were inspected.
 
 The full offline verifier passed with 92 backend tests, 11 browser workflows, 3 physics simulations, build/types, contracts, and all 58 original artwork hashes. Browser glyph inspection confirms actual custom Lora rendering. Motion checks cover crowded mobile targets, pause/focus/reduced-motion behavior, and continued movement after a simulated minute. Inspected final desktop/mobile dialogue and board captures. Original assets and game rules remain intact. PR #14 awaits user review; actual device keyboards/screen readers and publishing remain playtest steps.
 

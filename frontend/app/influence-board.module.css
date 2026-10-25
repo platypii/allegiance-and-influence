@@ -1,8 +1,9 @@
 .graph { position: relative; width: 100%; isolation: isolate; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px 24px; padding: 76px 32px 40px; }
-.graph::before { content: ""; position: absolute; inset: 20px; z-index: -1; background: radial-gradient(ellipse, #f6f1e63b, var(--paper) 72%), url('/images/background.jpg') center/cover; opacity: .18; border-radius: 50%; }
+.graph::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(#f6f1e61a, #f6f1e61a), url('/images/background.jpg') center/cover; }
 .node { pointer-events: none; position: relative; min-width: 0; display: flex; justify-content: center; }
 .node > button { pointer-events: auto; position: relative; padding: 4px; width: 144px; max-width: 100%; min-height: 160px; display: flex; flex-direction: column; justify-content: flex-start; gap: 6px; border: 0; border-radius: 8px; background: transparent; }
 .node > button img { width: 96px; height: 96px; border: 3px solid; border-radius: 50%; object-fit: cover; box-shadow: 0 4px 0 #243c3518, 0 8px 20px #243c3517; margin-bottom: 4px; }
+.node > button > span { background: var(--paper-raised); border-radius: 3px; box-shadow: 0 0 0 3px var(--paper-raised); }
 .node > button:disabled { opacity: 1; }
 .node > button:enabled:hover { background: #fffcf5bb; }
 .node > button:enabled:hover img { outline: 3px solid var(--brass); outline-offset: 3px; }
@@ -12,7 +13,6 @@
   .graph { grid-template-columns: repeat(auto-fit, minmax(116px, 1fr)); gap: 24px 12px; padding: 68px 16px 28px; }
   .node > button { width: 132px; min-height: 144px; }
   .node > button img { width: 80px; height: 80px; }
-  .graph::before { border-radius: 0; }
 }
 
 .motionControl { position: absolute; top: 12px; right: 16px; z-index: 1; font-size: var(--text-small); color: var(--ink-muted); }
