@@ -69,3 +69,9 @@ User feedback in issue #13 called out inconsistent fonts/CSS/text graphics and s
 Replace floating overlays with a board and separate round/session sections. The decorative force simulation allowed character names and targets to collide, so use stable positions while retaining desktop pairing lines. Mobile presents labeled targets in a responsive grid and summaries in the round recap. This changes visual arrangement only; no simulation/game rules depend on those positions.
 
 Use a native conversation dialog to provide keyboard focus containment, Escape, and an inert board while conversing. Full-width on phones, a panel on desktop, with accessible expandable profiles and API errors inside the dialog. Body/form text is at least 16px; secondary labels at least 14px; compact controls at least 44px. Test enlarged text and a complete mobile game rather than only the welcome screen. Real-device keyboards and screen readers remain a hosted playtest check.
+
+## 2026-10-25 — Preserve entertainment motion and ship actual dialogue fonts
+
+User review of PR #14 rejected the static board and Arial-like dialogue. Issue #15 supersedes the previous stable-board/system-dialogue-font choice: animated swarm behavior is an intended part of the game. Restore wandering, repulsion and pair attraction within measured full-label collision bounds, with pause/resume, target stability during pointer/focus/press, and reduced-motion support. Coordinates remain presentation-only. Keep the desktop board visible behind the conversation panel.
+
+Bundle the unmodified Lora variable font and its OFL/source metadata locally. Apply it to headings and the dialogue panel, including 18px transcript/composer text. Browser verification must inspect actual rendered font glyphs, and motion must be tested with reduced motion turned off; static screenshots alone cannot validate entertainment motion. Keep original artwork and offline operation.

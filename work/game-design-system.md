@@ -19,3 +19,14 @@ The full offline verifier passed: **92 backend tests**, **8 browser workflows**,
 Inspected desktop setup, board, chat, result and design reference; mobile setup, profile, chat (390×844 and 320×568), results/replay; enlarged-text setup. Original captures are in ignored `artifacts/design-before/`, new captures in `artifacts/screenshots/design-*` and refreshed numbered files. Primary text/paper palette contrast computes to 10.52:1, secondary text/paper 5.49:1, and faction score colors at least 5.05:1. This is a palette check, not a claim of a complete accessibility audit.
 
 Verification found and resolved a model-mode lobby label regression, enlarged caption overflow, and static subpage routing (Next directory-index export now serves `/design-system/`). No live inference or backend/API changes. Real-device iOS/Android keyboard and screen-reader playtesting and Replit publishing remain outside this local implementation.
+
+## User review correction: motion and dialogue type
+
+Issue [#15](https://github.com/platypii/allegiance-and-influence/issues/15). The user explicitly rejected removing board animation: it is part of the entertainment. They also rejected the plain Arial-like dialogue text. Supersedes the stable-board/system-font choice above. Restore organic motion and pair attraction with measured label collision bounds, pointer/keyboard target stability, pause and reduced-motion behavior. Bundle Lora locally with its license and verify the loaded font rather than relying on a system fallback. Assess normal-motion recordings and browser checks separately from reduced-motion captures.
+
+
+### Correction evidence
+
+Restored continuous wandering, repulsion, faction gravity and pair attraction in presentation-only physics. Measured full portrait/label bounds stay separate; targets steady on mouse hover, pointer interaction and keyboard focus. Added explicit pause/resume and live reduced-motion handling. Desktop chat uses a light, unblurred backdrop. Lora is bundled unmodified with its OFL license/source; dialogue and composer use 18px type.
+
+The full offline gate passed after the correction: **92 backend tests, 11 browser workflows and 3 physics checks**, plus lint, contracts, build/types, all **58 artwork hashes**, server logs and whitespace. Browser tests sample actual animation frames on desktop and a 25-portrait mobile board, check interaction pauses, and inspect browser-rendered glyphs to confirm custom Lora. Pure simulations check a minute of safe continuous motion and pair attraction. Inspected final desktop/mobile Lora dialogue and displaced swarm captures; a normal-motion video was captured as additional review evidence in ignored `artifacts/swarm-video/`. No paid model calls or backend changes.

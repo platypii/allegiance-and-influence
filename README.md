@@ -80,7 +80,7 @@ This drives the same game transitions and persistence boundary with scripted pla
 
 ## Design system
 
-The game uses a shared typography, color, spacing, and control system. Open `/design-system/` on the running server for the visual reference, and see [the design guidelines](docs/design-system.md). Conversation text is readable on phones, character targets remain separate, and all original artwork is preserved.
+The game uses a shared typography, color, spacing, and control system. Open `/design-system/` on the running server for the visual reference, and see [the design guidelines](docs/design-system.md). Conversation text is readable on phones, the animated swarm keeps character targets separate, and all original artwork is preserved.
 
 ## Architecture and roadmap
 

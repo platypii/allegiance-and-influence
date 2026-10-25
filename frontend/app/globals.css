@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "Lora";
+  src: url("/fonts/lora/Lora-Variable.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+}
+
 :root {
   color-scheme: light;
   --ink: #243c35;
@@ -16,7 +24,8 @@
   --neutral: #81786a;
   --focus: #1b6885;
   --font-body: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-display: Georgia, "Times New Roman", serif;
+  --font-display: "Lora", Georgia, serif;
+  --font-dialogue: "Lora", Georgia, serif;
   --text-small: .875rem;
   --text-body: 1rem;
   --text-large: 1.125rem;

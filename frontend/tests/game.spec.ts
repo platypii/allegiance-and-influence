@@ -269,3 +269,116 @@ test("a full character roster keeps every mobile target reachable", async ({ pag
   await targets.last().click()
   await expect(page.getByRole("dialog")).toBeVisible()
 })
+
+test("the live swarm moves, keeps targets separate, and pauses for interaction", async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: "no-preference", recordVideo: { dir: "../artifacts/swarm-video", size: { width: 1440, height: 1000 } } })
+  const page = await context.newPage()
+  await page.goto("http://127.0.0.1:8765")
+  await page.getByRole("button", { name: "Start single-player game" }).click()
+  const board = page.getByLabel("Influence board")
+  await expect(board).toHaveAttribute("data-motion", "running")
+  const targets = board.locator("[data-node] button")
+  const positions = () => targets.evaluateAll(elements => elements.map(element => {
+    const r = element.getBoundingClientRect(); return { x: r.x, y: r.y, right: r.right, bottom: r.bottom }
+  }))
+  const initial = await positions()
+  await page.screenshot({ path: "../artifacts/screenshots/swarm-before.png" })
+  // Sample real animation frames, including all target rectangles, not CSS declarations.
+  const samples = await board.evaluate(async element => {
+    const samples: { x: number; y: number; right: number; bottom: number }[][] = []
+    for (let i = 0; i < 120; i++) {
+      await new Promise(requestAnimationFrame)
+      samples.push([...element.querySelectorAll("[data-node] button")].map(button => {
+        const r = button.getBoundingClientRect(); return { x: r.x, y: r.y, right: r.right, bottom: r.bottom }
+      }))
+    }
+    return samples
+  })
+  expect(samples.at(-1)!.some((r, i) => Math.hypot(r.x - initial[i].x, r.y - initial[i].y) > 8)).toBeTruthy()
+  for (const sample of samples) for (let i = 0; i < sample.length; i++) {
+    const a = sample[i]
+    for (const b of sample.slice(i + 1)) expect(a.right <= b.x || b.right <= a.x || a.bottom <= b.y || b.bottom <= a.y).toBeTruthy()
+  }
+  await page.screenshot({ path: "../artifacts/screenshots/swarm-after.png" })
+  const target = page.getByRole("button", { name: /^Recruit/ }).first()
+  await target.hover({ force: true })
+  const hovered = await positions()
+  await page.waitForTimeout(250) // Verify that a pointed-at target really stops.
+  expect(await positions()).toEqual(hovered)
+  await page.mouse.move(0, 0)
+  await target.focus()
+  const focused = await positions()
+  await page.waitForTimeout(250)
+  expect(await positions()).toEqual(focused)
+  await target.evaluate(element => (element as HTMLElement).blur())
+  await page.getByRole("button", { name: "Pause board motion" }).click()
+  await expect(board).toHaveAttribute("data-motion", "paused")
+  const paused = await positions()
+  await page.waitForTimeout(250)
+  expect(await positions()).toEqual(paused)
+  await page.getByRole("button", { name: "Resume board motion" }).click()
+  await page.mouse.move(0, 0)
+  await expect.poll(async () => (await positions()).some((r, i) => Math.abs(r.x - paused[i].x) + Math.abs(r.y - paused[i].y) > 3)).toBeTruthy()
+  await page.emulateMedia({ reducedMotion: "reduce" })
+  await expect(board).toHaveAttribute("data-motion", "reduced")
+  const reduced = await positions()
+  await page.waitForTimeout(250)
+  expect(await positions()).toEqual(reduced)
+  await context.close()
+})
+
+test("dialogue actually renders the bundled Lora font at readable sizes", async ({ page }) => {
+  await page.goto("/")
+  await page.getByRole("button", { name: "Start single-player game" }).click()
+  await page.getByRole("button", { name: /^Recruit/ }).first().click()
+  await expect(page.getByRole("dialog")).toBeVisible()
+  await page.evaluate(() => document.fonts.ready)
+  expect(await page.evaluate(() => [...document.fonts].some(font => font.family === "Lora" && font.status === "loaded"))).toBeTruthy()
+  for (const element of [page.getByRole("log").locator("p").first(), page.getByLabel("Your message")]) {
+    expect(await element.evaluate(e => getComputedStyle(e).fontFamily)).toContain("Lora")
+    expect(await element.evaluate(e => parseFloat(getComputedStyle(e).fontSize))).toBeGreaterThanOrEqual(18)
+  }
+  const cdp = await page.context().newCDPSession(page)
+  await cdp.send("DOM.enable")
+  await cdp.send("CSS.enable")
+  const { root } = await cdp.send("DOM.getDocument")
+  const { nodeId } = await cdp.send("DOM.querySelector", { nodeId: root.nodeId, selector: '[role="log"] p' })
+  const { fonts } = await cdp.send("CSS.getPlatformFontsForNode", { nodeId })
+  expect(fonts.some(font => font.familyName === "Lora" && font.isCustomFont && font.glyphCount > 0)).toBeTruthy()
+  await page.screenshot({ path: "../artifacts/screenshots/lora-dialogue-desktop.png" })
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.screenshot({ path: "../artifacts/screenshots/lora-dialogue-mobile.png" })
+  await cdp.detach()
+})
+
+test("a crowded mobile board remains animated without overlapping tap targets", async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 320, height: 568 }, isMobile: true, hasTouch: true, reducedMotion: "no-preference" })
+  const page = await context.newPage()
+  await page.goto("http://127.0.0.1:8765")
+  await page.getByLabel("Characters", { exact: true }).fill("23")
+  await page.getByRole("button", { name: "Start single-player game" }).click()
+  const board = page.getByLabel("Influence board")
+  await expect(board.locator("[data-node]")).toHaveCount(25)
+  const result = await board.evaluate(async element => {
+    let collision = false, escaped = false
+    const sample = () => [...element.querySelectorAll("[data-node] button")].map(e => e.getBoundingClientRect().toJSON())
+    const before = sample()
+    for (let step = 0; step < 90; step++) {
+      await new Promise(requestAnimationFrame)
+      const bounds = element.getBoundingClientRect(), rectangles = sample()
+      for (let i = 0; i < rectangles.length; i++) {
+        const a = rectangles[i]
+        escaped ||= a.left < bounds.left || a.right > bounds.right || a.top < bounds.top || a.bottom > bounds.bottom
+        for (const b of rectangles.slice(i + 1)) collision ||= a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom
+      }
+    }
+    return { collision, escaped, moved: sample().some((r, i) => Math.hypot(r.x - before[i].x, r.y - before[i].y) > 1) }
+  })
+  expect(result).toEqual({ collision: false, escaped: false, moved: true })
+  const last = page.getByRole("button", { name: /^Recruit/ }).last()
+  // Scroll like a user without Playwright waiting for an intentionally moving target to settle.
+  await last.evaluate(element => element.scrollIntoView({ block: "center", behavior: "instant" }))
+  await last.tap({ force: true })
+  await expect(page.getByRole("dialog")).toBeVisible()
+  await context.close()
+})
