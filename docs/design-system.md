@@ -1,0 +1,48 @@
+# Allegiance & Influence design system
+
+The visual direction is a historical strategy salon: warm ivory paper, dark green framing, brass detail, and the existing expressive character portraits. The interface should feel calm enough to read an entire conversation. Faction color communicates allegiance; it does not decorate unrelated controls.
+
+The executable source is `frontend/app/globals.css`. Open `/design-system/` on any running game server for a reference page with palette, typography, and control states. Component CSS modules handle layouts; new interface work should use the shared tokens rather than reintroducing separate palettes or font stacks.
+
+## Tokens and hierarchy
+
+| Purpose | Token / value | Usage |
+| --- | --- | --- |
+| Main ink | `--ink` / #243c35 | Text and primary controls |
+| Deep ink | `--ink-strong` / #172c26 | Surrounding frame and landing background |
+| Secondary ink | `--ink-muted` / #59645b | Supporting descriptions and metadata |
+| Paper | `--paper` / #f6f1e6 | Main surfaces |
+| Raised paper | `--paper-raised` / #fffcf5 | Forms, messages, session controls |
+| Sunken paper | `--paper-sunken` / #eae4d6 | Page background, quiet status areas |
+| Brass / gold | `--brass` / #886323; `--gold` / #e6c889 | Small accents, dark-surface labels |
+| Factions | `--red` / #a43c38; `--blue` / #315e85 | Score labels, portrait rings, player messages |
+| Focus | `--focus` / #1b6885 | Visible 3px keyboard focus outline |
+| Spacing | `--space-1` through `--space-7` | 4, 8, 12, 16, 24, 32, 48px rhythm |
+| Corners | `--radius-small` / 6.4px; `--radius` / 12px | Controls and panels |
+
+Display headings use Georgia with a serif fallback; body text and controls use the platform sans-serif stack. Both work offline without font downloads or missing-font substitutes. Serif headlines establish character; readable sans-serif text carries the actual game. Use rem-based body sizes to respect user font settings.
+
+- Body, messages, form fields, and button text: at least **16px**, typically 1.6 line height.
+- Secondary labels, supporting metadata, character names: at least **14px**.
+- Dialog/section headings: 26–36px; landing masthead scales from 38–78px.
+- Primary/secondary buttons are normally 48px tall; compact dismiss/profile controls are at least 44px.
+- Keep text on solid surfaces. Do not place instructions over detailed artwork or use embedded image lettering as the app title.
+- Pair faction colors with written Red / Blue / Unaligned labels. Do not dim portraits merely because they cannot currently be selected.
+
+## Layout and components
+
+**Setup:** a portrait composition and real-text masthead beside a paper form on desktop. Stack into ordinary document flow on phones; vertical scrolling is intentional. Labels sit above full-width form fields. Characters and rounds share a row and stack when enlarged text needs more room.
+
+**Board:** a stable score header, a separate board surface, and a sidebar for round/session controls. Mobile places those sections in document flow. Labeled portrait buttons use a stable grid at every width, preventing collisions between names, portraits, and tap targets. Desktop influence connections follow the actual portrait positions; mobile exposes those pairings in the readable round recap. Original artwork is lightly washed behind the board so it cannot compete with labels.
+
+**Conversation:** a native modal dialog with a strong identity header, expandable character profile, readable message cards, and clear message/finish controls. Desktop uses a right-hand panel; phones use the available viewport. Native dialog behavior keeps keyboard focus inside, makes the board inert, supports Escape, and restores focus to a still-focusable trigger when dismissed. Avoid autofocus on the text field so opening a profile does not immediately summon the phone keyboard. API errors belong inside the open dialog.
+
+**Round and results:** expose the current round as a clear heading and the recap in a disclosure. Outcomes use real text and existing portraits; controls lead to the final board/replay or another match. Replay uses the same readable surfaces and labels as the live board.
+
+**Motion:** no pulsing status or glowing text. Respect reduced motion. Original raster assets remain unchanged; improvements come from composition, framing, contrast, and HTML/CSS typography.
+
+## Verification
+
+Browser coverage includes 320/390/430px layouts, enlarged text, a complete mobile conversation and replay, character profile access, dialog focus and Escape, and reachability of all 23 character targets. Existing desktop multiplayer, model, invite, cancellation/retry and reload workflows remain required. Inspect captures in `artifacts/screenshots/`; compare the preserved baseline in `artifacts/design-before/`. Run `bash scripts/agent-verify.sh` and retain all 58 original asset hashes.
+
+Automated viewport checks do not substitute for testing an actual iPhone/Android keyboard or screen reader. Check both during hosted playtesting. Update this document and the reference page when introducing new components or tokens.

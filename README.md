@@ -78,6 +78,10 @@ The [first live validation](docs/live-validation-2026-10-24.md) completed 18 pai
 
 This drives the same game transitions and persistence boundary with scripted players. The optional JSON contains a manifest and public replay frames; private conversations and player keys are excluded. This is a smoke experiment, not a model benchmark.
 
+## Design system
+
+The game uses a shared typography, color, spacing, and control system. Open `/design-system/` on the running server for the visual reference, and see [the design guidelines](docs/design-system.md). Conversation text is readable on phones, character targets remain separate, and all original artwork is preserved.
+
 ## Architecture and roadmap
 
 - [Modernization plan](docs/modernization-plan.md)

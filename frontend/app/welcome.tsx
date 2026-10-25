@@ -21,10 +21,22 @@ export default function Welcome({ game, busy, onCreate, onJoin }: {
   const [rounds, setRounds] = useState(3)
   const [agents, setAgents] = useState(6)
   return <div className={styles.welcome}>
-    <img src="/images/splash_logo.jpg" alt="Allegiance & Influence" width={480} />
-    <div className={styles.setup}>
-      <h1>{game ? "Choose your side" : "A room full of possibilities"}</h1>
-      <p>{game?.mode === "scripted" ? "Local demo · scripted characters · no API keys" : game ? "Model experiment · character-specific model assignments" : "Persuasion game · local server"}</p>
+    <div className={styles.layout}>
+    <section className={styles.story} aria-label="About the game">
+      <p className={`eyebrow ${styles.brand}`}>The art of persuasion</p>
+      <h1 className={styles.title}>Allegiance<br /><em>&amp; Influence</em></h1>
+      <p className={styles.intro}>Great minds. Strong opinions.<br />Who will you bring to your side?</p>
+      <div className={styles.portraits}>
+        {[["albert_einstein", "Einstein"], ["marie_curie", "Curie"], ["winston_churchill", "Churchill"]].map(([id, name]) => <figure className={styles.portrait} key={id}>
+          <img src={`/images/agents/${id}.jpg`} alt="" width={160} height={160} /><figcaption>{name}</figcaption>
+        </figure>)}
+      </div>
+      <p className={styles.caption}>A game of conversation, character, and changing loyalties.</p>
+    </section>
+    <section className={styles.setup} aria-label="Game setup">
+      <div className="eyebrow muted">{game ? "Your invitation" : "Gather your company"}</div>
+      <h2>{game ? "Choose your side" : "A room full of possibilities"}</h2>
+      <p className="muted">{game ? <><span>{game.mode === "scripted" ? "Scripted demo" : "Model experiment"}</span> · {game.mode === "scripted" ? "no API key needed" : "each character has a mind of their own"}</> : "Play solo against an opponent, or invite a friend."}</p>
       {!game ? <form onSubmit={e => { e.preventDefault(); onCreate({ num_agents: agents, num_rounds: rounds, seed: 32, opponent_profile: solo ? profile : null }) }}>
         <label>Play mode <select aria-label="Play mode" value={solo ? "solo" : "multiplayer"} onChange={e => setSolo(e.target.value === "solo")}>
           <option value="solo">Single player</option><option value="multiplayer">Two players</option>
@@ -33,9 +45,10 @@ export default function Welcome({ game, busy, onCreate, onJoin }: {
           {profiles.map(p => <option key={p.profile} value={p.profile}>{p.kind === "scripted" ? "Scripted opponent (offline)" : p.model} · {p.profile}</option>)}
         </select></label>}
         {solo && optionsError && <p role="alert">Could not load opponent models. Reload to try again.</p>}
-        <label>Characters <input aria-label="Characters" type="number" min={2} max={23} value={agents} onChange={e => setAgents(Number(e.target.value))} /></label>
+        <div className={styles.numbers}><label>Characters <input aria-label="Characters" type="number" min={2} max={23} value={agents} onChange={e => setAgents(Number(e.target.value))} /></label>
         <label>Rounds <input aria-label="Rounds" type="number" min={1} max={20} value={rounds} onChange={e => setRounds(Number(e.target.value))} /></label>
-        <button disabled={busy || (solo && !profile)} type="submit">{solo ? "Start single-player game" : "Create local game"}</button>
+        </div>
+        <button className="primary" disabled={busy || (solo && !profile)} type="submit">{solo ? "Start single-player game" : "Create game"}</button>
       </form> : <>
         {game.opponent ? <p>You play Red against {game.opponent.model}. Blue is ready.</p> : <>
           <p>Share this session link. Each player chooses a different side.</p>
@@ -48,7 +61,8 @@ export default function Welcome({ game, busy, onCreate, onJoin }: {
         {game.players.player_red && game.players.player_blue && <p>Both seats are occupied. You can watch the board.</p>}
         <a href="/">Create another game</a>
       </>}
-      <p>Choose a character, make your case, then finish the conversation. Watch allegiances change when the round ends.</p>
+      <div className={styles.how}><h3>Win them over. Change the room.</h3><p>Choose a character, make your case, then finish the conversation. Watch allegiances change when the round ends.</p></div>
+    </section>
     </div>
   </div>
 }
