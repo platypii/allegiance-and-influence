@@ -2,6 +2,10 @@
 
 Updated 2026-10-24. User authorized modernization and merging all open PRs, and selected OpenRouter for hosted models with different models per character.
 
+## Replit hosting preparation
+
+Issue [#11](https://github.com/platypii/allegiance-and-influence/issues/11), branch `codex/replit-import`, task packet `work/replit-import.md`. The user chose Replit instead of proceeding with DigitalOcean. The implementation adds GitHub import/Run/build/publish configuration and optional PostgreSQL persistence, while keeping local SQLite and all artwork. Single-server ownership is enforced; production requires a separate PostgreSQL database with a direct/session connection. OpenRouter configuration remains explicit and keys stay in Secrets. See [the import/runbook](../docs/replit-hosting.md). Local verification passed: 92 offline backend tests, 5 browser workflows, 19 real PostgreSQL cases, original assets, and a fresh source-only build. CI adds its own PostgreSQL service. No Replit app has been provisioned or published; the prepared branch awaits review/merge before default-branch import.
+
 ## Milestones
 
 - [PR #3](https://github.com/platypii/allegiance-and-influence/pull/3), local foundation, merged as `d0aff12`: authoritative game rules, SQLite, local multiplayer/replay, original art, and the software factory.

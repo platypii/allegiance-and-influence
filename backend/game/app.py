@@ -29,18 +29,32 @@ def create_app(db_path: Path | None = None, static_dir: Path | None = None, prov
 
     @asynccontextmanager
     async def lifespan(app):
-        store.recover_jobs()
-        with store.connection() as db:
-            states = [store._load(db, row[0]) for row in db.execute("SELECT id FROM games")]
-        for state in states:
-            opponent.wake(state)
-        yield
-        await opponent.close()
-        await runtime.close()
+        try:
+            store.recover_jobs()
+            with store.connection() as db:
+                states = [store._load(db, row[0]) for row in db.execute("SELECT id FROM games")]
+            for state in states:
+                opponent.wake(state)
+            yield
+        finally:
+            try:
+                await opponent.close()
+            finally:
+                try:
+                    await runtime.close()
+                finally:
+                    store.close()
 
     app = FastAPI(title="Allegiance & Influence", version="0.3.0", lifespan=lifespan)
-    store = Store(
-        db_path or Path(os.environ.get("GAME_DB", ROOT / "data/game.sqlite3")),
+    # Explicit local paths always win, keeping experiments and tests isolated.
+    database_url = os.environ.get("DATABASE_URL") if db_path is None else None
+    store_class = Store
+    if database_url:
+        from .postgres import PostgresStore
+
+        store_class = PostgresStore
+    store = store_class(
+        database_url or db_path or Path(os.environ.get("GAME_DB", ROOT / "data/game.sqlite3")),
         roster,
         identity=provider.identity,
         policy=policy,
@@ -93,6 +107,8 @@ def create_app(db_path: Path | None = None, static_dir: Path | None = None, prov
 
     @app.get("/api/health")
     async def health():
+        with store.connection() as db:
+            db.execute("SELECT 1")
         return {
             "status": "ok",
             "mode": "scripted" if provider.identity.provider == "scripted" else "model",

@@ -1,4 +1,4 @@
-"""SQLite snapshots and an atomic command journal. One server process owns updates."""
+"""Snapshots and an atomic command journal. One server process owns updates."""
 
 import hashlib
 import json
@@ -37,9 +37,20 @@ class Store(Jobs):
         self.policy = policy or RuntimePolicy()
         self.routes = routes or {"*": self.identity.model_dump()}
         self.opponents = opponents or {"scripted": ScriptedProvider.identity.model_dump()}
+        self.open(path)
+        try:
+            self.initialize()
+        except BaseException:
+            self.close()
+            raise
+
+    def open(self, path):
         path.parent.mkdir(parents=True, exist_ok=True)
         with self.connection() as db:
             db.execute("PRAGMA journal_mode=WAL")
+
+    def initialize(self):
+        with self.connection() as db:
             db.executescript("""
                 CREATE TABLE IF NOT EXISTS games (id TEXT PRIMARY KEY, state TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS seats (
@@ -52,6 +63,17 @@ class Store(Jobs):
             """)
 
             self.init_jobs(db)
+
+    def begin_write(self, db):
+        db.execute("BEGIN IMMEDIATE")
+
+    def add_column(self, db, table, column):
+        # Identifiers are fixed migration constants, never user input.
+        if column not in {r["name"] for r in db.execute(f"PRAGMA table_info({table})")}:
+            db.execute(f"ALTER TABLE {table} ADD COLUMN {column} TEXT")
+
+    def close(self):
+        pass  # SQLite connections are scoped to individual transactions.
 
     @contextmanager
     def connection(self):
@@ -150,7 +172,7 @@ class Store(Jobs):
 
     def join(self, game_id, seat, token):
         with self.connection() as db:
-            db.execute("BEGIN IMMEDIATE")
+            self.begin_write(db)
             state = self._load(db, game_id)
             existing = db.execute(
                 "SELECT seat FROM seats WHERE game_id=? AND token_hash=?", (game_id, digest(token))
@@ -173,7 +195,7 @@ class Store(Jobs):
 
     def _apply(self, game_id, token, command, *, opponent=False):
         with self.connection() as db:
-            db.execute("BEGIN IMMEDIATE")
+            self.begin_write(db)
             state = self._load(db, game_id)
             if opponent:
                 if not state.get("opponent"):

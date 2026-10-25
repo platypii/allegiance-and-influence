@@ -4,6 +4,10 @@ Recruit historical characters, build a faction, and watch influence spread acros
 
 The current baseline runs **entirely locally with scripted characters**. No Firebase project, API key, Docker, or separate database server is needed. It supports two human players, saved games, reconnects, replay, and a provider-neutral asynchronous agent runtime. Optional hosted conversations use OpenRouter, with separate model assignments per character and a paired persuasion experiment runner.
 
+## Import into Replit
+
+Use [the Replit setup guide](docs/replit-hosting.md) for GitHub import, Run/Preview, production PostgreSQL, and OpenRouter Secrets. The repository includes build and launch commands. Publish as one Reserved VM; local SQLite remains the default for self-contained play.
+
 ## Run locally
 
 Prerequisites: Python 3.12 through [uv](https://docs.astral.sh/uv/) and Node.js 22 or later with npm. Dependency installation needs an internet connection; running the default scripted game does not.
@@ -29,7 +33,7 @@ GAME_HOST=0.0.0.0 GAME_PORT=8000 bash scripts/run-local.sh
 GAME_DB=/absolute/path/to/game.sqlite3 bash scripts/run-local.sh
 ```
 
-The default save is `data/game.sqlite3`. Startup never resets games. To back it up, stop the server and copy the data directory, including any SQLite sidecar files. This is a single-server local/LAN baseline; public internet hosting and account management remain future work.
+The default save is `data/game.sqlite3`. Startup never resets games. To back it up, stop the server and copy the data directory, including any SQLite sidecar files. For hosted persistence use the PostgreSQL setup above. Account management remains future work.
 
 ## Develop and verify
 

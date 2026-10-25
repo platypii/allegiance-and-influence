@@ -7,3 +7,4 @@ def offline_environment(monkeypatch):
     monkeypatch.delenv("GAME_MODEL_CONFIG", raising=False)
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     monkeypatch.delenv("OPENROUTER_API_KEY_FILE", raising=False)
+    monkeypatch.delenv("DATABASE_URL", raising=False)
