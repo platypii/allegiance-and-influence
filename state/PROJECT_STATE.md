@@ -1,14 +1,14 @@
 # Project state
 
-Updated 2026-10-24. User authorized modernization, approved prior merges, and selected OpenRouter for hosted models with different models per character.
+Updated 2026-10-24. User authorized modernization and merging all open PRs, and selected OpenRouter for hosted models with different models per character.
 
 ## Milestones
 
 - [PR #3](https://github.com/platypii/allegiance-and-influence/pull/3), local foundation, merged as `d0aff12`: authoritative game rules, SQLite, local multiplayer/replay, original art, and the software factory.
 - [PR #5](https://github.com/platypii/allegiance-and-influence/pull/5), provider-neutral runtime, merged as `03b2a49`: durable asynchronous replies, bounded execution, cancellation/retry, recovery, budgets, and offline conformance.
-- OpenRouter increment: branch `codex/model-conversations`, [task #6](https://github.com/platypii/allegiance-and-influence/issues/6), under [epic #1](https://github.com/platypii/allegiance-and-influence/issues/1). Scope: `work/model-conversations.md`.
+- [PR #7](https://github.com/platypii/allegiance-and-influence/pull/7), OpenRouter increment, merged as `5fa039e`: [task #6](https://github.com/platypii/allegiance-and-influence/issues/6), under [epic #1](https://github.com/platypii/allegiance-and-influence/issues/1). Scope: `work/model-conversations.md`.
 
-- Current playtest increment: [PR #10](https://github.com/platypii/allegiance-and-influence/pull/10), branch `codex/solo-and-invites`, issues [#8](https://github.com/platypii/allegiance-and-influence/issues/8) and [#9](https://github.com/platypii/allegiance-and-influence/issues/9). Stacked on unmerged PR #7; scope: `work/solo-and-invites.md`. Do not infer approval to merge the base PR.
+- [PR #10](https://github.com/platypii/allegiance-and-influence/pull/10), solo play and invites, merged as `0bc0fa1`, closes issues [#8](https://github.com/platypii/allegiance-and-influence/issues/8) and [#9](https://github.com/platypii/allegiance-and-influence/issues/9). Merged after PR #7 with explicit user approval; scope: `work/solo-and-invites.md`. Both increments are on the default branch, `master` (this repository has no `main` branch). Issues #6, #8, and #9 are closed; epic #1 remains open.
 
 ## Solo and invites: implemented and verified
 

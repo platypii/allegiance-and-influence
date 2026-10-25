@@ -35,3 +35,7 @@ The user requested file-based model options and identified mobile as a possible 
 The user supplied the private key locally and confirmed its spending cap. Selected three concrete models from the current public catalog and configured a $1 whole-game cap. Five live paired runs produced 18 valid replies; a real two-player browser game produced one further reply. Recorded total: $0.004381. Assignment/order controls succeeded without retries or output repair; all paired recruitment decisions were false. [Dated evidence](../docs/live-validation-2026-10-24.md) records settings, measurements, limitations, and report hashes. This is compatibility evidence, not a model ranking.
 
 The first browser automation attempt selected before a WebSocket update; the server correctly rejected the stale version before inference. Both selection workflows now wait for the other browser to observe the reserved target. The complete offline gate passed afterward: 79 backend tests, 3 browser workflows, schemas/fixtures, lint, build/types, 58 artwork hashes, clean server logs, and whitespace. Gameplay incentives and longer/repeated comparisons remain follow-up work.
+
+## Merge resolution
+
+The user explicitly authorized merging all open PRs. PR #7 merged into the default branch `master` as `5fa039e`; task #6 is closed. PR #10 subsequently merged the solo/invite follow-up.

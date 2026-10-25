@@ -1,6 +1,6 @@
 # Scope: session invites and a selectable solo opponent
 
-[PR #10](https://github.com/platypii/allegiance-and-influence/pull/10). Issues #8 and #9, under epic #1. Branch `codex/solo-and-invites` is stacked on unmerged PR #7; do not merge its base implicitly.
+[PR #10](https://github.com/platypii/allegiance-and-influence/pull/10). Issues #8 and #9, under epic #1. Originally stacked on PR #7. The user explicitly authorized merging all PRs: #7 merged as `5fa039e`, then #10 as `0bc0fa1` into the default branch `master`. Issues #8 and #9 are closed.
 
 ## Plan
 
