@@ -62,13 +62,13 @@ Use the database provider's recovery controls and take a PostgreSQL backup befor
 ```bash
 mkdir -p artifacts
 umask 077
-PGDATABASE="$DATABASE_URL" pg_dump --format=custom --file=artifacts/game-backup.dump
+pg_dump --dbname="$DATABASE_URL" --format=custom --file=artifacts/game-backup.dump
 ```
 
 Download backups from the Replit workspace; the artifact directory is ignored by Git. A database dump includes game transcripts and hashed seat credentials. Restore into a **new empty database**, with the game stopped, then point the app at that database:
 
 ```bash
-PGDATABASE="$RESTORE_DATABASE_URL" pg_restore --no-owner --no-privileges --dbname="" artifacts/game-backup.dump
+pg_restore --no-owner --no-privileges --dbname="$RESTORE_DATABASE_URL" artifacts/game-backup.dump
 ```
 
 `RESTORE_DATABASE_URL` must identify the new restore target. Test restoration before relying on backups. Local SQLite saves are not imported automatically into PostgreSQL; this deployment begins with fresh sessions.
