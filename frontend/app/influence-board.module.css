@@ -17,3 +17,5 @@
 
 .motionControl { position: absolute; top: 12px; right: 16px; z-index: 1; font-size: var(--text-small); color: var(--ink-muted); }
 .motionControl button { min-height: 44px; padding: 8px 12px; font-size: var(--text-small); background: var(--paper-raised); }
+
+.motionControl > span { display: block; padding: 8px 12px; background: var(--paper-raised); border-radius: var(--radius-small); }
