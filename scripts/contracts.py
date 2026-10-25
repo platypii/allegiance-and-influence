@@ -9,6 +9,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 from game.agent_contracts import AgentRequest, ProviderResult, RuntimeReport  # noqa: E402
+from game.experiments import PairReport, PairScenario  # noqa: E402
+from game.model_config import ModelConfig  # noqa: E402
 from game.models import COMMAND_ADAPTER, GameView  # noqa: E402
 from jsonschema import Draft202012Validator  # noqa: E402
 
@@ -19,10 +21,13 @@ def main():
     args = parser.parse_args()
     schemas = {
         "command-v2": COMMAND_ADAPTER.json_schema(),
-        "game-view-v2": GameView.model_json_schema(by_alias=True),
-        "agent-request-v1": AgentRequest.model_json_schema(by_alias=True),
-        "agent-result-v1": ProviderResult.model_json_schema(),
-        "runtime-report-v1": RuntimeReport.model_json_schema(),
+        "game-view-v3": GameView.model_json_schema(by_alias=True),
+        "agent-request-v2": AgentRequest.model_json_schema(by_alias=True),
+        "agent-result-v2": ProviderResult.model_json_schema(),
+        "runtime-report-v2": RuntimeReport.model_json_schema(),
+        "model-config-v1": ModelConfig.model_json_schema(),
+        "pair-scenario-v1": PairScenario.model_json_schema(),
+        "pair-report-v1": PairReport.model_json_schema(by_alias=True),
     }
     for name, schema in schemas.items():
         path = ROOT / f"schemas/{name}.schema.json"
@@ -34,10 +39,13 @@ def main():
         Draft202012Validator.check_schema(schema)
     for directory, schema_name in [
         ("command", "command-v2"),
-        ("game-view", "game-view-v2"),
-        ("agent-request", "agent-request-v1"),
-        ("agent-result", "agent-result-v1"),
-        ("runtime-report", "runtime-report-v1"),
+        ("game-view", "game-view-v3"),
+        ("agent-request", "agent-request-v2"),
+        ("agent-result", "agent-result-v2"),
+        ("runtime-report", "runtime-report-v2"),
+        ("model-config", "model-config-v1"),
+        ("pair-scenario", "pair-scenario-v1"),
+        ("pair-report", "pair-report-v1"),
     ]:
         validator = Draft202012Validator(schemas[schema_name])
         fixtures = sorted((ROOT / "tests/fixtures" / directory).glob("*.json"))

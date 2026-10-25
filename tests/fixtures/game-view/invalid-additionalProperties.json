@@ -1,5 +1,5 @@
 {
-  "schema_version": "2",
+  "schema_version": "3",
   "rules_version": "scripted-v1",
   "id": "fixture-game",
   "version": 0,

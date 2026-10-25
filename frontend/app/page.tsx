@@ -55,7 +55,7 @@ export default function Home() {
         </div>
         <Round game={shown} />
         <div className={styles.toolbar}>
-          <span role="status">{connection}</span><span>Scripted demo</span>
+          <span role="status">{connection}</span><span>{shown.mode === "scripted" ? "Scripted demo" : "Model experiment"}</span>
           <button onClick={async () => { try { await navigator.clipboard.writeText(location.href); setCopied(true) } catch { setCopied(false) } }}>{copied ? "Link copied" : "Copy invite link"}</button>
           <a href="/">New game</a>
           {player && <button disabled={busy} onClick={async () => { const result = await replay(); if (result) { setFrames(result.frames); setFrame(result.frames.length - 1) } }}>Review replay</button>}
@@ -72,7 +72,7 @@ export default function Home() {
       {!frames && game?.phase === "finished" && !closedEnd && <Endgame game={game} onClose={() => setClosedEnd(true)} />}
     </main>
     {!frames && character && player && chat && !closedChat && (game?.phase === "selecting" || game?.phase === "conversing") && <Panel
-      playerName={player} character={character} chat={chat} busy={busy}
+      mode={game.mode} playerName={player} character={character} chat={chat} busy={busy}
       enabled={game.phase === "conversing" && !chat.done}
       onMessage={text => command({ kind: "message", text })}
       onDone={() => command({ kind: "done" })} onRetry={() => command({ kind: "retry" })} onCancel={() => command({ kind: "cancel" })} onClose={() => setClosedChat(true)} />}

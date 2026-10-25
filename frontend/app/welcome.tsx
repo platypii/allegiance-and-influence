@@ -13,7 +13,7 @@ export default function Welcome({ game, busy, onCreate, onJoin }: {
     <img src="/images/splash_logo.jpg" alt="Allegiance & Influence" width={480} />
     <div className={styles.setup}>
       <h1>{game ? "Choose your side" : "A room full of possibilities"}</h1>
-      <p>Local demo · scripted characters · no API keys</p>
+      <p>{game?.mode === "scripted" ? "Local demo · scripted characters · no API keys" : game ? "Model experiment · character-specific model assignments" : "Persuasion game · local server"}</p>
       {!game ? <form onSubmit={e => { e.preventDefault(); onCreate({ num_agents: agents, num_rounds: rounds, seed: 32 }) }}>
         <label>Characters <input aria-label="Characters" type="number" min={2} max={23} value={agents} onChange={e => setAgents(Number(e.target.value))} /></label>
         <label>Rounds <input aria-label="Rounds" type="number" min={1} max={20} value={rounds} onChange={e => setRounds(Number(e.target.value))} /></label>
@@ -27,7 +27,7 @@ export default function Welcome({ game, busy, onCreate, onJoin }: {
         {game.players.player_red && game.players.player_blue && <p>Both seats are occupied. You can watch the board.</p>}
         <a href="/">Create another game</a>
       </>}
-      <p>Choose a character, send two messages to recruit them, then finish the conversation. Unselected characters meet between rounds.</p>
+      <p>Choose a character, make your case, then finish the conversation. Watch allegiances change when the round ends.</p>
     </div>
   </div>
 }

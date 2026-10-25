@@ -3,6 +3,7 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 export NEXT_TELEMETRY_DISABLED=1
+unset GAME_MODEL_CONFIG OPENROUTER_API_KEY OPENROUTER_API_KEY_FILE
 failed=()
 run_check() {
   local check_name=$1
@@ -28,7 +29,7 @@ run_check 'Original artwork and canonical character data' .venv/bin/python scrip
 run_check 'Frontend build and types' npm --prefix frontend run build
 if [[ " ${failed[*]} " != *"Frontend build and types"* ]]; then
   run_check 'Two-player browser workflows' npm --prefix frontend run test:e2e
-  run_check 'Browser server error log' .venv/bin/python -c 'from pathlib import Path; p=Path("artifacts/e2e-server.log"); assert p.exists(), "Server log missing"; s=p.read_text(); assert "Traceback" not in s and "ERROR:" not in s, "Server exceptions: inspect artifacts/e2e-server.log"'
+  run_check 'Browser server error log' .venv/bin/python -c 'from pathlib import Path; paths=list(Path("artifacts").glob("e2e*-server.log")); assert len(paths)>=2, "Server logs missing"; s="\n".join(p.read_text() for p in paths); assert "Traceback" not in s and "ERROR:" not in s, "Server exceptions: inspect artifacts/e2e-server.log"'
 fi
 run_check 'Patch whitespace' git diff --check
 if (( ${#failed[@]} )); then

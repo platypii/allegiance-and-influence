@@ -1,0 +1,131 @@
+{
+  "$defs": {
+    "Decision": {
+      "additionalProperties": false,
+      "properties": {
+        "dialogue": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Dialogue",
+          "type": "string"
+        },
+        "join_opponent": {
+          "title": "Join Opponent",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "dialogue",
+        "join_opponent"
+      ],
+      "title": "Decision",
+      "type": "object"
+    },
+    "Receipt": {
+      "additionalProperties": false,
+      "properties": {
+        "requested_model": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Requested Model",
+          "type": "string"
+        },
+        "actual_model": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Actual Model",
+          "type": "string"
+        },
+        "generation_id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Generation Id",
+          "type": "string"
+        },
+        "upstream_provider": {
+          "anyOf": [
+            {
+              "maxLength": 120,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Upstream Provider"
+        }
+      },
+      "required": [
+        "requested_model",
+        "actual_model",
+        "generation_id"
+      ],
+      "title": "Receipt",
+      "type": "object"
+    },
+    "Usage": {
+      "additionalProperties": false,
+      "properties": {
+        "input_tokens": {
+          "minimum": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "minimum": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "cost_microusd": {
+          "minimum": 0,
+          "title": "Cost Microusd",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "input_tokens",
+        "output_tokens",
+        "cost_microusd"
+      ],
+      "title": "Usage",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "default": "2",
+      "enum": [
+        "1",
+        "2"
+      ],
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "decision": {
+      "$ref": "#/$defs/Decision"
+    },
+    "usage": {
+      "$ref": "#/$defs/Usage"
+    },
+    "receipt": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Receipt"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "decision",
+    "usage"
+  ],
+  "title": "ProviderResult",
+  "type": "object"
+}

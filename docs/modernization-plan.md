@@ -1,6 +1,6 @@
 # Allegiance & Influence modernization plan
 
-Roadmap, 2026-10-21. The user authorized autonomous execution. The local foundation is merged in PR #3. The provider-neutral runtime portion of milestone 4 is implemented on `codex/agent-runtime`; live adapters, streaming, and memory remain subsequent work. See `../state/PROJECT_STATE.md` for current evidence and remaining work. See the scoped [runtime task](../work/agent-runtime.md) and [contract](agent-runtime-contract.md) for this increment.
+Roadmap, 2026-10-21. The user authorized autonomous execution. The local foundation is merged in PR #3. The provider-neutral runtime merged in PR #5. The next increment uses OpenRouter for per-character model assignments and controlled paired persuasion experiments; streaming and cross-round memory remain subsequent work. See `../state/PROJECT_STATE.md` for current evidence and remaining work. See the scoped [runtime task](../work/agent-runtime.md) and [contract](agent-runtime-contract.md) for this increment.
 
 ## Scope
 
@@ -91,6 +91,10 @@ Technical basis: [SQLite deployment guidance](https://sqlite.org/whentouse.html)
 4. Exercise that path with scripted model responses. Record intentional fixes separately from preserved behavior.
 5. Add live providers behind the same interface, then automated participants and larger experiments.
 6. Remove superseded code only after its behavior has a replacement and relevant evidence.
+
+## Client direction: web first, mobile later
+
+The user identified iPhone/Android as a possible later product on 2026-10-24; the current target remains the web app. Retain a responsive web client and a server-owned HTTP/WebSocket game protocol. Model profiles, budgets, and OpenRouter credentials belong on that server. Future mobile clients should reuse this boundary without carrying shared provider keys. Defer mobile packaging/framework selection until gameplay is established; hosted authentication, seat recovery, HTTPS, and reconnect behavior across app suspension precede public/mobile release.
 
 ## Model and experiment design
 

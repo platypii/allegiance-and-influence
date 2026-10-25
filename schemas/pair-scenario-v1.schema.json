@@ -1,0 +1,62 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1",
+      "default": "1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "characters": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 2,
+      "title": "Characters",
+      "type": "array"
+    },
+    "opening": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Opening",
+      "type": "string"
+    },
+    "exchanges": {
+      "default": 2,
+      "maximum": 5,
+      "minimum": 1,
+      "title": "Exchanges",
+      "type": "integer"
+    },
+    "seed": {
+      "default": 32,
+      "maximum": 2147483647,
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    },
+    "first_seat": {
+      "default": "player_red",
+      "enum": [
+        "player_red",
+        "player_blue"
+      ],
+      "title": "First Seat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "characters",
+    "opening"
+  ],
+  "title": "PairScenario",
+  "type": "object"
+}

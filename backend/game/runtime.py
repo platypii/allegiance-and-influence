@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from .agent_contracts import AgentRequest, ProviderResult, RuntimePolicy
 from .core import GameError
-from .providers import RetryableProviderError, ScriptedProvider
+from .providers import ProviderFailure, RetryableProviderError, ScriptedProvider
 
 
 class AgentRuntime:
@@ -59,6 +59,15 @@ class AgentRuntime:
         ):
             self._finish(request_id, "failed", "provider_changed")
             return
+        provider = (
+            self.provider.for_character(request.character.UID)
+            if hasattr(self.provider, "for_character")
+            else self.provider
+        )
+        route = json.loads(job["route"] or job["identity"])
+        if route != provider.identity.model_dump():
+            self._finish(request_id, "failed", "provider_changed")
+            return
         for _ in range(policy.max_attempts):
             attempt = None
             started = monotonic()
@@ -72,7 +81,7 @@ class AgentRuntime:
                         if attempt is None:
                             raise asyncio.CancelledError()
                         started = monotonic()
-                        return await self.provider.generate(request.model_copy(deep=True))
+                        return await provider.generate(request.model_copy(deep=True))
 
                 provider_task = asyncio.create_task(invoke())
                 self.provider_tasks.add(provider_task)
@@ -83,7 +92,7 @@ class AgentRuntime:
                     raise TimeoutError()
                 raw = provider_task.result()
                 result = ProviderResult.model_validate(raw)
-                identity = self.identity
+                identity = provider.identity
                 usage = result.usage
                 if (
                     usage.input_tokens > identity.max_input_tokens
@@ -91,15 +100,36 @@ class AgentRuntime:
                     or usage.cost_microusd > identity.max_cost_microusd
                 ):
                     self.store.record_attempt(
-                        request_id, attempt, "usage_exceeded", self._latency(started), usage.model_dump()
+                        request_id,
+                        attempt,
+                        "usage_exceeded",
+                        self._latency(started),
+                        usage.model_dump(),
+                        result.receipt.model_dump() if result.receipt else None,
                     )
                     self._finish(request_id, "failed", "usage_exceeded")
                     return
                 self.store.record_attempt(
-                    request_id, attempt, "succeeded", self._latency(started), usage.model_dump()
+                    request_id,
+                    attempt,
+                    "succeeded",
+                    self._latency(started),
+                    usage.model_dump(),
+                    result.receipt.model_dump() if result.receipt else None,
                 )
                 self._finish(request_id, "succeeded", result=result.model_dump())
                 return
+            except ProviderFailure as error:
+                if attempt:
+                    self.store.record_attempt(
+                        request_id,
+                        attempt,
+                        error.code,
+                        self._latency(started),
+                        error.usage.model_dump() if error.usage else None,
+                        error.receipt.model_dump() if error.receipt else None,
+                    )
+                self._finish(request_id, "failed", error.code)
             except RetryableProviderError:
                 if attempt:
                     self.store.record_attempt(request_id, attempt, "transient_error", self._latency(started))

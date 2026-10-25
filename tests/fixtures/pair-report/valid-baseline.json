@@ -1,0 +1,435 @@
+{
+  "schema_version": "1",
+  "evidence": "scripted",
+  "status": "completed",
+  "scenario": {
+    "schema_version": "1",
+    "name": "A coalition worth joining",
+    "characters": [
+      "albert_einstein",
+      "winston_churchill"
+    ],
+    "opening": "Our factions could accomplish more together. What concrete commitment would make an alliance worth your trust?",
+    "exchanges": 2,
+    "seed": 32,
+    "first_seat": "player_red"
+  },
+  "scenario_hash": "66627310cd3ee587dc3a5e011e5765548a94cfd0972370a8e1b7ef9899116806",
+  "roster_hash": "340bd9be2f2f9cb75557a366bdc01c781ee9750de9258ba1022c34bf38896cf1",
+  "provider": {
+    "provider": "scripted",
+    "model": "scripted-v1",
+    "prompt_version": "scripted-v1",
+    "max_input_tokens": 0,
+    "max_output_tokens": 0,
+    "max_cost_microusd": 0
+  },
+  "configuration": null,
+  "assignments": {
+    "albert_einstein": {
+      "provider": "scripted",
+      "model": "scripted-v1",
+      "prompt_version": "scripted-v1",
+      "max_input_tokens": 0,
+      "max_output_tokens": 0,
+      "max_cost_microusd": 0
+    },
+    "winston_churchill": {
+      "provider": "scripted",
+      "model": "scripted-v1",
+      "prompt_version": "scripted-v1",
+      "max_input_tokens": 0,
+      "max_output_tokens": 0,
+      "max_cost_microusd": 0
+    }
+  },
+  "policy": {
+    "timeout_seconds": 10.0,
+    "concurrency": 4,
+    "max_queued": 64,
+    "max_attempts": 2,
+    "call_limit": 200,
+    "token_limit": 200000,
+    "cost_limit_microusd": 0
+  },
+  "turns": [
+    {
+      "character": "albert_einstein",
+      "request_id": "920146585210502f04ba2bdb456318f3ff29599466b96714fb39d8f2d99c5883",
+      "status": "succeeded",
+      "error": null,
+      "decision": {
+        "dialogue": "You have made your case. I will join your faction when this round ends.",
+        "join_opponent": true
+      },
+      "messages": [
+        {
+          "name": "albert_einstein",
+          "content": "I am Albert Einstein. What would you like our alliance to stand for?"
+        },
+        {
+          "name": "player_blue",
+          "content": "Tell me more about how we would work together."
+        },
+        {
+          "name": "albert_einstein",
+          "content": "Tell me more about how we would work together."
+        },
+        {
+          "name": "player_blue",
+          "content": "You have made your case. I will join your faction when this round ends."
+        },
+        {
+          "name": "albert_einstein",
+          "content": "You have made your case. I will join your faction when this round ends."
+        }
+      ]
+    }
+  ],
+  "accounting": {
+    "player_red": {
+      "schema_version": "2",
+      "identity": {
+        "provider": "scripted",
+        "model": "scripted-v1",
+        "prompt_version": "scripted-v1",
+        "max_input_tokens": 0,
+        "max_output_tokens": 0,
+        "max_cost_microusd": 0
+      },
+      "policy": {
+        "timeout_seconds": 10.0,
+        "concurrency": 4,
+        "max_queued": 64,
+        "max_attempts": 2,
+        "call_limit": 200,
+        "token_limit": 200000,
+        "cost_limit_microusd": 0
+      },
+      "attempts": [
+        {
+          "request_id": "c9ccb0938dc0a9e63be291624067114a21da28db152247df98ef8943199762da",
+          "identity": {
+            "provider": "scripted",
+            "model": "scripted-v1",
+            "prompt_version": "scripted-v1",
+            "max_input_tokens": 0,
+            "max_output_tokens": 0,
+            "max_cost_microusd": 0
+          },
+          "receipt": null,
+          "attempt": 1,
+          "status": "succeeded",
+          "charged_tokens": 0,
+          "charged_cost": 0,
+          "usage": {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cost_microusd": 0
+          },
+          "latency_ms": 0
+        },
+        {
+          "request_id": "384a37778731f750cf0ca7974e589af608b8d2c848dba107f392639131222b04",
+          "identity": {
+            "provider": "scripted",
+            "model": "scripted-v1",
+            "prompt_version": "scripted-v1",
+            "max_input_tokens": 0,
+            "max_output_tokens": 0,
+            "max_cost_microusd": 0
+          },
+          "receipt": null,
+          "attempt": 1,
+          "status": "succeeded",
+          "charged_tokens": 0,
+          "charged_cost": 0,
+          "usage": {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cost_microusd": 0
+          },
+          "latency_ms": 0
+        }
+      ]
+    },
+    "player_blue": {
+      "schema_version": "2",
+      "identity": {
+        "provider": "scripted",
+        "model": "scripted-v1",
+        "prompt_version": "scripted-v1",
+        "max_input_tokens": 0,
+        "max_output_tokens": 0,
+        "max_cost_microusd": 0
+      },
+      "policy": {
+        "timeout_seconds": 10.0,
+        "concurrency": 4,
+        "max_queued": 64,
+        "max_attempts": 2,
+        "call_limit": 200,
+        "token_limit": 200000,
+        "cost_limit_microusd": 0
+      },
+      "attempts": [
+        {
+          "request_id": "5131f704b1f9aaf8fb246afaa89f16525d31ff9bc6b11c6d5132a0fce6dadcdf",
+          "identity": {
+            "provider": "scripted",
+            "model": "scripted-v1",
+            "prompt_version": "scripted-v1",
+            "max_input_tokens": 0,
+            "max_output_tokens": 0,
+            "max_cost_microusd": 0
+          },
+          "receipt": null,
+          "attempt": 1,
+          "status": "succeeded",
+          "charged_tokens": 0,
+          "charged_cost": 0,
+          "usage": {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cost_microusd": 0
+          },
+          "latency_ms": 0
+        },
+        {
+          "request_id": "920146585210502f04ba2bdb456318f3ff29599466b96714fb39d8f2d99c5883",
+          "identity": {
+            "provider": "scripted",
+            "model": "scripted-v1",
+            "prompt_version": "scripted-v1",
+            "max_input_tokens": 0,
+            "max_output_tokens": 0,
+            "max_cost_microusd": 0
+          },
+          "receipt": null,
+          "attempt": 1,
+          "status": "succeeded",
+          "charged_tokens": 0,
+          "charged_cost": 0,
+          "usage": {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cost_microusd": 0
+          },
+          "latency_ms": 0
+        }
+      ]
+    }
+  },
+  "final": {
+    "schema_version": "3",
+    "rules_version": "scripted-v1",
+    "id": "9f37afd0256d19269a7ff5fb3b6c66c9",
+    "version": 14,
+    "config": {
+      "num_agents": 2,
+      "num_rounds": 1,
+      "seed": 32
+    },
+    "mode": "scripted",
+    "phase": "finished",
+    "round_number": 1,
+    "players": {
+      "player_red": true,
+      "player_blue": true
+    },
+    "agents": [
+      {
+        "UID": "albert_einstein",
+        "Character": "Albert Einstein",
+        "Description": "Physicist, E=mc\u00b2 fame",
+        "Charisma": 7,
+        "Intellect": 10,
+        "Stubbornness": 6,
+        "Empathy": 7,
+        "Influence Range": 8,
+        "Loyalty": 7,
+        "Curiosity": 10,
+        "Consistency": 8,
+        "side": 1
+      },
+      {
+        "UID": "winston_churchill",
+        "Character": "Winston Churchill",
+        "Description": "British PM during WWII, famed orator",
+        "Charisma": 9,
+        "Intellect": 8,
+        "Stubbornness": 9,
+        "Empathy": 6,
+        "Influence Range": 9,
+        "Loyalty": 8,
+        "Curiosity": 7,
+        "Consistency": 8,
+        "side": -1
+      }
+    ],
+    "conversations": {
+      "player_red": {
+        "target": "winston_churchill",
+        "messages": [],
+        "done": true,
+        "join_opponent": false,
+        "work": null
+      },
+      "player_blue": {
+        "target": "albert_einstein",
+        "messages": [],
+        "done": true,
+        "join_opponent": false,
+        "work": null
+      }
+    },
+    "pairings": [
+      [
+        "albert_einstein",
+        "player_blue"
+      ],
+      [
+        "winston_churchill",
+        "player_red"
+      ]
+    ],
+    "history": [
+      {
+        "round_number": 1,
+        "summaries": [
+          {
+            "pair": [
+              "albert_einstein",
+              "player_blue"
+            ],
+            "text": "Albert Einstein joined Blue."
+          },
+          {
+            "pair": [
+              "winston_churchill",
+              "player_red"
+            ],
+            "text": "Winston Churchill joined Red."
+          }
+        ],
+        "scores": {
+          "player_red": 1,
+          "player_blue": 1
+        }
+      }
+    ],
+    "scores": {
+      "player_red": 1,
+      "player_blue": 1
+    },
+    "winner": "tie",
+    "you": null
+  },
+  "replay": [
+    {
+      "schema_version": "3",
+      "rules_version": "scripted-v1",
+      "id": "9f37afd0256d19269a7ff5fb3b6c66c9",
+      "version": 14,
+      "config": {
+        "num_agents": 2,
+        "num_rounds": 1,
+        "seed": 32
+      },
+      "mode": "scripted",
+      "phase": "finished",
+      "round_number": 1,
+      "players": {
+        "player_red": true,
+        "player_blue": true
+      },
+      "agents": [
+        {
+          "UID": "albert_einstein",
+          "Character": "Albert Einstein",
+          "Description": "Physicist, E=mc\u00b2 fame",
+          "Charisma": 7,
+          "Intellect": 10,
+          "Stubbornness": 6,
+          "Empathy": 7,
+          "Influence Range": 8,
+          "Loyalty": 7,
+          "Curiosity": 10,
+          "Consistency": 8,
+          "side": 1
+        },
+        {
+          "UID": "winston_churchill",
+          "Character": "Winston Churchill",
+          "Description": "British PM during WWII, famed orator",
+          "Charisma": 9,
+          "Intellect": 8,
+          "Stubbornness": 9,
+          "Empathy": 6,
+          "Influence Range": 9,
+          "Loyalty": 8,
+          "Curiosity": 7,
+          "Consistency": 8,
+          "side": -1
+        }
+      ],
+      "conversations": {
+        "player_red": {
+          "target": "winston_churchill",
+          "messages": [],
+          "done": true,
+          "join_opponent": false,
+          "work": null
+        },
+        "player_blue": {
+          "target": "albert_einstein",
+          "messages": [],
+          "done": true,
+          "join_opponent": false,
+          "work": null
+        }
+      },
+      "pairings": [
+        [
+          "albert_einstein",
+          "player_blue"
+        ],
+        [
+          "winston_churchill",
+          "player_red"
+        ]
+      ],
+      "history": [
+        {
+          "round_number": 1,
+          "summaries": [
+            {
+              "pair": [
+                "albert_einstein",
+                "player_blue"
+              ],
+              "text": "Albert Einstein joined Blue."
+            },
+            {
+              "pair": [
+                "winston_churchill",
+                "player_red"
+              ],
+              "text": "Winston Churchill joined Red."
+            }
+          ],
+          "scores": {
+            "player_red": 1,
+            "player_blue": 1
+          }
+        }
+      ],
+      "scores": {
+        "player_red": 1,
+        "player_blue": 1
+      },
+      "winner": "tie",
+      "you": null
+    }
+  ]
+}

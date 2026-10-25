@@ -30,7 +30,7 @@ def conversations() -> dict:
 def new_game(game_id: str, config: dict, characters: list[dict]) -> dict:
     selected = random.Random(config["seed"]).sample(characters, config["num_agents"])
     return {
-        "schema_version": "2",
+        "schema_version": "3",
         "rules_version": RULES_VERSION,
         "id": game_id,
         "version": 0,
@@ -57,7 +57,7 @@ def resolve_round(state: dict) -> None:
             agent["side"] = SIDES[seat]
             result = f"{agent['Character']} joined {seat.removeprefix('player_').title()}."
         else:
-            result = f"{agent['Character']} kept their allegiance. Two messages recruit in this demo."
+            result = f"{agent['Character']} kept their allegiance."
         summaries.append({"pair": [chat["target"], seat], "text": result})
     # Resolve AI pairs from the same pre-resolution snapshot, without order effects.
     initial_sides = {uid: agent["side"] for uid, agent in by_id.items()}
@@ -192,10 +192,12 @@ def upgrade_state(original: dict) -> dict:
     """Read old snapshots without rewriting historical events or inventing provider calls."""
     state = deepcopy(original)
     if state["schema_version"] == "1":
-        state["schema_version"] = "2"
+        state["schema_version"] = "3"
         for seat, chat in state["conversations"].items():
             chat["join_opponent"] = sum(m["name"] == seat for m in chat["messages"]) >= 2
             chat["work"] = None
+    if state["schema_version"] == "2":
+        state["schema_version"] = "3"
     return state
 
 

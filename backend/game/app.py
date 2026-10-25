@@ -11,8 +11,8 @@ from fastapi.staticfiles import StaticFiles
 
 from .agent_contracts import RuntimePolicy, RuntimeReport
 from .core import GameError, view
+from .model_config import configured_provider
 from .models import Command, CreateGame, GameView, JoinGame
-from .providers import ScriptedProvider
 from .runtime import AgentRuntime
 from .store import Store
 
@@ -20,7 +20,10 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def create_app(db_path: Path | None = None, static_dir: Path | None = None, provider=None, policy=None):
-    provider = provider or ScriptedProvider(float(os.environ.get("GAME_SCRIPTED_DELAY_MS", "0")) / 1000)
+    roster = json.loads((ROOT / "gameplay/characters.json").read_text())
+    if provider is None:
+        provider, configured_policy = configured_provider(roster)
+        policy = policy or configured_policy
     policy = policy or RuntimePolicy()
 
     @asynccontextmanager
@@ -32,9 +35,10 @@ def create_app(db_path: Path | None = None, static_dir: Path | None = None, prov
     app = FastAPI(title="Allegiance & Influence", version="0.2.0", lifespan=lifespan)
     store = Store(
         db_path or Path(os.environ.get("GAME_DB", ROOT / "data/game.sqlite3")),
-        json.loads((ROOT / "gameplay/characters.json").read_text()),
+        roster,
         identity=provider.identity,
         policy=policy,
+        routes=getattr(provider, "routes", None),
     )
     app.state.store = store
     # Full snapshots in bounded queues: slow browsers converge to the latest state.
@@ -76,7 +80,11 @@ def create_app(db_path: Path | None = None, static_dir: Path | None = None, prov
 
     @app.get("/api/health")
     async def health():
-        return {"status": "ok", "mode": "scripted", "schema_version": "2"}
+        return {
+            "status": "ok",
+            "mode": "scripted" if provider.identity.provider == "scripted" else "model",
+            "schema_version": "3",
+        }
 
     @app.post("/api/games", status_code=201, response_model=GameView)
     async def create(config: CreateGame):
@@ -109,7 +117,7 @@ def create_app(db_path: Path | None = None, static_dir: Path | None = None, prov
     @app.get("/api/games/{game_id}/replay")
     async def replay(game_id: str, authorization: str | None = Header(default=None)):
         actor = store.actor(game_id, token_from(authorization))
-        return {"schema_version": "2", "frames": store.replay(game_id, actor)}
+        return {"schema_version": "3", "frames": store.replay(game_id, actor)}
 
     @app.get("/api/games/{game_id}/runtime", response_model=RuntimeReport)
     async def runtime_report(game_id: str, authorization: str | None = Header(default=None)):

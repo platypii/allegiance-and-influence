@@ -24,17 +24,27 @@ class Jobs:
                 charged_tokens INTEGER NOT NULL, charged_cost INTEGER NOT NULL,
                 usage TEXT, latency_ms INTEGER, started_at REAL,
                 PRIMARY KEY(request_id, attempt));
+            CREATE TABLE IF NOT EXISTS runtime_context (
+                game_id TEXT PRIMARY KEY, routes TEXT NOT NULL, peers TEXT NOT NULL);
         """)
+
+        # Additive migration preserves existing requests and attempt accounting.
+        for table, column in [("agent_jobs", "route"), ("agent_attempts", "receipt")]:
+            if column not in {r["name"] for r in db.execute(f"PRAGMA table_info({table})")}:
+                db.execute(f"ALTER TABLE {table} ADD COLUMN {column} TEXT")
 
     def attach_job(self, db, state, actor):
         chat = state["conversations"][actor]
         work = chat["work"]
+        context = db.execute("SELECT * FROM runtime_context WHERE game_id=?", (state["id"],)).fetchone()
+        peers = json.loads(context["peers"]) if context else {}
         request = AgentRequest(
             request_id=work["request_id"],
             game_id=state["id"],
             round_number=state["round_number"],
             character=next(a for a in state["agents"] if a["UID"] == chat["target"]),
             opponent=actor,
+            opponent_character=peers.get(actor),
             opponent_side=SIDES[actor],
             messages=chat["messages"],
         )
@@ -46,8 +56,15 @@ class Jobs:
                 packed(self.policy.model_dump()),
             ),
         )
+        # Legacy games keep their previously pinned provider; never relabel scripted saves.
+        settings = db.execute("SELECT identity FROM runtime_games WHERE game_id=?", (state["id"],)).fetchone()
+        identity = json.loads(settings["identity"])
+        if not context and state["mode"] == "scripted" and identity["provider"] != "scripted":
+            raise GameError("provider_changed", "Create a new game for the configured models.")
+        routes = json.loads(context["routes"]) if context else {"*": identity}
+        route = routes.get(chat["target"], routes["*"])
         db.execute(
-            "INSERT INTO agent_jobs VALUES(?,?,?,?,?,?)",
+            "INSERT INTO agent_jobs (id,game_id,actor,request,status,error,route) VALUES(?,?,?,?,?,?,?)",
             (
                 work["request_id"],
                 state["id"],
@@ -55,6 +72,7 @@ class Jobs:
                 request.model_dump_json(by_alias=True),
                 "queued",
                 None,
+                packed(route),
             ),
         )
 
@@ -83,7 +101,8 @@ class Jobs:
                     "provider_bounds_exceeded", "The provider exceeded its declared usage limits."
                 )
             settings = db.execute("SELECT * FROM runtime_games WHERE game_id=?", (job["game_id"],)).fetchone()
-            policy, identity = json.loads(settings["policy"]), json.loads(settings["identity"])
+            policy = json.loads(settings["policy"])
+            identity = json.loads(job["route"] or settings["identity"])
             total = db.execute(
                 "SELECT count(*) calls, coalesce(sum(a.charged_tokens),0) tokens, "
                 "coalesce(sum(a.charged_cost),0) cost FROM agent_attempts a JOIN agent_jobs j "
@@ -106,7 +125,7 @@ class Jobs:
             ):
                 raise GameError("budget_exhausted", "The game has reached its agent budget.")
             db.execute(
-                "INSERT INTO agent_attempts VALUES(?,?,?,?,?,?,?,?)",
+                "INSERT INTO agent_attempts (request_id,attempt,status,charged_tokens,charged_cost,usage,latency_ms,started_at) VALUES(?,?,?,?,?,?,?,?)",
                 (
                     request_id,
                     attempt,
@@ -121,9 +140,13 @@ class Jobs:
             db.execute("UPDATE agent_jobs SET status='running' WHERE id=?", (request_id,))
             return attempt
 
-    def record_attempt(self, request_id, attempt, status, latency_ms, usage=None):
+    def record_attempt(self, request_id, attempt, status, latency_ms, usage=None, receipt=None):
         with self.connection() as db:
             db.execute("BEGIN IMMEDIATE")
+            db.execute(
+                "UPDATE agent_attempts SET receipt=? WHERE request_id=? AND attempt=? AND status='running'",
+                (packed(receipt) if receipt else None, request_id, attempt),
+            )
             # Only a successfully validated response releases unused reservation.
             if usage is not None and status == "succeeded":
                 db.execute(
@@ -219,18 +242,25 @@ class Jobs:
                 "SELECT identity,policy FROM runtime_games WHERE game_id=?", (game_id,)
             ).fetchone()
             if not settings:
-                return {"schema_version": "1", "identity": None, "policy": None, "attempts": []}
+                return {"schema_version": "2", "identity": None, "policy": None, "attempts": []}
             rows = db.execute(
                 "SELECT j.id request_id, a.attempt, a.status, a.charged_tokens, a.charged_cost, "
-                "a.usage, a.latency_ms FROM agent_jobs j JOIN agent_attempts a "
+                "a.usage, a.latency_ms, a.receipt, j.route identity FROM agent_jobs j JOIN agent_attempts a "
                 "ON j.id=a.request_id WHERE j.game_id=? AND j.actor=? ORDER BY a.started_at, a.attempt",
                 (game_id, actor),
             ).fetchall()
         attempts = [
-            {**dict(row), "usage": json.loads(row["usage"]) if row["usage"] else None} for row in rows
+            {
+                **dict(row),
+                **{
+                    key: json.loads(row[key]) if row[key] else None
+                    for key in ["usage", "receipt", "identity"]
+                },
+            }
+            for row in rows
         ]
         return {
-            "schema_version": "1",
+            "schema_version": "2",
             "identity": json.loads(settings["identity"]),
             "policy": json.loads(settings["policy"]),
             "attempts": attempts,

@@ -10,6 +10,14 @@ class RetryableProviderError(Exception):
     """An explicit transient failure. Retries consume another reserved attempt."""
 
 
+class ProviderFailure(Exception):
+    """Safe error code with optional validated accounting from a failed response."""
+
+    def __init__(self, code, usage=None, receipt=None):
+        super().__init__(code)
+        self.code, self.usage, self.receipt = code, usage, receipt
+
+
 class AgentProvider(Protocol):
     identity: ProviderIdentity
 

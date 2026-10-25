@@ -339,7 +339,7 @@ def test_v1_snapshot_and_replay_upgrade_without_fake_provider_events(tmp_path):
             (json.dumps(legacy), game["id"], game["version"]),
         )
     restored = store.load(game["id"])
-    assert restored["schema_version"] == "2"
+    assert restored["schema_version"] == "3"
     assert restored["version"] == legacy["version"]
     assert restored["conversations"]["player_red"]["join_opponent"]
     assert restored["conversations"]["player_red"]["work"] is None

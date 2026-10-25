@@ -29,3 +29,21 @@ PR #3 was merged after the user's review. Task #4 extracts human-facing characte
 Provider identity and policy are pinned per game; attempts reserve calls/tokens/micro-USD before invocation. Uncertain failures retain their reservation, and reported usage is distinct from budget charge. Cost defaults to zero. Restart interrupts work rather than automatically reissuing potentially billed calls. Cancelled/late work cannot mutate a later conversation.
 
 Game view v2 projects v1 saved states and replay frames without rewriting their recorded history. New clients expose pending/cancel/retry controls; original artwork remains unchanged. Live inference, token streaming, cross-round memory, and paid evaluation are subsequent scoped tasks.
+
+## 2026-10-24 — Hosted models through OpenRouter, assigned per character
+
+The user selected OpenRouter as the hosted gateway so experiments can vary models per character. Personas remain roster data; named model profiles define inference settings and character UID overrides choose the profile. New games pin the configuration, and each job reserves the selected model's allowance. Requested/returned model IDs and upstream receipts remain distinct. Model fallback is disabled; upstream routing can be pinned. Structured-output compatibility is explicit, with a prompt-JSON option that retains local validation.
+
+Paired persuasion experiments reuse the two-seat game, durable runtime, and shared ledger. Each synthetic seat represents the other character's faction; the characters' replies alternate until the fixed turn bound or a failure, then accepted decisions resolve together. Exported transcripts are explicitly experimental evidence, separate from the seat-filtered multiplayer API. Live inference remains opt-in; no credential was available during implementation. Direct OpenAI and Ollama adapters are deferred in favor of the user's hosted gateway choice.
+
+## 2026-10-24 — Operator setup file and future mobile clients
+
+Keep named model profiles, character overrides, and experiment budgets in `data/models.json`. Keep credentials in a separate owner-only file or server environment; an explicitly selected key file takes precedence. A setup helper creates files without overwriting, lists the public model catalog, and checks local assignments without inference. No key is collected in conversation or embedded in game reports.
+
+The user wants a web app now and may later ship iPhone/Android clients. Preserve the server-owned HTTP/WebSocket boundary and keep model credentials/budgets there. Defer the mobile wrapper/native choice until gameplay is established, with hosted identity/recovery and reconnect behavior as prerequisites.
+
+## 2026-10-24 — First live candidate configuration and evidence
+
+After the user saved a private key and confirmed its spending cap, selected Haiku, Gemini Flash Lite, and Luna profiles from the public OpenRouter catalog. The local setup assigns Haiku by default/Einstein and Gemini to Churchill, with Luna available as an alternative. A credential-free dated snapshot records exact IDs, parameters, price ceilings, and a $1 per-game ceiling. These are tested starting candidates, not a claim of best models. Keep live experiments separate from the credential-free verifier.
+
+Five paired runs covered assignment swaps, speaking-order reversal, and a third-model smoke check; all 18 replies passed validation. One additional live browser reply succeeded. Total recorded charge was $0.004381. No paired reply accepted recruitment. Preserve that result as evidence and test longer dialogue/concrete incentives next, rather than altering acceptance merely to manufacture successful persuasion. See [live validation](live-validation-2026-10-24.md) for limitations and local report hashes.
