@@ -80,7 +80,7 @@ This drives the same game transitions and persistence boundary with scripted pla
 
 ## 3D tabletop preview
 
-Open `/world/` on the running server, or choose **Board view → 3D tabletop preview** during a match. This playable art-direction slice adds a modeled island, landmarks, lighting, shadows and moving character maquettes while using the same conversations and saved games. The original illustrated board remains available, including as a fallback without WebGL. The current cast remains 23 characters; finished rigs and new cast packs are planned in [the visual world roadmap](docs/visual-world-plan.md).
+Open `/world/` on the running server, or choose **Board view → 3D tabletop preview** during a match. This playable art-direction slice adds a modeled island, landmarks, lighting, shadows and moving character maquettes while using the same conversations and saved games. The original illustrated board remains available, including as a fallback without WebGL. Open `/characters/` to inspect and rotate the seven figures with the first likeness pass. The current cast remains 23 characters; finished rigs and new cast packs are planned in [the visual world roadmap](docs/visual-world-plan.md).
 
 ## Design system
 

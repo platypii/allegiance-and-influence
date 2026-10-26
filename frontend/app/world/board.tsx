@@ -56,7 +56,7 @@ export default function WorldBoard({ nodes, edges, talking }: { nodes: GraphNode
       <span className={styles.preview}>3D art preview</span>
     </div>
     <section className={styles.cast} aria-label="Choose a character">
-      <div className={styles.castHeading}><h2>The company</h2><span>{nodes.filter(node => !node.id.startsWith("player_")).length} personalities · one unlikely alliance</span></div>
+      <div className={styles.castHeading}><h2>The company</h2><a href="/characters/" target="_blank" rel="noopener">Meet the characters ↗</a><span>{nodes.filter(node => !node.id.startsWith("player_")).length} personalities · one unlikely alliance</span></div>
       <div className={styles.castList}>{nodes.map(node => <div key={node.id} onFocusCapture={() => scene.current?.focus(node.id)} onBlurCapture={() => scene.current?.focus(null)}>{node.element}</div>)}</div>
     </section>
   </div>

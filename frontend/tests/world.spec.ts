@@ -128,3 +128,37 @@ test("a browser without WebGL can still start and play", async ({ page }) => {
   await page.getByRole("button", { name: /^Recruit/ }).first().click()
   await expect(page.getByRole("dialog")).toBeVisible()
 })
+
+test("character portraits switch reliably, rotate actual meshes and fit narrow screens", async ({ page }) => {
+  const errors: string[] = [], external: string[] = []
+  page.on("pageerror", error => errors.push(error.message))
+  await page.route("**/*", route => {
+    if (new URL(route.request().url()).hostname !== "127.0.0.1") { external.push(route.request().url()); return route.abort() }
+    return route.continue()
+  })
+  await page.goto("/characters/")
+  const ids = ["albert_einstein", "marie_curie", "winston_churchill", "nelson_mandela", "napoleon_bonaparte", "martin_luther", "genghis_khan", "albert_einstein"]
+  for (const id of ids) {
+    await page.getByLabel("Choose a character").selectOption(id)
+    const canvas = page.locator("canvas")
+    await expect(canvas).toHaveAttribute("data-rendered", "true")
+    await expect(page.getByText("3D is unavailable", { exact: false })).toHaveCount(0)
+    expect((await canvas.screenshot()).byteLength).toBeGreaterThan(10000)
+    if (ids.indexOf(id) < 3) {
+      await page.screenshot({ path: `../artifacts/screenshots/portrait-${id}-front.png` })
+      const front = await canvas.screenshot()
+      for (let i = 0; i < 3; i++) await page.getByRole("button", { name: "Turn portrait right" }).click()
+      await expect.poll(async () => !(await canvas.screenshot()).equals(front)).toBeTruthy()
+      await page.screenshot({ path: `../artifacts/screenshots/portrait-${id}-quarter.png` })
+    }
+  }
+  await page.setViewportSize({ width: 320, height: 568 })
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
+  await page.screenshot({ path: "../artifacts/screenshots/portrait-mobile.png", fullPage: true })
+  await page.locator("canvas").evaluate(element => element.dispatchEvent(new Event("webglcontextlost", { cancelable: true })))
+  await expect(page.getByText("3D is unavailable", { exact: false })).toBeVisible()
+  await page.getByLabel("Choose a character").selectOption("marie_curie")
+  await expect(page.locator("canvas")).toHaveAttribute("data-rendered", "true")
+  expect(errors).toEqual([])
+  expect(external).toEqual([])
+})

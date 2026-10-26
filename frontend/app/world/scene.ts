@@ -12,7 +12,7 @@ export interface WorldScene {
   dispose: () => void
 }
 
-export function createWorld(canvas: HTMLCanvasElement, initial: WorldState, onPick: (id: string) => void, onHover: (name: string) => void, onLost: () => void): WorldScene {
+export function createWorld(canvas: HTMLCanvasElement, initial: WorldState, onPick: (id: string) => void, onHover: (name: string) => void, onLost: () => void, inspection = false): WorldScene {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: "low-power" })
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
   renderer.shadowMap.enabled = true
@@ -23,11 +23,11 @@ export function createWorld(canvas: HTMLCanvasElement, initial: WorldState, onPi
   const scene = new THREE.Scene()
   const camera = new THREE.OrthographicCamera(-14, 14, 10, -10, .1, 100)
   let azimuth = .12, zoom = 1, width = 0, height = 0
-  const target = new THREE.Vector3(0, .5, 0)
+  const target = new THREE.Vector3(0, inspection ? 1.4 : .5, 0)
   function positionCamera() {
-    camera.position.set(Math.sin(azimuth) * 23, 19, Math.cos(azimuth) * 23)
+    camera.position.set(Math.sin(azimuth) * (inspection ? 7 : 23), inspection ? 3.2 : 19, Math.cos(azimuth) * (inspection ? 7 : 23))
     camera.lookAt(target)
-    camera.zoom = zoom * (width && width < 600 ? 1.2 : 1)
+    camera.zoom = zoom * (!inspection && width && width < 600 ? 1.2 : 1)
     camera.updateProjectionMatrix()
     camera.updateMatrixWorld()
   }
@@ -45,8 +45,9 @@ export function createWorld(canvas: HTMLCanvasElement, initial: WorldState, onPi
   const rim = new THREE.DirectionalLight("#9bc9d7", 1.2)
   rim.position.set(6, 7, -9)
   scene.add(rim)
-  scene.add(scenery(paint))
-  const floor = solid(scene, new THREE.PlaneGeometry(200, 200), paint("#1b3934"), 0, -1.09, 0)
+  if (!inspection) scene.add(scenery(paint))
+  else solid(scene, new THREE.CylinderGeometry(.87, .95, .2, 48), paint("#b79c61"), 0, .08, 0)
+  const floor = solid(scene, new THREE.PlaneGeometry(200, 200), paint("#1b3934"), 0, inspection ? -.025 : -1.09, 0)
   floor.rotation.x = -Math.PI / 2
   floor.castShadow = false
   const figures = new Map<string, { root: THREE.Group; figure: THREE.Group; ring: THREE.Mesh; person: WorldPerson; x: number; z: number; homeX: number; homeZ: number; celebration: number }>()
@@ -55,10 +56,10 @@ export function createWorld(canvas: HTMLCanvasElement, initial: WorldState, onPi
     const outer = index >= 10
     const count = outer ? initial.people.length - 10 : Math.min(initial.people.length, 10)
     const angle = (outer ? index - 10 : index) / count * Math.PI * 2 + (outer ? .25 : .1)
-    const radius = initial.people.length <= 10 ? 3.9 : outer ? 5.4 : 2.8
+    const radius = inspection ? 0 : initial.people.length <= 10 ? 3.9 : outer ? 5.4 : 2.8
     const x = Math.sin(angle) * radius, z = Math.cos(angle) * radius
     const root = new THREE.Group()
-    root.position.set(x, .58, z)
+    root.position.set(x, inspection ? .18 : .58, z)
     const figure = miniature(person.id, paint)
     figure.position.y = .12
     if (initial.people.length > 14) figure.scale.setScalar(.78)
@@ -140,7 +141,7 @@ export function createWorld(canvas: HTMLCanvasElement, initial: WorldState, onPi
     if (!width || !height) return
     renderer.setSize(width, height, false)
     const aspect = width / height
-    const horizontal = Math.max(12.3, 9.6 * aspect)
+    const horizontal = inspection ? Math.max(1.35, 1.75 * aspect) : Math.max(12.3, 9.6 * aspect)
     camera.left = -horizontal; camera.right = horizontal
     camera.top = horizontal / aspect; camera.bottom = -horizontal / aspect
     positionCamera()
@@ -165,14 +166,14 @@ export function createWorld(canvas: HTMLCanvasElement, initial: WorldState, onPi
       const targeted = hover === id || keyboardFocus === id
       if (moving && !targeted) {
         const t = elapsed * .4 + index * 1.9
-        item.x = item.homeX + Math.sin(t) * .23
-        item.z = item.homeZ + Math.cos(t * .8) * .22
+        item.x = item.homeX + Math.sin(t) * (inspection ? 0 : .23)
+        item.z = item.homeZ + Math.cos(t * .8) * (inspection ? 0 : .22)
       }
       item.root.position.x = item.x; item.root.position.z = item.z
       const talking = state.talking.includes(id)
       const pair = state.pairs.find(([a, b]) => a === id || b === id)
       const partner = pair ? figures.get(pair[0] === id ? pair[1] : pair[0]) : null
-      const facing = partner ? Math.atan2(partner.x - item.x, partner.z - item.z) : azimuth + Math.sin(index * 2) * .25
+      const facing = inspection ? 0 : partner ? Math.atan2(partner.x - item.x, partner.z - item.z) : azimuth + Math.sin(index * 2) * .25
       item.figure.rotation.y = facing + (moving ? Math.sin(elapsed * (talking ? 3 : .85) + index) * (talking ? .1 : .035) : 0)
       if (moving) item.celebration = Math.max(0, item.celebration - dt * 2)
       item.figure.position.y = .12 + (moving ? Math.sin(elapsed * 2 + index) * .025 + Math.abs(Math.sin(item.celebration * 8)) * item.celebration * .14 : 0)

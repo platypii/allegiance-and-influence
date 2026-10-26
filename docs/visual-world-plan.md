@@ -1,6 +1,6 @@
 # From readable interface to a living game world
 
-User direction, 2026-10-25: keep the illustrated caricature style, substantially raise visual quality, make most world objects 3D, expand the cast, and make the result entertaining. The visual slice is tracked in #17; cast production in #18. The working direction is a theatrical tabletop diorama, pending playtest feedback.
+User direction, 2026-10-25: keep the illustrated caricature style, substantially raise visual quality, make most world objects 3D, expand the cast, and make the result entertaining. The visual slice is tracked in #17; cast production in #18. The user approved the theatrical tabletop direction and its motion on 2026-10-26; character likeness is the next priority.
 
 ## The experience
 
@@ -37,3 +37,9 @@ Technical basis: [Three.js WebGLRenderer](https://threejs.org/docs/pages/WebGLRe
 ## What would make it fun
 
 Graphics make the world inviting; conversations need choices and consequences to sustain play. After the visual slice is reviewed, test character-specific motives, a limited number of commitments, and visible reactions to arguments. Start with a single short match and observe whether players understand their options, enjoy watching the other characters, and want another round. Keep experimental controls explicit: presentation improvements must not quietly change persuasion rules or model comparisons.
+
+## Approved direction and first likeness pass — 2026-10-26
+
+The user approved the tabletop style and animation and asked to improve character identity (#20). Seven figures now have individually authored proportions and silhouettes: Einstein, Curie, Churchill, Mandela, Napoleon, King and Genghis Khan. `/characters/` provides a rotating close-up of the same meshes used on the board. It makes visual review possible without starting a model conversation or changing a saved game's cast.
+
+The hero references were the original game portraits plus historical photographs: [Einstein, Halsman Archive exhibition](https://www.fuorisalone.it/it/magazine/focus/article/1288/roma-retrospettiva-italiana-philippe-halsman), [Churchill, Smithsonian National Portrait Gallery](https://npg.si.edu/object/npg_NPG.93.145), and [Curie, Wellcome Library M0002559](https://commons.wikimedia.org/wiki/File:Portrait_of_Marie_Curie_(1867_-_1934),_Polish_chemist_Wellcome_M0002559.jpg). Reference photos are not redistributed in the game. This pass changes actual geometry, not portrait textures pasted onto faces. Human review is still the test of recognition; it does not complete production sculpting, rigging or the cast-expansion milestone.
