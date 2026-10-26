@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react"
 import { Body, stepSwarm } from "./swarm"
 import styles from "./influence-board.module.css"
 
-export interface GraphNode { id: string; team: number; element: React.ReactElement }
+export interface GraphNode { id: string; name: string; team: number; selectable: boolean; onSelect: () => void; element: React.ReactElement }
 export interface Edge { source: string; target: string }
 
 export default function InfluenceBoard({ nodes, edges }: { nodes: GraphNode[]; edges: Edge[] }) {

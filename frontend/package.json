@@ -10,13 +10,15 @@
   "dependencies": {
     "next": "16.4.2",
     "react": "19.3.1",
-    "react-dom": "19.3.1"
+    "react-dom": "19.3.1",
+    "three": "0.186.1"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/three": "0.186.0",
     "typescript": "^5"
   }
 }

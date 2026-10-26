@@ -78,6 +78,10 @@ The [first live validation](docs/live-validation-2026-10-24.md) completed 18 pai
 
 This drives the same game transitions and persistence boundary with scripted players. The optional JSON contains a manifest and public replay frames; private conversations and player keys are excluded. This is a smoke experiment, not a model benchmark.
 
+## 3D tabletop preview
+
+Open `/world/` on the running server, or choose **Board view → 3D tabletop preview** during a match. This playable art-direction slice adds a modeled island, landmarks, lighting, shadows and moving character maquettes while using the same conversations and saved games. The original illustrated board remains available, including as a fallback without WebGL. The current cast remains 23 characters; finished rigs and new cast packs are planned in [the visual world roadmap](docs/visual-world-plan.md).
+
 ## Design system
 
 The game uses a shared typography, color, spacing, and control system. Open `/design-system/` on the running server for the visual reference, and see [the design guidelines](docs/design-system.md). Conversation text is readable on phones, the animated swarm keeps character targets separate, and all original artwork is preserved.

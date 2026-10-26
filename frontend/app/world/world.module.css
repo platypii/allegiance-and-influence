@@ -1,0 +1,37 @@
+.world { min-width: 0; }
+.stage { position: relative; overflow: hidden; background: #30544d; color: #fff1d7; }
+.canvas { display: block; width: 100%; height: clamp(540px, 62vw, 740px); touch-action: pan-y; }
+.sceneTitle { position: absolute; z-index: 1; left: 28px; top: 24px; pointer-events: none; display: grid; gap: 7px; text-shadow: 0 2px 6px #173a34; }
+.sceneTitle .eyebrow { color: #e8c98d; }
+.sceneTitle strong { font: 36px/1.2 var(--font-display); }
+.sceneTitle > span:last-child { font-size: 14px; }
+.camera { position: absolute; bottom: 42px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); display: flex; align-items: center; gap: 4px; border: 1px solid #c9b27d6b; border-radius: 12px; padding: 5px; background: #203d36ed; box-shadow: 0 4px 16px #10292344; }
+.camera button { flex-shrink: 0; white-space: nowrap; min-height: 44px; min-width: 44px; padding: 6px 10px; color: #fff1d7; border-color: transparent; background: transparent; font-size: 20px; }
+.camera button:last-child { font-size: 14px; }
+.camera button:enabled:hover { background: #536f57; border-color: #c6a86d; }
+.camera > span { height: 20px; width: 1px; background: #afbb9470; }
+.hover { position: absolute; bottom: 12px; left: 12px; right: 12px; text-align: center; font-size: 14px; color: #f0dfb8; pointer-events: none; }
+.preview { position: absolute; top: 20px; right: 20px; border: 1px solid #d2bb8077; border-radius: 24px; padding: 5px 12px; font-size: 14px; background: #203d36d9; }
+.loading { position: absolute; top: 50%; width: 100%; text-align: center; }
+.cast { padding: 20px 24px 24px; background: var(--paper-raised); }
+.castHeading { display: flex; gap: 16px; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+.castHeading h2 { font-size: 26px; }
+.castHeading > span { font-size: 14px; color: var(--ink-muted); }
+.castList { display: flex; overflow-x: auto; gap: 10px; padding: 4px 4px 12px; scroll-snap-type: x proximity; }
+.castList > div { flex: 0 0 144px; scroll-snap-align: start; }
+.castList button { width: 100%; height: 100%; min-height: 144px; padding: 12px 8px; display: flex; flex-direction: column; gap: 6px; background: var(--paper); }
+.castList button:disabled { opacity: 1; }
+.castList button:enabled:hover { background: #e9dfc6; border-color: var(--brass); }
+.castList img { width: 64px; height: 64px; object-fit: cover; border: 3px solid; border-radius: 50%; }
+.fallback { padding: 20px 24px; background: var(--paper-raised); }
+@media (max-width: 760px) {
+  .canvas { height: 520px; }
+  .sceneTitle { left: 20px; top: 20px; right: 16px; }
+  .sceneTitle strong { font-size: 28px; }
+  .sceneTitle > span:first-child { font-size: 14px; }
+  .preview { top: auto; bottom: 108px; left: 20px; right: auto; }
+  .cast { padding: 20px 16px; }
+  .castHeading { align-items: start; flex-direction: column; gap: 4px; }
+  .camera { gap: 0; }
+  .camera button { padding-inline: 8px; }
+}
