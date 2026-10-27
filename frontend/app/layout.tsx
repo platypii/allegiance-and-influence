@@ -15,6 +15,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href="/images/favicon.png" />
+        <link rel="preload" href="/fonts/lora/Lora-Variable.ttf" as="font" type="font/ttf" crossOrigin="anonymous" />
       </head>
       <body>
         {children}

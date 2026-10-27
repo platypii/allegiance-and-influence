@@ -14,7 +14,7 @@ export default function Invite({ gameId, expanded = false }: { gameId: string; e
     setCopied(false)
   }, [gameId])
   useEffect(() => { if (manual) { input.current?.focus(); input.current?.select() } }, [manual])
-  return <span>
+  return <div className="invite">
     <button disabled={!url} onClick={async () => {
       try {
         if (!navigator.clipboard) throw new Error("Clipboard unavailable")
@@ -22,10 +22,9 @@ export default function Invite({ gameId, expanded = false }: { gameId: string; e
         setCopied(true)
       } catch { setCopied(false); setManual(true) }
     }}>{copied ? "Link copied" : "Copy invite link"}</button>
-    {(expanded || manual) && <label style={{ display: "block", marginTop: 8 }}>
+    {(expanded || manual) && <label>
       {manual ? "Select and copy this session link:" : "Session invite link"}
-      <input ref={input} aria-label="Session invite link" readOnly value={url} onFocus={e => e.target.select()}
-        style={{ display: "block", width: "min(380px, 70vw)", padding: 8, color: "#241c14", background: "#fff" }} />
+      <input ref={input} aria-label="Session invite link" readOnly value={url} onFocus={e => e.target.select()} />
     </label>}
-  </span>
+  </div>
 }

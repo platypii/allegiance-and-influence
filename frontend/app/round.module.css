@@ -1,57 +1,14 @@
-.round {
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 280px;
-  background-color: #333;
-  color: #8c8;
-  padding: 10px 20px;
-  overflow-x: hidden;
-  overflow-y: auto;
-  font-family: 'Courier New', Courier, monospace;
-  border-bottom-left-radius: 10px;
-  max-height: 100vh;
-  background: linear-gradient(0deg, #333 0%, #222 100%);
-  box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
-}
+.round { padding: 24px; background: var(--ink); color: var(--paper); border-radius: var(--radius); min-width: 0; }
+.round h2 { font-size: 30px; letter-spacing: -.03em; margin: 8px 0 16px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: var(--text-small); color: #d6dfd2; }
+.phase { border: 1px solid #6d7f70; border-radius: 4px; padding: 2px 8px; }
+.round details { margin-top: 20px; border-top: 1px solid #68796b; }
+.round summary { padding-block: 16px; color: var(--gold); }
+.pairing { padding-block: 16px; border-top: 1px solid #68796b; }
+.pair { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.pair > div { width: 50%; display: grid; justify-items: center; gap: 8px; text-align: center; font-size: var(--text-small); line-height: 1.4; }
+.pair img { width: 56px; height: 56px; border: 3px solid; border-radius: 50%; }
+.pairing p { white-space: pre-wrap; font-size: var(--text-body); line-height: 1.6; }
+@media (max-width: 1000px) { .round { padding: 20px; } }
 
-.round h2 {
-  font-size: 20px;
-}
-.round sub {
-  margin-bottom: 20px;
-}
-
-.pairing {
-  color: #ddd;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #666;
-}
-.pair {
-  display: flex;
-  gap: 10px;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  /* overflow: hidden; */
-}
-.pair img {
-  width: 80px;
-  border-radius: 50%;
-  border: 2px solid #3B2F2F;
-}
-.pair > div {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  width: 50%;
-  font-size: 12px;
-}
-.pairing > div {
-  white-space: pre-wrap;
-}
-@media (max-width: 760px) { .round { width: 180px; padding: 10px; max-height: 220px; } .round h1 { font-size: 18px; } .round h2 { font-size: 16px; } .pair img { width: 50px; } }
+.round :focus-visible { outline-color: var(--gold); }

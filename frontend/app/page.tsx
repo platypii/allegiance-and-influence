@@ -5,7 +5,7 @@ import styles from "./page.module.css"
 import Welcome from "./welcome"
 import Invite from "./invite"
 import Panel from "./panel"
-import ForceGraph, { GraphNode } from "./forcegraph"
+import InfluenceBoard, { GraphNode } from "./influence-board"
 import characters from "./characters"
 import { teamColor } from "./teamColor"
 import Round from "./round"
@@ -32,12 +32,12 @@ export default function Home() {
       const canChoose = !frames && !!player && shown.phase === "selecting" && !chat?.target && !taken && !isPlayer
       const borderColor = teamColor(c.team)
       return { id: c.UID, team: c.team, element: <button
-        aria-label={`${isPlayer ? "Player" : "Recruit"} ${c.Character}`}
+        aria-label={`${isPlayer ? "" : "Recruit "}${c.Character}. ${c.team < 0 ? "Red" : c.team > 0 ? "Blue" : "Unaligned"}`}
         title={c.Character} disabled={!canChoose || busy}
-        onClick={() => command({ kind: "select", target: c.UID })}
-        style={{ borderColor }}>
-        <img src={`/images/agents/${c.UID}.jpg`} alt={c.Character} />
-        <span style={{ position: "absolute", inset: 0, backgroundColor: borderColor, opacity: 0.3, mixBlendMode: "multiply", pointerEvents: "none" }} />
+        onClick={() => command({ kind: "select", target: c.UID })}>
+        <img src={`/images/agents/${c.UID}.jpg`} alt={c.Character} style={{ borderColor }} />
+        <span className={styles.nodeName}>{c.Character}</span>
+        <span className={styles.nodeSide}>{c.team < 0 ? "Red" : c.team > 0 ? "Blue" : "Unaligned"}</span>
       </button> }
     })
   // command is rebound by the hook; rendering it here keeps the current state and credentials.
@@ -45,36 +45,53 @@ export default function Home() {
 
   const status = !game ? "" : game.phase === "lobby" ? "Share the link and wait for the other player to join" : game.phase === "selecting" ? chat?.target ? "Waiting for the other player to choose" : "Select a character to recruit" : game.phase === "conversing" ? chat?.done ? "Waiting for the other conversation to finish" : "Make your case" : game.phase === "round_complete" ? "Round complete — review what changed" : "Game finished"
 
+  const welcome = !game || (!player && game.phase === "lobby")
+  const ending = !frames && game?.phase === "finished" && !closedEnd
+  const conversationOpen = !frames && character && player && chat && !closedChat && (game?.phase === "selecting" || game?.phase === "conversing")
+
   return <div className={styles.page}>
     <main className={styles.main}>
-      <ForceGraph nodes={nodes} edges={(shown?.pairings || []).map(([source, target]) => ({ source, target }))} />
-      {shown && <>
-        <div className={styles.overlay}>
-          <div className={styles.score} aria-label="Score"><div className={styles.red}>{shown.scores.player_red}</div>–<div className={styles.blue}>{shown.scores.player_blue}</div></div>
-          <div>{player ? `You are ${player === "player_red" ? "Red" : "Blue"}` : "Spectator"}</div>
+      {welcome ? <Welcome game={game} busy={busy} onCreate={create} onJoin={join} /> : ending && game ? <Endgame game={game} onClose={() => setClosedEnd(true)} /> : shown && <div className={styles.gameShell}>
+        <header className={styles.header}>
+          <a className={styles.brand} href="/" aria-label="Allegiance & Influence home">Allegiance <em>&amp;</em> Influence</a>
+          <div className={styles.scoreboard}>
+            <div className={styles.score} aria-label="Score">
+              <span className={styles.red}>Red <strong>{shown.scores.player_red}</strong></span>
+              <span className={styles.scoreDivider}>/</span>
+              <span className={styles.blue}><strong>{shown.scores.player_blue}</strong> Blue</span>
+            </div>
+            <span className={styles.player}>{player ? `You are ${player === "player_red" ? "Red" : "Blue"}` : "Spectator"}</span>
+          </div>
+        </header>
+        <div className={styles.gameGrid}>
+          <section className={styles.board} aria-label="Game board">
+            <div className={styles.boardHeading}><div><p className="eyebrow muted">The gathering</p><h1>Every alliance starts<br />with a conversation.</h1></div><span className={styles.roundBadge}>Round {shown.round_number}</span></div>
+            <InfluenceBoard nodes={nodes} edges={(shown.pairings || []).map(([source, target]) => ({ source, target }))} />
+            <div className={styles.status}>
+              {!frames && game?.opponent?.error && <span role="alert">Opponent stopped this round ({game.opponent.error}). Finish your conversation to continue. </span>}
+              <p>{frames ? `Replay · step ${frame + 1} of ${frames.length}` : status}</p>
+              {!frames && game?.phase === "round_complete" && player && <button className="primary" disabled={busy} onClick={() => command({ kind: "advance" })}>Next round</button>}
+              {!frames && character && closedChat && game?.phase === "conversing" && <button className="primary" onClick={() => setClosedChat(false)}>Open conversation</button>}
+            </div>
+          </section>
+          <aside className={styles.sidebar} aria-label="Game information">
+            <Round game={shown} />
+            <section className={styles.toolbar} aria-label="Session controls">
+              <div className={styles.sessionHeading}><h2>Your session</h2><span role="status" className={styles.connection}>{connection}</span></div>
+              <span className={styles.mode}>{shown.mode === "scripted" ? "Scripted demo" : "Model experiment"}</span>
+              {shown.opponent && <p className={styles.opponent}>Blue: {shown.opponent.model}</p>}
+              {(player || game?.phase !== "lobby") && <Invite gameId={shown.id} />}
+              {player && <button disabled={busy} onClick={async () => { const result = await replay(); if (result) { setFrames(result.frames); setFrame(result.frames.length - 1) } }}>Review replay</button>}
+              {frames && <><label>Replay step <input aria-label="Replay step" type="range" min={0} max={frames.length - 1} value={frame} onChange={e => setFrame(Number(e.target.value))} /></label><button onClick={() => setFrames(null)}>Back to live game</button></>}
+              <a className={styles.newGame} href="/">New game <span aria-hidden="true">↗</span></a>
+            </section>
+          </aside>
         </div>
-        <Round game={shown} />
-        <div className={styles.toolbar}>
-          <span role="status">{connection}</span><span>{shown.mode === "scripted" ? "Scripted demo" : "Model experiment"}</span>
-          {(player || game?.phase !== "lobby") && <Invite gameId={shown.id} />}
-          {shown.opponent && <span>Blue: {shown.opponent.model}</span>}
-          <a href="/">New game</a>
-          {player && <button disabled={busy} onClick={async () => { const result = await replay(); if (result) { setFrames(result.frames); setFrame(result.frames.length - 1) } }}>Review replay</button>}
-          {frames && <><label>Replay step <input aria-label="Replay step" type="range" min={0} max={frames.length - 1} value={frame} onChange={e => setFrame(Number(e.target.value))} /></label><button onClick={() => setFrames(null)}>Back to live game</button></>}
-        </div>
-        <div className={styles.status}>
-          {!frames && game?.opponent?.error && <span role="alert">Opponent stopped this round ({game.opponent.error}). Finish your conversation to continue. </span>}
-          {frames ? `Replay · step ${frame + 1} of ${frames.length}` : status}
-          {!frames && game?.phase === "round_complete" && player && <button disabled={busy} onClick={() => command({ kind: "advance" })}>Next round</button>}
-          {!frames && character && closedChat && game?.phase === "conversing" && <button onClick={() => setClosedChat(false)}>Open conversation</button>}
-        </div>
-      </>}
-      {(!game || (!player && game.phase === "lobby")) && <Welcome game={game} busy={busy} onCreate={create} onJoin={join} />}
-      {error && <div role="alert" className={styles.error}>{error} <a href="/">Start page</a></div>}
-      {!frames && game?.phase === "finished" && !closedEnd && <Endgame game={game} onClose={() => setClosedEnd(true)} />}
+      </div>}
+      {error && !conversationOpen && <div role="alert" className={styles.error}>{error} <a href="/">Start page</a></div>}
     </main>
     {!frames && character && player && chat && !closedChat && (game?.phase === "selecting" || game?.phase === "conversing") && <Panel
-      mode={game.mode} playerName={player} character={character} chat={chat} busy={busy}
+      mode={game.mode} error={error} playerName={player} character={character} chat={chat} busy={busy}
       enabled={game.phase === "conversing" && !chat.done}
       onMessage={text => command({ kind: "message", text })}
       onDone={() => command({ kind: "done" })} onRetry={() => command({ kind: "retry" })} onCancel={() => command({ kind: "cancel" })} onClose={() => setClosedChat(true)} />}

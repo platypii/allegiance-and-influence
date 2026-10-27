@@ -1,0 +1,17 @@
+.system { background: var(--paper); min-height: 100svh; padding: clamp(24px, 6vw, 80px); }
+.system > * { max-width: 1100px; margin-inline: auto; }
+.system header > p { max-width: 60ch; margin-top: 24px; }
+.system header > h1 { font-size: clamp(40px, 7vw, 72px); margin-top: 16px; }
+.system header > a { display: inline-flex; align-items: center; min-height: 44px; margin-bottom: 32px; }
+.system section { border-top: 1px solid var(--line); padding-top: 32px; margin-top: 48px; }
+.system section > h2 { font-size: 28px; margin-bottom: 24px; }
+.colors { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 24px; }
+.swatch { height: 96px; border-radius: var(--radius-small); border: 1px solid var(--line); margin-bottom: 12px; }
+.colors p { color: var(--ink-muted); font-size: var(--text-small); }
+.type { display: grid; gap: 24px; }
+.type h1 { font-size: clamp(32px, 5vw, 48px); }
+.type h2 { font-size: 28px; }
+.controls { display: flex; flex-wrap: wrap; align-items: end; gap: 16px; margin-top: 24px; }
+.controls label { display: grid; gap: 8px; }
+.system ul { padding-left: 24px; }
+.system li { margin-block: 8px; }
