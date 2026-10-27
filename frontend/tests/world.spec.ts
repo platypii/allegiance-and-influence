@@ -86,6 +86,79 @@ test("3D motion, camera, pause and runtime reduced motion remain controllable", 
   await expect(page.locator("canvas")).toHaveAttribute("data-rendered", "true")
 })
 
+test("mouse drags turn and tilt the board without selecting characters or getting stuck", async ({ page }) => {
+  const errors: string[] = []
+  page.on("pageerror", error => errors.push(error.message))
+  await page.goto("/world/")
+  await page.getByRole("button", { name: "Start single-player game" }).click()
+  const canvas = page.locator("canvas")
+  await expect(canvas).toHaveAttribute("data-rendered", "true")
+  // With motion disabled, position changes prove camera movement, not idle animation.
+  await expect(canvas).toHaveAttribute("data-motion", "reduced")
+  const bounds = (await canvas.boundingBox())!
+  const original = (await canvas.getAttribute("data-targets"))!
+  const target = JSON.parse(original).winston_churchill
+  const x = bounds.x + target.x, y = bounds.y + target.y
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  await page.mouse.move(x + 100, y, { steps: 8 })
+  await expect.poll(() => canvas.getAttribute("data-targets")).not.toBe(original)
+  await expect(canvas).toHaveCSS("cursor", "grabbing")
+  const horizontal = await canvas.getAttribute("data-targets")
+  await page.mouse.move(x + 100, y + 60, { steps: 6 })
+  await expect.poll(() => canvas.getAttribute("data-targets")).not.toBe(horizontal)
+  await page.mouse.up()
+  await expect(page.getByRole("dialog")).not.toBeVisible()
+  await page.screenshot({ path: "../artifacts/screenshots/world-dragged.png", fullPage: true })
+
+  // Crossing the drag threshold then returning must not become a click.
+  const positions = JSON.parse((await canvas.getAttribute("data-targets"))!)
+  const next = positions.winston_churchill
+  await page.mouse.move(bounds.x + next.x, bounds.y + next.y)
+  await page.mouse.down()
+  await page.mouse.move(bounds.x + next.x + 40, bounds.y + next.y, { steps: 4 })
+  await page.mouse.move(bounds.x + next.x, bounds.y + next.y, { steps: 4 })
+  await page.mouse.up()
+  await expect(page.getByRole("dialog")).not.toBeVisible()
+
+  // Pointer capture keeps the gesture alive outside the canvas, then releases it.
+  await page.mouse.move(bounds.x + 100, bounds.y + 200)
+  await page.mouse.down()
+  await page.mouse.move(bounds.x - 20, bounds.y + 200, { steps: 8 })
+  await page.mouse.up()
+  await expect(canvas).toHaveCSS("cursor", "grab")
+  await page.waitForTimeout(100)
+  const released = await canvas.getAttribute("data-targets")
+  await page.mouse.move(bounds.x + 120, bounds.y + 220)
+  await page.waitForTimeout(100)
+  expect(await canvas.getAttribute("data-targets")).toBe(released)
+
+  for (const event of ["pointercancel", "lostpointercapture", "blur"]) {
+    await page.mouse.move(bounds.x + 100, bounds.y + 200)
+    await page.mouse.down()
+    await page.mouse.move(bounds.x + 125, bounds.y + 220)
+    await canvas.evaluate((element, event) => {
+      if (event === "blur") window.dispatchEvent(new Event(event))
+      else element.dispatchEvent(new Event(event))
+    }, event)
+    await expect(canvas).toHaveCSS("cursor", "grab")
+    await page.waitForTimeout(100)
+    const cancelled = await canvas.getAttribute("data-targets")
+    await page.mouse.move(bounds.x + 180, bounds.y + 240)
+    await page.mouse.up()
+    await page.waitForTimeout(100)
+    expect(await canvas.getAttribute("data-targets")).toBe(cancelled)
+  }
+  // Ordinary clicks still pick the actual mesh after camera changes and cancellation.
+  const finalTarget = JSON.parse((await canvas.getAttribute("data-targets"))!).winston_churchill
+  await page.mouse.move(bounds.x + finalTarget.x, bounds.y + finalTarget.y)
+  await page.mouse.down()
+  await page.mouse.move(bounds.x + finalTarget.x + 2, bounds.y + finalTarget.y + 1)
+  await page.mouse.up()
+  await expect(page.getByRole("dialog").getByRole("heading", { name: "Winston Churchill" })).toBeVisible()
+  expect(errors).toEqual([])
+})
+
 test("crowded mobile 3D and context-loss fallback preserve reachable characters", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto("/world/")
@@ -152,6 +225,14 @@ test("character portraits switch reliably, rotate actual meshes and fit narrow s
       await page.screenshot({ path: `../artifacts/screenshots/portrait-${id}-quarter.png` })
     }
   }
+  const portrait = page.locator("canvas")
+  const portraitBounds = (await portrait.boundingBox())!
+  const beforeDrag = await portrait.screenshot()
+  await page.mouse.move(portraitBounds.x + portraitBounds.width / 2, portraitBounds.y + 200)
+  await page.mouse.down()
+  await page.mouse.move(portraitBounds.x + portraitBounds.width / 2 + 90, portraitBounds.y + 200, { steps: 6 })
+  await page.mouse.up()
+  await expect.poll(async () => !(await portrait.screenshot()).equals(beforeDrag)).toBeTruthy()
   await page.setViewportSize({ width: 320, height: 568 })
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
   await page.screenshot({ path: "../artifacts/screenshots/portrait-mobile.png", fullPage: true })

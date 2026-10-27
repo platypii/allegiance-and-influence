@@ -44,7 +44,7 @@ export default function CharacterGallery() {
       <section className={styles.details}>
         <p className="eyebrow muted">A closer look</p><h1>{character.Character}</h1><p>{character.Description}</p>
         <label>Choose a character<select value={id} onChange={e => setId(e.target.value)}>{featured.map(uid => <option key={uid} value={uid}>{characters.find(c => c.UID === uid)!.Character}</option>)}</select></label>
-        <p>Turn the miniature to see its face, silhouette and costume. These seven characters have received the first likeness pass.</p>
+        <p>Drag with the mouse or use the arrows to turn the miniature and inspect its face, silhouette and costume. These seven characters have received the first likeness pass.</p>
         <a href="/world/" className="buttonLink primary">Play on the 3D board</a>
       </section>
     </div>

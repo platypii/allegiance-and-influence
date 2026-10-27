@@ -23,9 +23,12 @@ export function createWorld(canvas: HTMLCanvasElement, initial: WorldState, onPi
   const scene = new THREE.Scene()
   const camera = new THREE.OrthographicCamera(-14, 14, 10, -10, .1, 100)
   let azimuth = .12, zoom = 1, width = 0, height = 0
+  let elevation = Math.atan2(inspection ? 1.8 : 18.5, inspection ? 7 : 23)
+  const distance = Math.hypot(inspection ? 7 : 23, inspection ? 1.8 : 18.5)
   const target = new THREE.Vector3(0, inspection ? 1.4 : .5, 0)
   function positionCamera() {
-    camera.position.set(Math.sin(azimuth) * (inspection ? 7 : 23), inspection ? 3.2 : 19, Math.cos(azimuth) * (inspection ? 7 : 23))
+    const radius = distance * Math.cos(elevation)
+    camera.position.set(Math.sin(azimuth) * radius, target.y + distance * Math.sin(elevation), Math.cos(azimuth) * radius)
     camera.lookAt(target)
     camera.zoom = zoom * (!inspection && width && width < 600 ? 1.2 : 1)
     camera.updateProjectionMatrix()
@@ -114,27 +117,68 @@ export function createWorld(canvas: HTMLCanvasElement, initial: WorldState, onPi
     raycaster.setFromCamera(pointer, camera)
     return raycaster.intersectObjects([...figures.values()].map(item => item.root), true)[0]?.object.userData.person as string | undefined
   }
+  let pressed: { pointerId: number; id?: string; x: number; y: number; azimuth: number; elevation: number; mouse: boolean; dragged: boolean } | null = null
   function moved(event: PointerEvent) {
+    if (pressed) {
+      if (event.pointerId !== pressed.pointerId) return
+      const dx = event.clientX - pressed.x, dy = event.clientY - pressed.y
+      // Latch once crossed: returning to the starting point is still a drag.
+      if (Math.hypot(dx, dy) > 6) pressed.dragged = true
+      if (pressed.mouse && pressed.dragged) {
+        azimuth = pressed.azimuth - dx * .006
+        elevation = THREE.MathUtils.clamp(pressed.elevation + dy * .004, inspection ? .12 : .35, 1.15)
+        positionCamera()
+        hover = null
+        onHover("")
+        canvas.style.cursor = "grabbing"
+        dirty = true
+      }
+      return
+    }
     hover = pick(event) || null
     const item = hover ? figures.get(hover) : null
-    canvas.style.cursor = item?.person.selectable ? "pointer" : "default"
+    canvas.style.cursor = item?.person.selectable ? "pointer" : "grab"
     onHover(item?.person.name || "")
     dirty = true
   }
-  let pressed: { id: string; x: number; y: number } | null = null
-  function down(event: PointerEvent) { const id = pick(event); pressed = id ? { id, x: event.clientX, y: event.clientY } : null; if (id) hover = id }
-  function up(event: PointerEvent) {
-    if (pressed && Math.hypot(event.clientX - pressed.x, event.clientY - pressed.y) < 12 && figures.get(pressed.id)?.person.selectable) onPick(pressed.id)
-    pressed = null
-    if (event.pointerType !== "mouse") hover = null
+  function down(event: PointerEvent) {
+    if (pressed || event.button !== 0 || !event.isPrimary) return
+    const id = pick(event)
+    pressed = { pointerId: event.pointerId, id, x: event.clientX, y: event.clientY, azimuth, elevation, mouse: event.pointerType === "mouse", dragged: false }
+    if (id) hover = id
+    if (pressed.mouse) {
+      event.preventDefault()
+      canvas.setPointerCapture(event.pointerId)
+      canvas.style.cursor = "grabbing"
+    }
+    dirty = true
   }
-  function leave() { hover = null; pressed = null; onHover(""); dirty = true }
-  function lost(event: Event) { event.preventDefault(); onLost() }
+  function cancel() {
+    const pointerId = pressed?.pointerId
+    pressed = null
+    if (pointerId !== undefined && canvas.hasPointerCapture(pointerId)) canvas.releasePointerCapture(pointerId)
+    hover = null
+    canvas.style.cursor = "grab"
+    onHover("")
+    dirty = true
+  }
+  function up(event: PointerEvent) {
+    if (!pressed || event.pointerId !== pressed.pointerId) return
+    moved(event)
+    const selected = !pressed.dragged ? pressed.id : undefined
+    cancel()
+    if (selected && figures.get(selected)?.person.selectable) onPick(selected)
+  }
+  function leave() { if (!pressed?.mouse) cancel() }
+  function lost(event: Event) { event.preventDefault(); cancel(); onLost() }
+  canvas.style.cursor = "grab"
   canvas.addEventListener("pointermove", moved)
   canvas.addEventListener("pointerdown", down)
   canvas.addEventListener("pointerup", up)
   canvas.addEventListener("pointerleave", leave)
-  canvas.addEventListener("pointercancel", leave)
+  canvas.addEventListener("pointercancel", cancel)
+  canvas.addEventListener("lostpointercapture", cancel)
+  window.addEventListener("blur", cancel)
   canvas.addEventListener("webglcontextlost", lost)
   const observer = new ResizeObserver(() => {
     width = canvas.clientWidth; height = canvas.clientHeight
@@ -216,7 +260,9 @@ export function createWorld(canvas: HTMLCanvasElement, initial: WorldState, onPi
       preference.removeEventListener("change", preferenceChanged)
       canvas.removeEventListener("pointermove", moved); canvas.removeEventListener("pointerdown", down)
       canvas.removeEventListener("pointerup", up); canvas.removeEventListener("pointerleave", leave)
-      canvas.removeEventListener("pointercancel", leave); canvas.removeEventListener("webglcontextlost", lost)
+      canvas.removeEventListener("pointercancel", cancel); canvas.removeEventListener("lostpointercapture", cancel)
+      window.removeEventListener("blur", cancel); canvas.removeEventListener("webglcontextlost", lost)
+      cancel()
       const materials = new Set<THREE.Material>(), geometries = new Set<THREE.BufferGeometry>()
       scene.traverse(object => {
         if (object instanceof THREE.Mesh || object instanceof THREE.Line) {
