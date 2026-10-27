@@ -1,6 +1,6 @@
 # Project state
 
-Updated 2026-10-25. User authorized modernization and merging all open PRs, and selected OpenRouter for hosted models with different models per character.
+Updated 2026-10-26. User authorized modernization and merging all open PRs, and selected OpenRouter for hosted models with different models per character.
 
 ## Replit hosting preparation
 
@@ -17,6 +17,10 @@ The full offline verifier passed with 92 backend tests, 11 browser workflows, 3 
 User requested a substantially richer game presentation, mostly 3D objects and more characters while keeping the caricature style. Issues [#17](https://github.com/platypii/allegiance-and-influence/issues/17) and [#18](https://github.com/platypii/allegiance-and-influence/issues/18), branch `codex/three-dimensional-world` stacked on PR #14. The optional `/world/` route and in-game board selector use a lazy Three.js scene with a raised island, canal, bridges, trees, landmarks, lighting/shadows and distinct procedural character maquettes. The same game API owns selection, conversations, rounds, factions and saved matches. Existing portraits remain in an accessible cast strip; renderer failure/context loss returns to the illustrated board without losing the match.
 
 Production character rigs, expressive gestures and a first six-character expansion pack are specified in [the visual world plan](../docs/visual-world-plan.md). The currently playable library is still 23; proposed newcomers are not shipped content. Scope/evidence: `work/three-dimensional-world.md`. The full offline gate passed: 92 backend tests, 15 browser workflows, 3 physics checks, contracts/build and all 58 original artwork hashes. Actual canvas picking, recruitment, reload/completion/replay, motion controls and renderer fallbacks are covered; desktop and 320/390px captures were inspected. Headless software WebGL checks are functional evidence, not real-device performance claims.
+
+## Character likeness pass
+
+The user approved the 3D style and animation and rejected the generic character likenesses. Issue [#20](https://github.com/platypii/allegiance-and-influence/issues/20), branch `codex/character-likeness`, stacked on [PR #19](https://github.com/platypii/allegiance-and-influence/pull/19). Seven figures now use individually authored proportions, faces, hairstyles and clothing: Einstein, Curie, Churchill, Mandela, Napoleon, King and Genghis Khan. `/characters/` shows the actual game meshes at close range with rotation controls; it makes visual review possible without starting an AI conversation. Historical reference images inform identity and remain ignored research artifacts; original game portraits remain intact. This is a first likeness pass, not completion of production rigging or the larger cast pack. Task: `work/character-likeness.md`. Local full verification passed: 92 backend tests, 16 browser workflows, 3 physics checks, contracts/build and all 58 original artwork hashes. Final desktop and 320px captures were inspected; the existing default-board draw-call ceiling still passes. The other 16 characters retain the earlier designs, and real-device performance remains unmeasured.
 
 ## Milestones
 
