@@ -5,7 +5,7 @@ import styles from "./page.module.css"
 import Welcome from "./welcome"
 import Invite from "./invite"
 import Panel from "./panel"
-import InfluenceBoard, { GraphNode } from "./influence-board"
+import type { GraphNode } from "./influence-board"
 import characters from "./characters"
 import { teamColor } from "./teamColor"
 import Round from "./round"
@@ -13,13 +13,12 @@ import Endgame from "./endgame"
 import { Game, useGame } from "./client"
 import WorldBoard from "./world/board"
 
-export default function GameApp({ initialBoard = "2d" }: { initialBoard?: "2d" | "3d" }) {
+export default function GameApp() {
   const { game, connection, error, busy, create, join, command, replay } = useGame()
   const [closedChat, setClosedChat] = useState(false)
   const [closedEnd, setClosedEnd] = useState(false)
   const [frames, setFrames] = useState<Game[] | null>(null)
   const [frame, setFrame] = useState(0)
-  const [board, setBoard] = useState(initialBoard)
   const shown = frames ? frames[frame] : game
   const player = game?.you
   const chat = player && shown ? shown.conversations[player] : null
@@ -53,7 +52,7 @@ export default function GameApp({ initialBoard = "2d" }: { initialBoard?: "2d" |
 
   return <div className={styles.page}>
     <main className={styles.main}>
-      {welcome ? <Welcome game={game} busy={busy} onCreate={create} onJoin={join} worldPreview={initialBoard === "3d"} /> : ending && game ? <Endgame game={game} homeHref={board === "3d" ? "/world/" : "/"} onClose={() => setClosedEnd(true)} /> : shown && <div className={styles.gameShell}>
+      {welcome ? <Welcome game={game} busy={busy} onCreate={create} onJoin={join} /> : ending && game ? <Endgame game={game} onClose={() => setClosedEnd(true)} /> : shown && <div className={styles.gameShell}>
         <header className={styles.header}>
           <a className={styles.brand} href="/" aria-label="Allegiance & Influence home">Allegiance <em>&amp;</em> Influence</a>
           <div className={styles.scoreboard}>
@@ -67,8 +66,7 @@ export default function GameApp({ initialBoard = "2d" }: { initialBoard?: "2d" |
         </header>
         <div className={styles.gameGrid}>
           <section className={styles.board} aria-label="Game board">
-            {board === "2d" && <div className={styles.boardHeading}><div><p className="eyebrow muted">The gathering</p><h1>Every alliance starts<br />with a conversation.</h1></div><span className={styles.roundBadge}>Round {shown.round_number}</span></div>}
-            {board === "3d" ? <WorldBoard nodes={nodes} edges={(shown.pairings || []).map(([source, target]) => ({ source, target }))} talking={Object.values(shown.conversations).filter(chat => !chat.done && chat.target).map(chat => chat.target!)} /> : <InfluenceBoard nodes={nodes} edges={(shown.pairings || []).map(([source, target]) => ({ source, target }))} />}
+            <WorldBoard nodes={nodes} edges={(shown.pairings || []).map(([source, target]) => ({ source, target }))} talking={Object.values(shown.conversations).filter(chat => !chat.done && chat.target).map(chat => chat.target!)} />
             <div className={styles.status}>
               {!frames && game?.opponent?.error && <span role="alert">Opponent stopped this round ({game.opponent.error}). Finish your conversation to continue. </span>}
               <p>{frames ? `Replay · step ${frame + 1} of ${frames.length}` : status}</p>
@@ -80,13 +78,12 @@ export default function GameApp({ initialBoard = "2d" }: { initialBoard?: "2d" |
             <Round game={shown} />
             <section className={styles.toolbar} aria-label="Session controls">
               <div className={styles.sessionHeading}><h2>Your session</h2><span role="status" className={styles.connection}>{connection}</span></div>
-              <label>Board view <select aria-label="Board view" value={board} onChange={event => setBoard(event.target.value as "2d" | "3d")}><option value="2d">Illustrated board</option><option value="3d">3D tabletop preview</option></select></label>
               <span className={styles.mode}>{shown.mode === "scripted" ? "Scripted demo" : "Model experiment"}</span>
               {shown.opponent && <p className={styles.opponent}>Blue: {shown.opponent.model}</p>}
               {(player || game?.phase !== "lobby") && <Invite gameId={shown.id} />}
               {player && <button disabled={busy} onClick={async () => { const result = await replay(); if (result) { setFrames(result.frames); setFrame(result.frames.length - 1) } }}>Review replay</button>}
               {frames && <><label>Replay step <input aria-label="Replay step" type="range" min={0} max={frames.length - 1} value={frame} onChange={e => setFrame(Number(e.target.value))} /></label><button onClick={() => setFrames(null)}>Back to live game</button></>}
-              <a className={styles.newGame} href={board === "3d" ? "/world/" : "/"}>New game <span aria-hidden="true">↗</span></a>
+              <a className={styles.newGame} href="/">New game <span aria-hidden="true">↗</span></a>
             </section>
           </aside>
         </div>

@@ -3,9 +3,8 @@ import styles from "./welcome.module.css"
 import Invite from "./invite"
 import type { Game, Seat } from "./client"
 
-export default function Welcome({ game, busy, onCreate, onJoin, worldPreview = false }: {
+export default function Welcome({ game, busy, onCreate, onJoin }: {
   game: Game | null; busy: boolean
-  worldPreview?: boolean
   onCreate: (config: Game["config"]) => void
   onJoin: (seat: Seat) => void
 }) {
@@ -35,7 +34,7 @@ export default function Welcome({ game, busy, onCreate, onJoin, worldPreview = f
       <p className={styles.caption}>A game of conversation, character, and changing loyalties.</p>
     </section>
     <section className={styles.setup} aria-label="Game setup">
-      <div className="eyebrow muted">{game ? "Your invitation" : worldPreview ? "Gather your company · 3D preview" : "Gather your company"}</div>
+      <div className="eyebrow muted">{game ? "Your invitation" : "Gather your company"}</div>
       <h2>{game ? "Choose your side" : "A room full of possibilities"}</h2>
       <p className="muted">{game ? <><span>{game.mode === "scripted" ? "Scripted demo" : "Model experiment"}</span> · {game.mode === "scripted" ? "no API key needed" : "each character has a mind of their own"}</> : "Play solo against an opponent, or invite a friend."}</p>
       {!game ? <form onSubmit={e => { e.preventDefault(); onCreate({ num_agents: agents, num_rounds: rounds, seed: 32, opponent_profile: solo ? profile : null }) }}>
@@ -62,8 +61,8 @@ export default function Welcome({ game, busy, onCreate, onJoin, worldPreview = f
         {game.players.player_red && game.players.player_blue && <p>Both seats are occupied. You can watch the board.</p>}
         <a href="/">Create another game</a>
       </>}
+      {!game && <a href="/characters/">Meet the characters</a>}
       <div className={styles.how}><h3>Win them over. Change the room.</h3><p>Choose a character, make your case, then finish the conversation. Watch allegiances change when the round ends.</p></div>
-      {!game && <a href={worldPreview ? "/" : "/world/"}>{worldPreview ? "Use the illustrated board" : "Explore the 3D tabletop preview"}</a>}
     </section>
     </div>
   </div>

@@ -1,5 +1,16 @@
 import { test, expect, Page } from "@playwright/test"
 
+// The illustrated renderer exists only for browsers that cannot render WebGL.
+async function withoutWebGL(page: Page) {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext
+    HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, ...args: Parameters<typeof original>) {
+      if (String(args[0]).includes("webgl")) return null
+      return original.apply(this, args)
+    } as typeof original
+  })
+}
+
 async function message(page: Page, text: string) {
   await page.getByLabel("Your message").fill(text)
   await page.getByRole("button", { name: "Send message", exact: true }).click()
@@ -7,6 +18,7 @@ async function message(page: Page, text: string) {
 }
 
 test("two independent players finish, reload, replay, and make no external requests", async ({ browser }) => {
+  test.setTimeout(90000)
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: "reduce" })
   const other = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: "reduce" })
   const external: string[] = []
@@ -34,6 +46,8 @@ test("two independent players finish, reload, replay, and make no external reque
   await blue.goto(address)
   await blue.getByRole("button", { name: "Join Blue" }).click()
   await expect(blue.getByText("You are Blue", { exact: true })).toBeVisible()
+  await expect(red.locator("canvas")).toHaveAttribute("data-rendered", "true")
+  await expect(blue.locator("canvas")).toHaveAttribute("data-rendered", "true")
   for (let round = 1; round <= 2; round++) {
     await expect(red.getByRole("heading", { name: `Round ${round} of 2` })).toBeVisible()
     await expect(red.getByRole("button", { name: /^Recruit/ }).first()).toBeEnabled()
@@ -48,9 +62,9 @@ test("two independent players finish, reload, replay, and make no external reque
       await red.getByLabel("Your message").fill("Let us build something together.")
       await red.getByRole("button", { name: "Send message", exact: true }).click()
       await expect(red.getByRole("button", { name: "Cancel reply" })).toBeVisible()
-      await red.screenshot({ path: "../artifacts/screenshots/06-agent-pending.png" })
       await red.getByRole("button", { name: "Cancel reply" }).click()
       await expect(red.getByText("Reply cancelled.", { exact: false })).toBeVisible()
+      await red.screenshot({ path: "../artifacts/screenshots/06-agent-cancelled.png" })
       await red.getByRole("button", { name: "Retry reply" }).click()
       await expect(red.getByRole("button", { name: "Cancel reply" })).not.toBeVisible()
       await expect(red.getByRole("log").getByText("Let us build something together.", { exact: false })).toHaveCount(1)
@@ -255,24 +269,26 @@ test("a full character roster keeps every mobile target reachable", async ({ pag
   await page.getByRole("button", { name: "Start single-player game" }).click()
   const targets = page.getByRole("button", { name: /^Recruit/ })
   await expect(targets).toHaveCount(23)
-  const bounds = await targets.evaluateAll(elements => elements.map(e => {
-    const r = e.getBoundingClientRect(); return { left: r.left, top: r.top, right: r.right, bottom: r.bottom, width: r.width, height: r.height }
-  }))
-  for (let i = 0; i < bounds.length; i++) {
-    const a = bounds[i]
-    expect(a.left).toBeGreaterThanOrEqual(0)
-    expect(a.right).toBeLessThanOrEqual(320)
-    expect(a.width).toBeGreaterThanOrEqual(44)
-    expect(a.height).toBeGreaterThanOrEqual(44)
-    for (const b of bounds.slice(i + 1)) expect(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top).toBeTruthy()
+  await expect(page.locator("canvas")).toHaveAttribute("data-rendered", "true")
+  // The horizontal cast strip exposes all figures without overflowing the page.
+  for (const target of await targets.all()) {
+    await target.evaluate(element => element.scrollIntoView({ inline: "start", block: "nearest", behavior: "instant" }))
+    await expect(target).toBeInViewport({ ratio: 1 })
+    const bounds = (await target.boundingBox())!
+    expect(bounds.x).toBeGreaterThanOrEqual(0)
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(320)
+    expect(bounds.width).toBeGreaterThanOrEqual(44)
+    expect(bounds.height).toBeGreaterThanOrEqual(44)
   }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
   await targets.last().click()
   await expect(page.getByRole("dialog")).toBeVisible()
 })
 
-test("the live swarm moves, keeps targets separate, and pauses for interaction", async ({ browser }) => {
+test("the fallback swarm moves, keeps targets separate, and pauses for interaction", async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: "no-preference", recordVideo: { dir: "../artifacts/swarm-video", size: { width: 1440, height: 1000 } } })
   const page = await context.newPage()
+  await withoutWebGL(page)
   await page.goto("http://127.0.0.1:8765")
   await page.getByRole("button", { name: "Start single-player game" }).click()
   const board = page.getByLabel("Influence board")
@@ -354,9 +370,10 @@ test("dialogue actually renders the bundled Lora font at readable sizes", async 
   await cdp.detach()
 })
 
-test("a crowded mobile board remains animated without overlapping tap targets", async ({ browser }) => {
+test("a crowded fallback mobile board remains animated without overlapping tap targets", async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 320, height: 568 }, isMobile: true, hasTouch: true, reducedMotion: "no-preference" })
   const page = await context.newPage()
+  await withoutWebGL(page)
   await page.goto("http://127.0.0.1:8765")
   await page.getByLabel("Characters", { exact: true }).fill("23")
   await page.getByRole("button", { name: "Start single-player game" }).click()

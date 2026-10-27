@@ -16,7 +16,8 @@ JSON
   test_port=8766
   test_log=artifacts/e2e-model-server.log
 fi
-GAME_SCRIPTED_DELAY_MS=800 GAME_DB="$test_dir/game.sqlite3" GAME_PORT="$test_port" bash scripts/run-local.sh > "$test_log" 2>&1 &
+# Leave a usable cancellation window while two software-WebGL clients render.
+GAME_SCRIPTED_DELAY_MS=2000 GAME_DB="$test_dir/game.sqlite3" GAME_PORT="$test_port" bash scripts/run-local.sh > "$test_log" 2>&1 &
 server_pid=$!
 trap 'kill "$server_pid" 2>/dev/null || true; wait "$server_pid" 2>/dev/null || true; rm -rf "$test_dir"' EXIT INT TERM
 wait "$server_pid"

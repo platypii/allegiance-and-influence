@@ -85,3 +85,7 @@ Prototype figures are authored procedural maquettes. They demonstrate scale, lig
 ## 2026-10-26 — Character identity before further world decoration
 
 The user approved the tabletop style and animation but found the figures unrecognizable. Issue #20 prioritizes seven individually authored silhouettes, faces and costumes within the existing procedural mesh pipeline. Historical portrait references inform identity; original illustrations continue to define the stylized presentation and remain untouched. Share the same meshes and renderer between the board and a local `/characters/` inspection gallery so close-up review reflects the playable assets. This is an incremental likeness pass; production rigs and cast expansion remain separate work under #18.
+
+## 2026-10-27 — One canonical world
+
+User approval of the 3D world promotes it from preview to the normal game at `/`. Remove the alternate board selector, preview copy and split new-game destinations. Keep `/world/` solely as a static-export-compatible browser redirect preserving query and hash, so shared session links/bookmarks continue to work without mounting a second game client. All gallery return links point to `/`. Automatic illustrated recovery remains a renderer compatibility measure for unavailable/lost WebGL, not a user-selectable mode. Game contracts and model routing are unchanged.
