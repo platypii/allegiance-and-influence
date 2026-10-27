@@ -12,6 +12,12 @@ Issues [#13](https://github.com/platypii/allegiance-and-influence/issues/13) and
 
 The full offline verifier passed with 92 backend tests, 11 browser workflows, 3 physics simulations, build/types, contracts, and all 58 original artwork hashes. Browser glyph inspection confirms actual custom Lora rendering. Motion checks cover crowded mobile targets, pause/focus/reduced-motion behavior, and continued movement after a simulated minute. Inspected final desktop/mobile dialogue and board captures. Original assets and game rules remain intact. PR #14 awaits user review; actual device keyboards/screen readers and publishing remain playtest steps.
 
+## Playable 3D world direction
+
+User requested a substantially richer game presentation, mostly 3D objects and more characters while keeping the caricature style. Issues [#17](https://github.com/platypii/allegiance-and-influence/issues/17) and [#18](https://github.com/platypii/allegiance-and-influence/issues/18), branch `codex/three-dimensional-world` stacked on PR #14. The optional `/world/` route and in-game board selector use a lazy Three.js scene with a raised island, canal, bridges, trees, landmarks, lighting/shadows and distinct procedural character maquettes. The same game API owns selection, conversations, rounds, factions and saved matches. Existing portraits remain in an accessible cast strip; renderer failure/context loss returns to the illustrated board without losing the match.
+
+Production character rigs, expressive gestures and a first six-character expansion pack are specified in [the visual world plan](../docs/visual-world-plan.md). The currently playable library is still 23; proposed newcomers are not shipped content. Scope/evidence: `work/three-dimensional-world.md`. The full offline gate passed: 92 backend tests, 15 browser workflows, 3 physics checks, contracts/build and all 58 original artwork hashes. Actual canvas picking, recruitment, reload/completion/replay, motion controls and renderer fallbacks are covered; desktop and 320/390px captures were inspected. Headless software WebGL checks are functional evidence, not real-device performance claims.
+
 ## Milestones
 
 - [PR #3](https://github.com/platypii/allegiance-and-influence/pull/3), local foundation, merged as `d0aff12`: authoritative game rules, SQLite, local multiplayer/replay, original art, and the software factory.

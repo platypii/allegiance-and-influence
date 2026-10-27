@@ -41,6 +41,10 @@ Display headings and the dialogue panel use locally bundled **Lora** (variable 4
 
 **Motion:** animate the board by default, with a visible pause/resume control. Respect reduced motion, including changes while the page is open; hidden tabs must not advance the simulation. No pulsing status or glowing text. Original raster assets remain unchanged; improvements come from composition, framing, contrast, and HTML/CSS typography.
 
+## 3D world direction
+
+The optional `/world/` preview uses actual 3D geometry for the island, scenery and animated character maquettes while retaining the same typography, readable HTML dialogue, faction colors and original portraits. The illustrated board remains available. See [the visual world plan](visual-world-plan.md) for the production art standard, animation stages and larger cast pipeline. Procedural maquettes establish the direction; they are not final rigged character assets.
+
 ## Verification
 
 Normal-motion tests sample actual frames for movement, collisions, bounds and interaction pauses; simulation checks cover sustained movement and pair attraction. A browser font test inspects rendered glyphs to prove Lora is used, rather than merely declared in CSS. Browser coverage also includes 320/390/430px layouts, enlarged text, a complete mobile conversation and replay, character profile access, dialog focus and Escape, and reachability of all 23 character targets. Existing desktop multiplayer, model, invite, cancellation/retry and reload workflows remain required. Inspect captures in `artifacts/screenshots/`; compare the preserved baseline in `artifacts/design-before/`. Run `bash scripts/agent-verify.sh` and retain all 58 original asset hashes.
