@@ -53,7 +53,6 @@ export default function WorldBoard({ nodes, edges, talking }: { nodes: GraphNode
         <button aria-pressed={paused} disabled={!ready} onClick={() => { scene.current?.pause(!paused); setPaused(!paused) }}>{paused ? "Resume" : "Pause"}</button>
       </div>
       <p className={styles.hover} aria-live="polite">{hover || "Drag with mouse to turn · Tap a figure to talk"}</p>
-      <span className={styles.preview}>3D art preview</span>
     </div>
     <section className={styles.cast} aria-label="Choose a character">
       <div className={styles.castHeading}><h2>The company</h2><a href="/characters/" target="_blank" rel="noopener">Meet the characters ↗</a><span>{nodes.filter(node => !node.id.startsWith("player_")).length} personalities · one unlikely alliance</span></div>

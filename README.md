@@ -78,13 +78,13 @@ The [first live validation](docs/live-validation-2026-10-24.md) completed 18 pai
 
 This drives the same game transitions and persistence boundary with scripted players. The optional JSON contains a manifest and public replay frames; private conversations and player keys are excluded. This is a smoke experiment, not a model benchmark.
 
-## 3D tabletop preview
+## The 3D gathering
 
-Open `/world/` on the running server, or choose **Board view → 3D tabletop preview** during a match. This playable art-direction slice adds a modeled island, landmarks, lighting, shadows and moving character maquettes while using the same conversations and saved games. The original illustrated board remains available, including as a fallback without WebGL. Open `/characters/` to inspect and rotate the seven figures with the first likeness pass. The current cast remains 23 characters; finished rigs and new cast packs are planned in [the visual world roadmap](docs/visual-world-plan.md).
+Open `/` on the running server to play in the 3D world: a modeled island, landmarks, lighting, shadows and animated characters. Solo games, multiplayer invitations and replay all use this same experience. Old `/world/` links redirect to `/` while preserving their session. Browsers without WebGL automatically recover to the illustrated renderer; there is no board-mode selector. Open `/characters/` to inspect and drag the seven figures with the first likeness pass. The current cast remains 23 characters; finished rigs and new cast packs are planned in [the visual world roadmap](docs/visual-world-plan.md).
 
 ## Design system
 
-The game uses a shared typography, color, spacing, and control system. Open `/design-system/` on the running server for the visual reference, and see [the design guidelines](docs/design-system.md). Conversation text is readable on phones, the animated swarm keeps character targets separate, and all original artwork is preserved.
+The game uses a shared typography, color, spacing, and control system. Open `/design-system/` on the running server for the visual reference, and see [the design guidelines](docs/design-system.md). Conversation text is readable on phones, the animated world includes an accessible character roster, and all original artwork is preserved.
 
 ## Architecture and roadmap
 

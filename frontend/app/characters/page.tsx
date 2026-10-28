@@ -29,7 +29,7 @@ export default function CharacterGallery() {
     return () => { stopped = true; scene.current?.dispose(); scene.current = null }
   }, [id]) // Character identity recreates the single-figure scene; controls act directly.
   return <main className={styles.gallery}>
-    <header><a href="/world/">← Back to the gathering</a><span className="eyebrow">Meet the company</span></header>
+    <header><a href="/">← Back to the gathering</a><span className="eyebrow">Meet the company</span></header>
     <div className={styles.layout}>
       <section className={styles.stage} aria-label="Character portrait">
         <canvas key={id} ref={canvas} aria-label={`3D portrait of ${character.Character}`} />
@@ -45,7 +45,7 @@ export default function CharacterGallery() {
         <p className="eyebrow muted">A closer look</p><h1>{character.Character}</h1><p>{character.Description}</p>
         <label>Choose a character<select value={id} onChange={e => setId(e.target.value)}>{featured.map(uid => <option key={uid} value={uid}>{characters.find(c => c.UID === uid)!.Character}</option>)}</select></label>
         <p>Drag with the mouse or use the arrows to turn the miniature and inspect its face, silhouette and costume. These seven characters have received the first likeness pass.</p>
-        <a href="/world/" className="buttonLink primary">Play on the 3D board</a>
+        <a href="/" className="buttonLink primary">Play the game</a>
       </section>
     </div>
   </main>

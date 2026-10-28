@@ -16,7 +16,8 @@ JSON
   test_port=8766
   test_log=artifacts/e2e-model-server.log
 fi
-GAME_SCRIPTED_DELAY_MS=800 GAME_DB="$test_dir/game.sqlite3" GAME_PORT="$test_port" bash scripts/run-local.sh > "$test_log" 2>&1 &
+# The test-only provider holds the cancellation scenario until explicitly cancelled.
+PYTHONPATH=backend GAME_DB="$test_dir/game.sqlite3" .venv/bin/python -m uvicorn scripts.e2e_app:create_e2e_app --factory --host 127.0.0.1 --port "$test_port" > "$test_log" 2>&1 &
 server_pid=$!
 trap 'kill "$server_pid" 2>/dev/null || true; wait "$server_pid" 2>/dev/null || true; rm -rf "$test_dir"' EXIT INT TERM
 wait "$server_pid"

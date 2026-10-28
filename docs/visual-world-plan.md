@@ -6,7 +6,7 @@ User direction, 2026-10-25: keep the illustrated caricature style, substantially
 
 An unlikely gathering of big personalities on a little world. The board is a place: a warm stone plaza, a canal, trees, lamps, pennants and miniature landmarks. Characters should look at each other, move into conversations, gesture, disagree and celebrate. Influence should be visible through reactions, faction markers and changed relationships. Keep the original expressive proportions and warm palette. Text remains clear HTML, with Lora dialogue, rather than becoming tiny labels baked into a 3D texture.
 
-The first implementation is a playable art-direction slice at `/world/`, or **Board view → 3D tabletop preview** inside a match. It uses the same server, saved games, model profiles, commands and replay as the illustrated board. Most visible scene objects are actual meshes. The character maquettes are authored procedural geometry with distinct outfits, faces and props; they are not finished sculpted or rigged production assets. The current 23-character library remains the playable cast. Do not describe proposals below as shipped characters.
+The user approved the world as the main game experience on 2026-10-27. `/` now opens the 3D gathering for all ordinary play, invitations and replay. The board-mode selector and preview labels are removed; `/world/` is only a compatibility redirect retaining query/hash. Automatic illustrated fallback remains for unavailable/lost WebGL. Most visible scene objects are actual meshes. The current 23-character library remains the playable cast, with seven figures receiving the first authored likeness pass. Production rigs and proposed cast additions below remain future work.
 
 ## Production sequence
 

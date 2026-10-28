@@ -1,6 +1,10 @@
 # Project state
 
-Updated 2026-10-26. User authorized modernization and merging all open PRs, and selected OpenRouter for hosted models with different models per character.
+Updated 2026-10-27. User authorized modernization and merging all open PRs, and selected OpenRouter for hosted models with different models per character.
+
+## Canonical 3D game — 2026-10-27
+
+The user approved the world as the main game and authorized merging the visual work. PRs #14, #19, #21 and #23 are merged into `master` with ancestry preserved (latest merge `8273171`). Issue [#24](https://github.com/platypii/allegiance-and-influence/issues/24), branch `codex/default-world`, removes the alternate board selector and preview labels. Normal play, invitations, new games and replay use `/`; `/world/` redirects to the same route with query/hash intact. Gallery return links point to `/`. Automatic illustrated renderer recovery remains for missing/lost WebGL, not a second game mode. The sections below retain the implementation history; the optional preview description is superseded by this decision. The final local gate passed: 92 backend tests, 18 browser workflows, 3 physics checks, contracts/build and 58 original assets. Desktop/mobile captures were inspected. Task/evidence: `work/default-world.md`.
 
 ## Replit hosting preparation
 
@@ -10,7 +14,7 @@ Issue [#11](https://github.com/platypii/allegiance-and-influence/issues/11), bra
 
 Issues [#13](https://github.com/platypii/allegiance-and-influence/issues/13) and [#15](https://github.com/platypii/allegiance-and-influence/issues/15), branch `codex/game-design-system`, [PR #14](https://github.com/platypii/allegiance-and-influence/pull/14), task `work/game-design-system.md`. Shared tokens, `/design-system/`, responsive setup/board/results, and a native conversation dialog establish the visual system. Following user review, the board again animates continuously with wandering, repulsion, faction gravity and pair attraction; full portrait/label bounds prevent collisions. Pointer/focus stability, a pause control and reduced-motion support preserve reliable targeting. Locally bundled Lora renders dialogue and composer text at 18px and supplies the headings. The desktop conversation backdrop leaves the moving board visible. User feedback [#16](https://github.com/platypii/allegiance-and-influence/issues/16) removes the heavy scenery fade and elliptical crop: the original board illustration now fills the play area with a light tint, while solid label backings preserve readability. The full offline gate passed again and refreshed desktop/mobile captures were inspected.
 
-The full offline verifier passed with 92 backend tests, 11 browser workflows, 3 physics simulations, build/types, contracts, and all 58 original artwork hashes. Browser glyph inspection confirms actual custom Lora rendering. Motion checks cover crowded mobile targets, pause/focus/reduced-motion behavior, and continued movement after a simulated minute. Inspected final desktop/mobile dialogue and board captures. Original assets and game rules remain intact. PR #14 awaits user review; actual device keyboards/screen readers and publishing remain playtest steps.
+The full offline verifier passed with 92 backend tests, 11 browser workflows, 3 physics simulations, build/types, contracts, and all 58 original artwork hashes. Browser glyph inspection confirms actual custom Lora rendering. Motion checks cover crowded mobile targets, pause/focus/reduced-motion behavior, and continued movement after a simulated minute. Inspected final desktop/mobile dialogue and board captures. Original assets and game rules remain intact. PR #14 merged on 2026-10-27; actual device keyboards/screen readers and publishing remain playtest steps.
 
 ## Playable 3D world direction
 
